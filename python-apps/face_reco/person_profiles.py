@@ -754,10 +754,53 @@ def main():
     # Get monitor dimensions
     screen_w, screen_h = get_monitor_size()
     
-    # Initialize webcam
-    video_capture = cv2.VideoCapture(0)
+    # Initialize webcam with better error handling
+    print("Initializing camera...")
+    
+    # Try different camera backends and indices
+    video_capture = None
+    camera_backends = [
+        (cv2.CAP_DSHOW, "DirectShow"),  # Windows preferred
+        (cv2.CAP_MSMF, "Windows Media Foundation"),
+        (cv2.CAP_ANY, "Any available")
+    ]
+    
+    for backend, backend_name in camera_backends:
+        for camera_index in range(3):  # Try first 3 camera indices
+            try:
+                print(f"Trying camera {camera_index} with {backend_name} backend...")
+                cap = cv2.VideoCapture(camera_index, backend)
+                
+                # Wait a moment for camera to initialize
+                time.sleep(0.5)
+                
+                # Try to read a frame to verify camera works
+                ret, test_frame = cap.read()
+                if ret and test_frame is not None:
+                    print(f"Successfully initialized camera {camera_index} with {backend_name}")
+                    video_capture = cap
+                    break
+                else:
+                    cap.release()
+            except Exception as e:
+                print(f"Failed with camera {camera_index} and {backend_name}: {e}")
+                continue
+        
+        if video_capture is not None:
+            break
+    
+    if video_capture is None:
+        print("Error: Could not initialize any camera!")
+        print("Please check that:")
+        print("  1. A camera is connected to your computer")
+        print("  2. No other application is using the camera")
+        print("  3. Camera drivers are properly installed")
+        return
+    
+    # Set camera properties
     video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)  # HD resolution
     video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    video_capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Reduce buffer to minimize latency
     
     # Variables
     fullscreen = True
@@ -806,12 +849,27 @@ def main():
         cv2.imshow(window_name, splash_copy)
         cv2.waitKey(100)  # Delay between frames
     
+    # Track consecutive failures
+    consecutive_failures = 0
+    max_failures = 10
+    
     while True:
         # Capture frame from camera
         ret, frame = video_capture.read()
-        if not ret:
-            print("Failed to grab frame from camera")
-            break
+        if not ret or frame is None:
+            consecutive_failures += 1
+            print(f"Warning: Failed to grab frame from camera (attempt {consecutive_failures}/{max_failures})")
+            
+            if consecutive_failures >= max_failures:
+                print("Error: Too many consecutive frame capture failures. Exiting...")
+                break
+            
+            # Wait a bit before trying again
+            time.sleep(0.1)
+            continue
+        
+        # Reset failure counter on successful read
+        consecutive_failures = 0
         
         # Calculate FPS
         frame_count += 1

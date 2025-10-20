@@ -9,7 +9,7 @@
       "color": "#3498db",
       "scriptPath": "python-apps/air-writing",
       "mainScript": "main.py",
-      "pythonPath": "python-apps/media_control/env/Scripts/python.exe"
+      "pythonPath": "python-apps/air-writing/env/Scripts/python.exe"
     },
     {
       "id": "SignLang",

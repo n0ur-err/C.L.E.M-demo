@@ -2,13 +2,92 @@ import cv2
 import mediapipe as mp
 import numpy as np
 from collections import deque
+import sys
+import time
+import os
+
+# Set UTF-8 encoding for console output
+if sys.platform == 'win32':
+    try:
+        import codecs
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+    except:
+        pass
 
 mp_hands = mp.solutions.hands
 
-# Webcam
-cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+# Function to find and initialize camera (works with OBS Virtual Camera)
+def initialize_camera():
+    print("Searching for available cameras...")
+    
+    # Try different camera indices and backends
+    # Based on diagnostics, prioritize camera index 1 (OBS Virtual Camera)
+    camera_configs = [
+        (1, None),           # Camera 1 - OBS Virtual Camera (works!)
+        (1, cv2.CAP_DSHOW),  # Camera 1 with DirectShow
+        (0, None),           # Fallback to camera 0
+        (2, None),           # Third camera
+        (0, cv2.CAP_DSHOW),  # Camera 0 DirectShow backend
+        (2, cv2.CAP_DSHOW),  # Third camera with DirectShow
+        (3, None),           # Fourth camera
+        (3, cv2.CAP_DSHOW),  # Fourth camera with DirectShow
+    ]
+    
+    for cam_idx, backend in camera_configs:
+        try:
+            print(f"Trying camera index {cam_idx} with {('DirectShow' if backend else 'default')} backend...")
+            
+            if backend is not None:
+                cap = cv2.VideoCapture(cam_idx, backend)
+                backend_name = "DirectShow"
+            else:
+                cap = cv2.VideoCapture(cam_idx)
+                backend_name = "default"
+            
+            if cap.isOpened():
+                # Give camera time to initialize (OBS Virtual Camera needs this)
+                time.sleep(1.0)  # Increased delay for OBS
+                
+                # Try to read a test frame multiple times
+                for attempt in range(3):
+                    ret, test_frame = cap.read()
+                    if ret and test_frame is not None and test_frame.size > 0:
+                        print(f"SUCCESS! Camera found at index {cam_idx} using {backend_name} backend")
+                        
+                        # Try to set resolution (may not work with OBS, but that's okay)
+                        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+                        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+                        
+                        # Give additional time for settings to apply
+                        time.sleep(0.5)
+                        
+                        return cap
+                    time.sleep(0.2)
+                
+                cap.release()
+        except Exception as e:
+            print(f"Error with camera {cam_idx}: {str(e)}")
+            if 'cap' in locals():
+                try:
+                    cap.release()
+                except:
+                    pass
+            continue
+    
+    print("\nError: No working camera found. Please check:")
+    print("1. OBS Virtual Camera is started (check OBS > Tools > Virtual Camera)")
+    print("2. Camera permissions are granted in Windows settings")
+    print("3. Camera drivers are properly installed")
+    print("4. No other application is exclusively locking the camera")
+    return None
+
+# Initialize camera
+cap = initialize_camera()
+if cap is None:
+    sys.exit(1)
+
+print("Camera initialized successfully!")
 
 # Drawing state
 points = []
@@ -40,10 +119,17 @@ def erase_by_thumb(thumb_pos):
     return new_strokes
 
 with mp_hands.Hands(min_detection_confidence=0.85, min_tracking_confidence=0.5, max_num_hands=1) as hands:
+    frame_count = 0
     while cap.isOpened():
         success, frame = cap.read()
         if not success:
-            break
+            frame_count += 1
+            if frame_count > 10:  # If we fail to read 10 times in a row, exit
+                print("Error: Lost connection to camera")
+                break
+            continue
+        
+        frame_count = 0  # Reset counter on successful read
 
         frame = cv2.flip(frame, 1)
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -111,5 +197,9 @@ with mp_hands.Hands(min_detection_confidence=0.85, min_tracking_confidence=0.5, 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
+print("Closing Air Writing application...")
 cap.release()
 cv2.destroyAllWindows()
+# Give time for proper cleanup
+time.sleep(0.5)
+print("Application closed successfully")

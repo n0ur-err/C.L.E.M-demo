@@ -252,148 +252,90 @@ function launchApp(appId) {
     pythonPath = "python";
   }
   
-  // List of apps that should open in a separate terminal window
-  const terminalApps = ['youtube-download', 'music-download', 'phone-info', 'health-report'];
+  // All apps should now be embedded within the feature viewer
+  // No more separate terminal windows
   
-  // Check if this app should be launched in a separate terminal
-  if (terminalApps.includes(appId)) {
-    // Launch app in a new terminal window
-    const { exec } = require('child_process');
-    
-    // Get the current directory to properly set working directory
-    const workingDir = mainScriptDir;
-    
-    // Create the command to run in a new terminal window
-    // For Windows, use 'start cmd /k' to keep the terminal open after the command completes
-    let command;
-    if (process.platform === 'win32') {
-      command = `start cmd /k "cd /d ${workingDir} && "${pythonPath}" ${mainScriptName} ${app.launchArgs ? app.launchArgs.join(' ') : ''}"`; 
-    } else if (process.platform === 'darwin') {
-      // macOS
-      command = `osascript -e 'tell app "Terminal" to do script "cd ${workingDir} && ${pythonPath} ${mainScriptName} ${app.launchArgs ? app.launchArgs.join(' ') : ''}"'`;
-    } else {
-      // Linux
-      command = `gnome-terminal -- bash -c "cd ${workingDir} && ${pythonPath} ${mainScriptName} ${app.launchArgs ? app.launchArgs.join(' ') : ''}; exec bash"}`;
+  // Regular app launch with PythonShell for embedded execution
+  const options = {
+    mode: 'text',
+    pythonPath: pythonPath,
+    pythonOptions: ['-u'], // Unbuffered output
+    scriptPath: mainScriptDir,
+    args: app.launchArgs || []
+  };
+  
+  try {
+    // If this app already has a running process, terminate it
+    if (pythonProcesses[appId]) {
+      pythonProcesses[appId].terminate();
+      delete pythonProcesses[appId];
     }
     
-    console.log(`Running ${app.name} in a terminal with command: ${command}`);
+    console.log(`Running ${app.name} with options:`, options);
     
-    try {
-      exec(command, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Failed to launch ${app.name} in terminal: ${error}`);
-          if (mainWindow) {
-            mainWindow.webContents.send('app-launch-error', {
-              id: appId,
-              error: error.toString()
-            });
-          }
-          return;
-        }
-        
-        console.log(`[${app.name}] Terminal launched successfully`);
-        if (mainWindow) {
-          mainWindow.webContents.send('app-launched', {
-            id: appId,
-            message: `${app.name} launched in a terminal window`
-          });
-        }
-      });
-      
-      return true;
-    } catch (err) {
-      console.error(`Failed to launch ${app.name} in terminal: ${err}`);
+    const pyshell = new PythonShell(mainScriptName, options);
+    pythonProcesses[appId] = pyshell;
+    
+    pyshell.on('message', (message) => {
+      console.log(`[${app.name}] ${message}`);
+      // Forward messages to the renderer for embedded display
+      if (mainWindow) {
+        mainWindow.webContents.send('app-message', {
+          id: appId,
+          message: message
+        });
+      }
+    });
+    
+    pyshell.on('stderr', (stderr) => {
+      console.error(`[${app.name}] Error: ${stderr}`);
+      if (mainWindow) {
+        mainWindow.webContents.send('app-stderr', {
+          id: appId,
+          error: stderr
+        });
+      }
+    });
+    
+    pyshell.on('error', (err) => {
+      console.error(`[${app.name}] Error: ${err}`);
       if (mainWindow) {
         mainWindow.webContents.send('app-launch-error', {
           id: appId,
           error: err.toString()
         });
       }
-      return false;
-    }
-  } else {
-    // Regular app launch with PythonShell
-    const options = {
-      mode: 'text',
-      pythonPath: pythonPath,
-      pythonOptions: ['-u'], // Unbuffered output
-      scriptPath: mainScriptDir,
-      args: app.launchArgs || []
-    };
+    });
     
-    try {
-      // If this app already has a running process, terminate it
-      if (pythonProcesses[appId]) {
-        pythonProcesses[appId].terminate();
-        delete pythonProcesses[appId];
-      }
+    pyshell.on('close', (code) => {
+      console.log(`[${app.name}] Process closed with code ${code}`);
       
-      console.log(`Running ${app.name} with options:`, options);
-      
-      const pyshell = new PythonShell(mainScriptName, options);
-      pythonProcesses[appId] = pyshell;
-      
-      pyshell.on('message', (message) => {
-        console.log(`[${app.name}] ${message}`);
-        // We could forward messages to the renderer if needed
-        if (mainWindow) {
-          mainWindow.webContents.send('app-message', {
-            id: appId,
-            message: message
-          });
-        }
-      });
-      
-      pyshell.on('stderr', (stderr) => {
-        console.error(`[${app.name}] Error: ${stderr}`);
-        if (mainWindow) {
-          mainWindow.webContents.send('app-stderr', {
-            id: appId,
-            error: stderr
-          });
-        }
-      });
-      
-      pyshell.on('error', (err) => {
-        console.error(`[${app.name}] Error: ${err}`);
-        if (mainWindow) {
-          mainWindow.webContents.send('app-launch-error', {
-            id: appId,
-            error: err.toString()
-          });
-        }
-      });
-      
-      pyshell.on('close', (code) => {
-        console.log(`[${app.name}] Process closed with code ${code}`);
-        
-        delete pythonProcesses[appId];
-        
-        if (mainWindow) {
-          mainWindow.webContents.send('app-closed', {
-            id: appId,
-            code: code
-          });
-        }
-      });
+      delete pythonProcesses[appId];
       
       if (mainWindow) {
-        mainWindow.webContents.send('app-launched', {
-          id: appId
-        });
-      }
-      
-      return true;
-    } catch (err) {
-      console.error(`Failed to launch ${app.name}: ${err}`);
-      if (mainWindow) {
-        mainWindow.webContents.send('app-launch-error', {
+        mainWindow.webContents.send('app-closed', {
           id: appId,
-          error: err.toString()
+          code: code
         });
       }
-      return false;
+    });
+    
+    if (mainWindow) {
+      mainWindow.webContents.send('app-launched', {
+        id: appId
+      });
     }
+    
+    return true;
+  } catch (err) {
+    console.error(`Failed to launch ${app.name}: ${err}`);
+    if (mainWindow) {
+      mainWindow.webContents.send('app-launch-error', {
+        id: appId,
+        error: err.toString()
+      });
+    }
+    return false;
   }
 }
 
@@ -403,6 +345,230 @@ function terminateAllPythonProcesses() {
       process.terminate();
     }
   });
+}
+
+// Download process management
+function startDownloadProcess(appId, url, quality = 'best') {
+  try {
+    const outputPath = path.join(require('os').homedir(), 'Videos');
+    const scriptPath = path.join(__dirname, 'python-apps', appId.replace('-', '_'));
+    
+    const options = {
+      mode: 'text',
+      pythonPath: path.join(__dirname, 'env', 'Scripts', 'python.exe'),
+      pythonOptions: ['-u'],
+      scriptPath: scriptPath,
+      args: [url, outputPath, quality]
+    };
+
+    console.log(`Starting ${appId} with options:`, options);
+    
+    const pyshell = new PythonShell('main.py', options);
+    pythonProcesses[appId] = pyshell;
+    
+    // Track completion state
+    let downloadCompleted = false;
+    let hasError = false;
+
+    // Helper function to process output (works for both stdout and stderr)
+    const processOutput = (message) => {
+      console.log(`[${appId}]`, message);
+      
+      // Send message to renderer
+      if (mainWindow) {
+        mainWindow.webContents.send('python-output', { 
+          appId, 
+          message, 
+          type: 'output' 
+        });
+        
+        // Parse progress information from yt-dlp output
+        if (message.includes('%')) {
+          // Handle yt-dlp progress format: "[download] 45.2% of 123.45MiB at 1.23MiB/s ETA 00:30"
+          const progressMatch = message.match(/(?:\[download\]|\[hlsnative\])?.*?(\d+(?:\.\d+)?)%/);
+          if (progressMatch) {
+            const progress = parseFloat(progressMatch[1]);
+            console.log(`Progress detected: ${progress}% from message: "${message}"`);
+            mainWindow.webContents.send('download-progress', { 
+              appId, 
+              progress, 
+              message 
+            });
+          }
+        }
+        
+        // Also check for "ExtractAudio" progress (for music downloads)
+        if (message.includes('[ExtractAudio]')) {
+          mainWindow.webContents.send('download-progress', { 
+            appId, 
+            progress: 95, 
+            message: 'Converting to MP3...' 
+          });
+        }
+      }
+    };
+    
+    pyshell.on('message', function (message) {
+      processOutput(message);
+      
+      if (mainWindow) {
+        // Also handle title extraction
+        if (message.includes('Title:') || message.includes('📺 Title:')) {
+          const title = message.split('Title: ')[1] || message.split('📺 Title: ')[1];
+          if (title) {
+            mainWindow.webContents.send('download-info', { 
+              appId, 
+              title: title.trim()
+            });
+          }
+        }
+        
+        // Detect completion from various messages
+        if (message.includes('Download completed') || 
+            message.includes('✅') ||
+            message.includes('[Merger] Merging formats') ||
+            message.includes('Deleting original file')) {
+          downloadCompleted = true;
+          mainWindow.webContents.send('download-complete', { 
+            appId, 
+            message 
+          });
+        }
+        
+        // Detect actual errors (not warnings)
+        if (message.includes('ERROR:') || message.includes('❌ Download error:')) {
+          hasError = true;
+          mainWindow.webContents.send('download-error', { 
+            appId, 
+            error: message 
+          });
+        }
+      }
+    });
+    
+    // Also listen to stderr where yt-dlp sends progress updates
+    pyshell.on('stderr', function (stderr) {
+      // Process stderr output for progress and other info
+      processOutput(stderr);
+      
+      if (mainWindow) {
+        // Same handlers as message event
+        if (stderr.includes('Title:') || stderr.includes('📺 Title:')) {
+          const title = stderr.split('Title: ')[1] || stderr.split('📺 Title: ')[1];
+          if (title) {
+            mainWindow.webContents.send('download-info', { 
+              appId, 
+              title: title.trim()
+            });
+          }
+        }
+      }
+    });
+
+    pyshell.on('error', function (err) {
+      console.error(`[${appId}] Error:`, err);
+      hasError = true;
+      if (mainWindow && !downloadCompleted) {
+        mainWindow.webContents.send('download-error', { 
+          appId, 
+          error: err.message 
+        });
+      }
+    });
+
+    pyshell.on('close', function (code) {
+      console.log(`[${appId}] Process closed with code ${code}`);
+      delete pythonProcesses[appId];
+      
+      // Only send completion if we haven't detected it yet and there were no errors
+      if (mainWindow && !downloadCompleted && !hasError && code === 0) {
+        mainWindow.webContents.send('download-complete', { 
+          appId, 
+          message: 'Download completed successfully' 
+        });
+      }
+    });
+
+    return true;
+    
+  } catch (error) {
+    console.error(`Failed to start download process for ${appId}:`, error);
+    if (mainWindow) {
+      mainWindow.webContents.send('download-error', { 
+        appId, 
+        error: error.message 
+      });
+    }
+    return false;
+  }
+}
+
+// Generic Python app launcher
+function startPythonApp(appId, args = []) {
+  try {
+    const scriptPath = path.join(__dirname, 'python-apps', appId.replace('-', '_'));
+    
+    const options = {
+      mode: 'text',
+      pythonPath: path.join(__dirname, 'env', 'Scripts', 'python.exe'),
+      pythonOptions: ['-u'],
+      scriptPath: scriptPath,
+      args: args
+    };
+
+    console.log(`Starting ${appId} with options:`, options);
+    
+    const pyshell = new PythonShell('main.py', options);
+    pythonProcesses[appId] = pyshell;
+
+    pyshell.on('message', function (message) {
+      console.log(`[${appId}]`, message);
+      if (mainWindow) {
+        mainWindow.webContents.send('python-output', { 
+          appId, 
+          message, 
+          type: 'output' 
+        });
+      }
+    });
+
+    pyshell.on('error', function (err) {
+      console.error(`[${appId}] Error:`, err);
+      if (mainWindow) {
+        mainWindow.webContents.send('python-output', { 
+          appId, 
+          message: `Error: ${err.message}`, 
+          type: 'error' 
+        });
+      }
+    });
+
+    pyshell.on('close', function (code) {
+      console.log(`[${appId}] Process closed with code ${code}`);
+      delete pythonProcesses[appId];
+      
+      if (mainWindow) {
+        mainWindow.webContents.send('python-output', { 
+          appId, 
+          message: `Process closed with code ${code}`, 
+          type: code === 0 ? 'info' : 'error'
+        });
+      }
+    });
+
+    return true;
+    
+  } catch (error) {
+    console.error(`Failed to start Python app ${appId}:`, error);
+    if (mainWindow) {
+      mainWindow.webContents.send('python-output', { 
+        appId, 
+        message: `Failed to start: ${error.message}`, 
+        type: 'error'
+      });
+    }
+    return false;
+  }
 }
 
 // App lifecycle events
@@ -440,6 +606,34 @@ app.whenReady().then(() => {
         mainWindow.maximize();
       }
     }
+  });
+
+  // Python process management handlers
+  ipcMain.handle('start-download', (event, appId, url, quality) => {
+    return startDownloadProcess(appId, url, quality);
+  });
+
+  ipcMain.handle('cancel-download', (event, appId) => {
+    if (pythonProcesses[appId]) {
+      pythonProcesses[appId].kill();
+      delete pythonProcesses[appId];
+      return true;
+    }
+    return false;
+  });
+
+  ipcMain.handle('start-python-app', (event, appId, args) => {
+    return startPythonApp(appId, args);
+  });
+
+  ipcMain.handle('stop-python-app', (event, appId) => {
+    if (pythonProcesses[appId]) {
+      pythonProcesses[appId].kill();
+      delete pythonProcesses[appId];
+      mainWindow.webContents.send('python-output', { appId, message: 'Process stopped', type: 'info' });
+      return true;
+    }
+    return false;
   });
   
   // macOS-specific behavior

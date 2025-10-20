@@ -140,16 +140,51 @@ except Exception as e:
     print(f"GPU initialization error: {str(e)}")
     print("Falling back to CPU")
 
-# Initialize webcam with higher resolution
-cap = cv2.VideoCapture(0)
-if not cap.isOpened():
-    cap = cv2.VideoCapture(0)
+# Initialize webcam with higher resolution and camera index search
+def initialize_camera():
+    """Find and initialize working camera (supports OBS Virtual Camera)"""
+    print("Searching for available cameras...")
+    
+    # Try different camera indices
+    for cam_idx in [1, 0, 2, 3]:  # Prioritize index 1 (OBS Virtual Camera)
+        try:
+            print(f"Trying camera index {cam_idx}...")
+            cap = cv2.VideoCapture(cam_idx)
+            
+            if cap.isOpened():
+                time.sleep(0.5)  # Give camera time to initialize
+                
+                # Test reading a frame
+                ret, test_frame = cap.read()
+                if ret and test_frame is not None and test_frame.size > 0:
+                    print(f"SUCCESS! Camera found at index {cam_idx}")
+                    
+                    # Set optimal camera parameters
+                    cap.set(cv2.CAP_PROP_FRAME_WIDTH, wCam)
+                    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, hCam)
+                    cap.set(cv2.CAP_PROP_FPS, 30)  # Request 30 FPS
+                    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))  # Use MJPG for better performance
+                    
+                    return cap
+                else:
+                    cap.release()
+        except Exception as e:
+            print(f"Error with camera {cam_idx}: {str(e)}")
+            if 'cap' in locals():
+                try:
+                    cap.release()
+                except:
+                    pass
+    
+    print("\nError: No working camera found!")
+    print("Please check:")
+    print("1. OBS Virtual Camera is started (OBS > Tools > Virtual Camera)")
+    print("2. Camera permissions are granted")
+    return None
 
-# Set optimal camera parameters
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, wCam)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, hCam)
-cap.set(cv2.CAP_PROP_FPS, 30)  # Request 30 FPS
-cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))  # Use MJPG for better performance
+cap = initialize_camera()
+if cap is None:
+    sys.exit(1)
 
 pTime = 0
 

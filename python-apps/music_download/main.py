@@ -7,23 +7,31 @@ import json
 import shutil
 import importlib.util
 
+# Set UTF-8 encoding for stdout on Windows
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
+
+# Get the directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Set FFmpeg path to the local directory (check if exists, otherwise use system)
+FFMPEG_PATH = os.path.join(SCRIPT_DIR, 'ffmpeg.exe')
+if not os.path.exists(FFMPEG_PATH):
+    # Try parent youtube_download directory
+    FFMPEG_PATH = os.path.join(os.path.dirname(SCRIPT_DIR), 'youtube_download', 'ffmpeg.exe')
+
 # Modern hacker-style header
 def print_banner():
-    os.system("clear" if os.name == "posix" else "cls")
-    banner = r'''
-    
-
-░▒▓█▓▒░      ░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░      
-░▒▓█▓▒░   ░▒▓████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░          
-░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░          
-░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒▒▓███▓▒░▒▓████████▓▒░  ░▒▓█▓▒░          
-░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░          
-░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░          
-░▒▓████████▓▒░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░          
-                                                                 
-                Welc0m T0 🄻①🄶🄷🅃 🄼🅄🅂①🄲                                
-'''
-    print(banner)
+    banner = """
+========================================================================
+                    LIGHT MUSIC DOWNLOADER
+                       Audio from YouTube
+========================================================================
+"""
+    try:
+        print(banner)
+    except UnicodeEncodeError:
+        print("=== LIGHT MUSIC DOWNLOADER - Audio from YouTube ===")
 
 # Check if yt-dlp is installed and available
 def check_yt_dlp():
@@ -78,63 +86,110 @@ def get_playlist_entries(url, yt_dlp_mode):
                 
     return entries
 
-def download_audio(url):
-    print("\n⬇️  Downloading and converting to MP3...\n")
-
-    # Verify that yt-dlp is available
-    yt_dlp_mode = check_yt_dlp()
-    if not yt_dlp_mode:
-        return
-
-    music_dir = str(Path.home() / "Music")
-    os.makedirs(music_dir, exist_ok=True)
-
+def download_audio(url, output_path=None, quality='best'):
+    """Download audio from YouTube and convert to MP3"""
+    if not output_path:
+        output_path = str(Path.home() / "Music")
+    
+    os.makedirs(output_path, exist_ok=True)
+    
+    print("🎵 Starting download...")
+    print(f"📂 Output folder: {output_path}")
+    print(f"🎯 Quality: {quality}")
+    print("-" * 50)
+    
     try:
-        entries = get_playlist_entries(url, yt_dlp_mode)
-        total = len(entries) if entries else 1
-
-        for i, entry in enumerate(entries if entries else [None], 1):
-            label = f"Track {i}/{total}"
-            animate_bar(label, total)
-
-            cmd_url = f"https://www.youtube.com/watch?v={entry['id']}" if entry else url
-
-            if yt_dlp_mode == "command":
-                command = [
-                    "yt-dlp",
-                    "-f", "bestaudio",
-                    "--extract-audio",
-                    "--audio-format", "mp3",
-                    "--audio-quality", "0",
-                    "-o", os.path.join(music_dir, "%(title)s.%(ext)s"),
-                    cmd_url
-                ]
-            else:  # module mode
-                command = [
-                    sys.executable, "-m", "yt_dlp",
-                    "-f", "bestaudio",
-                    "--extract-audio",
-                    "--audio-format", "mp3",
-                    "--audio-quality", "0",
-                    "-o", os.path.join(music_dir, "%(title)s.%(ext)s"),
-                    cmd_url
-                ]
-
-            subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-        print("\n✅ All downloads complete! Saved in ~/Music\n")
+        # Use yt-dlp Python module directly (more reliable)
+        import yt_dlp
+        
+        # Progress hook to print progress on separate lines
+        def progress_hook(d):
+            if d['status'] == 'downloading':
+                if 'total_bytes' in d or 'total_bytes_estimate' in d:
+                    total = d.get('total_bytes') or d.get('total_bytes_estimate')
+                    downloaded = d.get('downloaded_bytes', 0)
+                    if total:
+                        percent = (downloaded / total) * 100
+                        speed = d.get('speed', 0)
+                        speed_str = f"{speed/1024/1024:.2f}MiB/s" if speed else "N/A"
+                        # Print on new line so it's captured by the app
+                        print(f"[download] {percent:.1f}% of {total/1024/1024:.2f}MiB at {speed_str}", flush=True)
+            elif d['status'] == 'finished':
+                print(f"[download] 100% Download complete, now converting...", flush=True)
+        
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': f'{output_path}/%(title)s.%(ext)s',
+            'quiet': False,
+            'no_warnings': False,
+            'ffmpeg_location': SCRIPT_DIR if os.path.exists(FFMPEG_PATH) else None,
+            'progress_hooks': [progress_hook],  # Add progress hook
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192' if quality == 'best' else '128',
+            }],
+        }
+        
+        print("🔗 Fetching video information...")
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            # Get video info first
+            info = ydl.extract_info(url, download=False)
+            title = info.get('title', 'Unknown Title')
+            duration = info.get('duration', 0)
+            
+            print(f"🎵 Title: {title}")
+            if duration:
+                mins, secs = divmod(duration, 60)
+                print(f"⏱️ Duration: {mins:02d}:{secs:02d}")
+            
+            print("\n⬇️ Downloading and converting to MP3...")
+            
+            # Download and convert
+            ydl.download([url])
+        
+        print("\n✅ Download completed successfully!")
+        print(f"📁 Files saved to: {output_path}")
+        
+    except ImportError:
+        print("❌ Error: yt-dlp module not found")
+        print("Please install it with: pip install yt-dlp")
+        sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Error occurred: {str(e)}")
-        print("Please make sure yt-dlp is properly installed and try again.")
+        print(f"\n❌ Download error: {str(e)}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     print_banner()
-    while True:
-        url = input("📎 Paste YouTube URL here (or type 'exit'): ").strip()
-        if url.lower() == "exit":
-            print("👋 Exiting L1ght Music. Stay safe out there.")
-            break
-        elif url:
-            download_audio(url)
-        else:
-            print("❌ No URL provided. Try again or type 'exit'.")
+    
+    # Check if running with command line arguments
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+        output_path = sys.argv[2] if len(sys.argv) > 2 else None
+        quality = sys.argv[3] if len(sys.argv) > 3 else 'best'
+        
+        print(f"Arguments received: {len(sys.argv)}")
+        print(f"URL: {url}")
+        if output_path:
+            print(f"Output Path: {output_path}")
+        print(f"Quality: {quality}")
+        
+        download_audio(url, output_path, quality)
+        
+    else:
+        # Interactive mode
+        try:
+            while True:
+                url = input("\n📎 Paste YouTube URL here (or type 'exit'): ").strip()
+                if url.lower() == "exit":
+                    print("👋 Exiting Light Music Downloader. Goodbye!")
+                    break
+                elif url:
+                    output_path = str(Path.home() / "Music")
+                    download_audio(url, output_path, 'best')
+                else:
+                    print("❌ No URL provided. Try again or type 'exit'.")
+        except KeyboardInterrupt:
+            print("\n\n👋 Exiting Light Music Downloader. Goodbye!")
+            sys.exit(0)

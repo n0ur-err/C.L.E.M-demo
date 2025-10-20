@@ -179,7 +179,182 @@ function switchSection(sectionId) {
   if (targetSection) {
     targetSection.classList.add('active');
     activeSection = sectionId;
+    
+    // If switching to settings, ensure settings listeners are attached
+    if (sectionId === 'settings') {
+      setupSettingsListeners();
+    }
   }
+}
+
+// Setup settings event listeners
+function setupSettingsListeners() {
+  console.log('Setting up settings listeners...');
+  
+  // General Settings
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  if (darkModeToggle) {
+    // Remove any existing listener
+    darkModeToggle.replaceWith(darkModeToggle.cloneNode(true));
+    const newDarkModeToggle = document.getElementById('darkModeToggle');
+    newDarkModeToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      console.log('Dark mode toggled:', enabled);
+      showToast('Settings', `Dark mode ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    });
+    console.log('Dark mode toggle attached');
+  }
+  
+  const notificationsToggle = document.getElementById('notificationsToggle');
+  if (notificationsToggle) {
+    notificationsToggle.replaceWith(notificationsToggle.cloneNode(true));
+    const newNotificationsToggle = document.getElementById('notificationsToggle');
+    newNotificationsToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      console.log('Notifications toggled:', enabled);
+      showToast('Settings', `Notifications ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    });
+    console.log('Notifications toggle attached');
+  }
+  
+  const autoStartToggle = document.getElementById('autoStartToggle');
+  if (autoStartToggle) {
+    autoStartToggle.replaceWith(autoStartToggle.cloneNode(true));
+    const newAutoStartToggle = document.getElementById('autoStartToggle');
+    newAutoStartToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      console.log('Auto-start toggled:', enabled);
+      showToast('Settings', `Auto-start ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    });
+    console.log('Auto-start toggle attached');
+  }
+  
+  // Camera Settings
+  const cameraSelect = document.getElementById('cameraSelect');
+  if (cameraSelect) {
+    cameraSelect.replaceWith(cameraSelect.cloneNode(true));
+    const newCameraSelect = document.getElementById('cameraSelect');
+    newCameraSelect.addEventListener('change', (e) => {
+      const option = e.target.options[e.target.selectedIndex].text;
+      console.log('Camera changed:', option);
+      showToast('Camera', `Camera source set to: ${option}`, 'success');
+    });
+    console.log('Camera select attached');
+  }
+  
+  const resolutionSelect = document.getElementById('resolutionSelect');
+  if (resolutionSelect) {
+    resolutionSelect.replaceWith(resolutionSelect.cloneNode(true));
+    const newResolutionSelect = document.getElementById('resolutionSelect');
+    newResolutionSelect.addEventListener('change', (e) => {
+      const value = e.target.value;
+      console.log('Resolution changed:', value);
+      showToast('Camera', `Resolution set to: ${value}`, 'success');
+    });
+    console.log('Resolution select attached');
+  }
+  
+  const fpsSelect = document.getElementById('fpsSelect');
+  if (fpsSelect) {
+    fpsSelect.replaceWith(fpsSelect.cloneNode(true));
+    const newFpsSelect = document.getElementById('fpsSelect');
+    newFpsSelect.addEventListener('change', (e) => {
+      const value = e.target.value;
+      console.log('FPS changed:', value);
+      showToast('Camera', `Frame rate set to: ${value} FPS`, 'success');
+    });
+    console.log('FPS select attached');
+  }
+  
+  // AI Model Settings
+  const modelPrecisionSelect = document.getElementById('modelPrecisionSelect');
+  if (modelPrecisionSelect) {
+    modelPrecisionSelect.replaceWith(modelPrecisionSelect.cloneNode(true));
+    const newModelPrecisionSelect = document.getElementById('modelPrecisionSelect');
+    newModelPrecisionSelect.addEventListener('change', (e) => {
+      const option = e.target.options[e.target.selectedIndex].text;
+      console.log('Model precision changed:', option);
+      showToast('AI Models', `Model precision set to: ${option}`, 'success');
+    });
+    console.log('Model precision select attached');
+  }
+  
+  const gpuAccelerationToggle = document.getElementById('gpuAccelerationToggle');
+  if (gpuAccelerationToggle) {
+    gpuAccelerationToggle.replaceWith(gpuAccelerationToggle.cloneNode(true));
+    const newGpuAccelerationToggle = document.getElementById('gpuAccelerationToggle');
+    newGpuAccelerationToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      console.log('GPU acceleration toggled:', enabled);
+      showToast('AI Models', `GPU acceleration ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    });
+    console.log('GPU acceleration toggle attached');
+  }
+  
+  const confidenceThreshold = document.getElementById('confidenceThreshold');
+  if (confidenceThreshold) {
+    confidenceThreshold.replaceWith(confidenceThreshold.cloneNode(true));
+    const newConfidenceThreshold = document.getElementById('confidenceThreshold');
+    newConfidenceThreshold.addEventListener('change', (e) => {
+      const option = e.target.options[e.target.selectedIndex].text;
+      console.log('Confidence threshold changed:', option);
+      showToast('AI Models', `Confidence threshold set to: ${option}`, 'success');
+    });
+    console.log('Confidence threshold select attached');
+  }
+  
+  // Performance Settings
+  const resourceUsageSelect = document.getElementById('resourceUsageSelect');
+  if (resourceUsageSelect) {
+    resourceUsageSelect.replaceWith(resourceUsageSelect.cloneNode(true));
+    const newResourceUsageSelect = document.getElementById('resourceUsageSelect');
+    newResourceUsageSelect.addEventListener('change', (e) => {
+      const option = e.target.options[e.target.selectedIndex].text;
+      console.log('Resource usage changed:', option);
+      showToast('Performance', `Resource usage mode: ${option}`, 'success');
+    });
+    console.log('Resource usage select attached');
+  }
+  
+  const cachingToggle = document.getElementById('cachingToggle');
+  if (cachingToggle) {
+    cachingToggle.replaceWith(cachingToggle.cloneNode(true));
+    const newCachingToggle = document.getElementById('cachingToggle');
+    newCachingToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      console.log('Caching toggled:', enabled);
+      showToast('Performance', `Model caching ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    });
+    console.log('Caching toggle attached');
+  }
+  
+  // Storage Settings
+  const saveFacesToggle = document.getElementById('saveFacesToggle');
+  if (saveFacesToggle) {
+    saveFacesToggle.replaceWith(saveFacesToggle.cloneNode(true));
+    const newSaveFacesToggle = document.getElementById('saveFacesToggle');
+    newSaveFacesToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      console.log('Save faces toggled:', enabled);
+      showToast('Storage', `Save recognized faces ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    });
+    console.log('Save faces toggle attached');
+  }
+  
+  const saveReportsToggle = document.getElementById('saveReportsToggle');
+  if (saveReportsToggle) {
+    saveReportsToggle.replaceWith(saveReportsToggle.cloneNode(true));
+    const newSaveReportsToggle = document.getElementById('saveReportsToggle');
+    newSaveReportsToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      console.log('Save reports toggled:', enabled);
+      showToast('Storage', `Save analysis reports ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    });
+    console.log('Save reports toggle attached');
+  }
+  
+  console.log('Settings listeners setup complete');
+  showToast('Settings', 'Settings panel loaded - all controls are active', 'info');
 }
 
 // Setup feature buttons
@@ -297,122 +472,224 @@ async function activateFeature(featureId) {
       } 
       // For download apps, create a form interface
       else if (['youtube-download', 'music-download'].includes(featureId)) {
+        const downloadType = featureId === 'youtube-download' ? 'YouTube' : 'Music';
         contentContainer.innerHTML = `
-          <div class="feature-form">
-            <h3>Enter URL to download</h3>
-            <div class="form-group">
-              <input type="text" class="form-control" placeholder="Enter URL here...">
-              <button class="form-btn">Start Download</button>
-            </div>
-            <div class="download-options">
-              <div class="option-group">
-                <label>Quality:</label>
-                <select class="quality-select">
-                  <option value="highest">Highest</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                </select>
-              </div>
-              <div class="option-group">
-                <label>Format:</label>
-                <select class="format-select">
-                  <option value="auto">Auto</option>
-                  <option value="mp4">MP4</option>
-                  <option value="mp3">MP3 (audio only)</option>
-                  <option value="webm">WebM</option>
-                </select>
+          <div class="embedded-app-interface">
+            <div class="app-header">
+              <h3>${downloadType} Downloader</h3>
+              <div class="app-status">
+                <i class="fas fa-circle status-indicator running"></i>
+                <span>Ready</span>
               </div>
             </div>
-            <div class="download-status">
-              <h4>Downloads</h4>
-              <div class="download-list">
-                <p class="no-downloads">No active downloads</p>
+            
+            <div class="app-content">
+              <div class="download-form">
+                <div class="input-group">
+                  <label for="url-input">Enter ${downloadType} URL:</label>
+                  <div class="input-row">
+                    <input type="text" id="url-input" class="form-control" placeholder="Paste ${downloadType === 'YouTube' ? 'YouTube' : 'music'} URL here...">
+                    <button class="form-btn download-btn">
+                      <i class="fas fa-download"></i>
+                      Download
+                    </button>
+                  </div>
+                </div>
+                
+                ${downloadType === 'YouTube' ? `
+                <div class="download-options">
+                  <div class="option-group">
+                    <label for="quality-select">Quality:</label>
+                    <select id="quality-select">
+                      <option value="best">Best Quality</option>
+                      <option value="720p">720p</option>
+                      <option value="480p">480p</option>
+                      <option value="360p">360p</option>
+                    </select>
+                  </div>
+                  <div class="option-group">
+                    <label for="format-select">Format:</label>
+                    <select id="format-select">
+                      <option value="mp4">MP4 Video</option>
+                      <option value="mp3">MP3 Audio</option>
+                    </select>
+                  </div>
+                </div>
+                ` : `
+                <div class="download-options">
+                  <div class="option-group">
+                    <label for="format-select">Format:</label>
+                    <select id="format-select">
+                      <option value="mp3">MP3</option>
+                      <option value="flac">FLAC</option>
+                      <option value="wav">WAV</option>
+                    </select>
+                  </div>
+                  <div class="option-group">
+                    <label for="quality-select">Bitrate:</label>
+                    <select id="quality-select">
+                      <option value="320">320 kbps</option>
+                      <option value="256">256 kbps</option>
+                      <option value="192">192 kbps</option>
+                      <option value="128">128 kbps</option>
+                    </select>
+                  </div>
+                </div>
+                `}
+              </div>
+              
+              <div class="app-console">
+                <div class="console-header">
+                  <h4>Console Output</h4>
+                  <button class="console-clear-btn">
+                    <i class="fas fa-trash"></i>
+                    Clear
+                  </button>
+                </div>
+                <div class="console-content" id="app-console-${featureId}">
+                  <div class="console-line">
+                    <span class="timestamp">[${new Date().toLocaleTimeString()}]</span>
+                    <span class="message">${app.name} is ready for downloads...</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="download-status">
+                <h4>Downloads</h4>
+                <div class="download-list" id="download-list-${featureId}">
+                  <p class="no-downloads">No active downloads</p>
+                </div>
               </div>
             </div>
           </div>
         `;
       }
-      // For phone info, create a connection interface
-      else if (featureId === 'phone-info') {
+      // For phone info app
+      else if (featureId === 'phoneInfo') {
         contentContainer.innerHTML = `
-          <div class="feature-form">
-            <h3>Phone Connection</h3>
-            <div class="connection-status">
-              <i class="fas fa-mobile-alt"></i>
-              <p>No device connected</p>
+          <div class="embedded-app-interface">
+            <div class="app-header">
+              <h3>Phone Information</h3>
+              <div class="app-status">
+                <i class="fas fa-circle status-indicator running"></i>
+                <span>Ready</span>
+              </div>
             </div>
-            <div class="connection-options">
-              <button class="connection-btn">
-                <i class="fas fa-link"></i>
-                <span>Connect Device</span>
-              </button>
-              <button class="connection-btn disabled">
-                <i class="fas fa-info-circle"></i>
-                <span>View Device Info</span>
-              </button>
-              <button class="connection-btn disabled">
-                <i class="fas fa-file-export"></i>
-                <span>Export Data</span>
-              </button>
+            
+            <div class="app-content">
+              <div class="connection-section">
+                <div class="connection-status">
+                  <i class="fas fa-mobile-alt"></i>
+                  <h4>Device Connection</h4>
+                  <p>Connect your device to view information</p>
+                  <div class="connection-buttons">
+                    <button class="connection-btn scan-btn">
+                      <i class="fas fa-search"></i>
+                      Scan for Devices
+                    </button>
+                    <button class="connection-btn wifi-btn">
+                      <i class="fas fa-wifi"></i>
+                      Connect via WiFi
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="app-console">
+                <div class="console-header">
+                  <h4>Console Output</h4>
+                  <button class="console-clear-btn">
+                    <i class="fas fa-trash"></i>
+                    Clear
+                  </button>
+                </div>
+                <div class="console-content" id="app-console-${featureId}">
+                  <div class="console-line">
+                    <span class="timestamp">[${new Date().toLocaleTimeString()}]</span>
+                    <span class="message">Phone information tool is ready...</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="device-info" id="device-info-${featureId}" style="display: none;">
+                <h4>Device Information</h4>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <label>Device Model:</label>
+                    <span id="device-model">N/A</span>
+                  </div>
+                  <div class="info-item">
+                    <label>OS Version:</label>
+                    <span id="device-os">N/A</span>
+                  </div>
+                  <div class="info-item">
+                    <label>Storage:</label>
+                    <span id="device-storage">N/A</span>
+                  </div>
+                  <div class="info-item">
+                    <label>Battery:</label>
+                    <span id="device-battery">N/A</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         `;
       }
-      // For health report, create a reports interface
-      else if (featureId === 'health-report') {
+      // For other apps (general purpose interface)
+      else {
         contentContainer.innerHTML = `
-          <div class="feature-reports">
-            <div class="reports-header">
-              <h3>Health Analysis Reports</h3>
-              <div class="report-filters">
-                <button class="report-filter active">All</button>
-                <button class="report-filter">Last Week</button>
-                <button class="report-filter">Last Month</button>
+          <div class="embedded-app-interface">
+            <div class="app-header">
+              <h3>${app.name}</h3>
+              <div class="app-status">
+                <i class="fas fa-circle status-indicator running"></i>
+                <span>Running</span>
               </div>
             </div>
-            <div class="reports-list">
-              <div class="report-item">
-                <div class="report-icon">
-                  <i class="fas fa-heartbeat"></i>
-                </div>
-                <div class="report-info">
-                  <h4>Full Health Analysis</h4>
-                  <p>April 28, 2025</p>
-                </div>
-                <button class="report-view-btn">View</button>
+            
+            <div class="app-content">
+              <div class="app-description">
+                <p>${app.description || 'Application is running and ready to use.'}</p>
               </div>
-              <div class="report-item">
-                <div class="report-icon">
-                  <i class="fas fa-eye"></i>
+              
+              <div class="app-console">
+                <div class="console-header">
+                  <h4>Console Output</h4>
+                  <button class="console-clear-btn">
+                    <i class="fas fa-trash"></i>
+                    Clear
+                  </button>
                 </div>
-                <div class="report-info">
-                  <h4>Eye Tracking Analysis</h4>
-                  <p>April 25, 2025</p>
+                <div class="console-content" id="app-console-${featureId}">
+                  <div class="console-line">
+                    <span class="timestamp">[${new Date().toLocaleTimeString()}]</span>
+                    <span class="message">${app.name} is running...</span>
+                  </div>
                 </div>
-                <button class="report-view-btn">View</button>
               </div>
-              <div class="report-item">
-                <div class="report-icon">
-                  <i class="fas fa-smile"></i>
-                </div>
-                <div class="report-info">
-                  <h4>Facial Symmetry Report</h4>
-                  <p>April 22, 2025</p>
-                </div>
-                <button class="report-view-btn">View</button>
+              
+              <div class="app-controls">
+                <button class="control-btn restart-btn">
+                  <i class="fas fa-redo"></i>
+                  Restart
+                </button>
+                <button class="control-btn stop-btn">
+                  <i class="fas fa-stop"></i>
+                  Stop
+                </button>
               </div>
             </div>
           </div>
         `;
       }
       
-      // Replace loading with content
+      // Replace the content
       featureContent.innerHTML = '';
       featureContent.appendChild(contentContainer);
       
-      // Add event listeners for feature-specific actions
-      setupFeatureContentEvents(featureId);
+      // Setup event listeners for the embedded interface
+      setupEmbeddedAppListeners(featureId, app);
     } else {
       showToast('Error', 'Failed to activate feature.', 'error');
       featureContent.innerHTML = `
@@ -447,155 +724,211 @@ async function activateFeature(featureId) {
   }
 }
 
-// Setup events for feature content
-function setupFeatureContentEvents(featureId) {
-  // Video feature buttons
-  const pauseBtn = featureContent.querySelector('.pause-btn');
-  const settingsBtn = featureContent.querySelector('.settings-btn');
-  const fullscreenBtn = featureContent.querySelector('.fullscreen-btn');
-  
-  if (pauseBtn) {
-    pauseBtn.addEventListener('click', () => {
-      if (pauseBtn.classList.contains('paused')) {
-        pauseBtn.classList.remove('paused');
-        pauseBtn.innerHTML = `<i class="fas fa-pause"></i><span>Pause</span>`;
-        showToast('Resumed', `${apps.find(a => a.id === featureId).name} resumed`, 'info');
-      } else {
-        pauseBtn.classList.add('paused');
-        pauseBtn.innerHTML = `<i class="fas fa-play"></i><span>Resume</span>`;
-        showToast('Paused', `${apps.find(a => a.id === featureId).name} paused`, 'info');
-      }
-    });
-  }
-  
-  if (settingsBtn) {
-    settingsBtn.addEventListener('click', () => {
-      showToast('Settings', 'Feature settings dialog would appear here', 'info');
-    });
-  }
-  
-  if (fullscreenBtn) {
-    fullscreenBtn.addEventListener('click', () => {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-        fullscreenBtn.innerHTML = `<i class="fas fa-expand"></i><span>Fullscreen</span>`;
-      } else {
-        featureViewer.requestFullscreen();
-        fullscreenBtn.innerHTML = `<i class="fas fa-compress"></i><span>Exit Fullscreen</span>`;
-      }
-    });
-  }
-  
-  // For download features
-  const formBtn = featureContent.querySelector('.form-btn');
-  if (formBtn) {
-    formBtn.addEventListener('click', () => {
-      const input = featureContent.querySelector('.form-control');
-      if (input && input.value.trim()) {
-        showToast('Download', `Started download process for ${input.value}`, 'info');
-        
-        // Show a download entry
-        const downloadList = featureContent.querySelector('.download-list');
-        if (downloadList) {
-          downloadList.querySelector('.no-downloads')?.remove();
-          
-          const downloadItem = document.createElement('div');
-          downloadItem.className = 'download-item';
-          downloadItem.innerHTML = `
-            <div class="download-info">
-              <p class="download-name">${input.value.split('/').pop() || 'File'}</p>
-              <div class="download-progress">
-                <div class="progress-bar" style="width: 0%"></div>
-              </div>
-              <p class="download-status">Initializing...</p>
-            </div>
-            <button class="download-cancel-btn">
-              <i class="fas fa-times"></i>
-            </button>
-          `;
-          
-          downloadList.appendChild(downloadItem);
-          
-          // Simulate progress
-          let progress = 0;
-          const progressBar = downloadItem.querySelector('.progress-bar');
-          const statusText = downloadItem.querySelector('.download-status');
-          
-          const interval = setInterval(() => {
-            progress += Math.random() * 10;
-            if (progress > 100) progress = 100;
-            
-            progressBar.style.width = `${progress}%`;
-            
-            if (progress < 100) {
-              statusText.textContent = `Downloading... ${Math.floor(progress)}%`;
-            } else {
-              statusText.textContent = 'Complete';
-              clearInterval(interval);
-            }
-          }, 500);
-          
-          // Cancel button
-          downloadItem.querySelector('.download-cancel-btn').addEventListener('click', () => {
-            clearInterval(interval);
-            downloadItem.remove();
-            showToast('Cancelled', 'Download cancelled', 'warning');
-            
-            // Show "no downloads" message if this was the last one
-            if (downloadList.children.length === 0) {
-              const noDownloads = document.createElement('p');
-              noDownloads.className = 'no-downloads';
-              noDownloads.textContent = 'No active downloads';
-              downloadList.appendChild(noDownloads);
-            }
-          });
-        }
-      }
-    });
-  }
-  
-  // For phone info connection
-  const connectionBtn = featureContent.querySelector('.connection-btn');
-  if (connectionBtn) {
-    connectionBtn.addEventListener('click', () => {
-      const connectionStatus = featureContent.querySelector('.connection-status');
-      if (connectionStatus) {
-        connectionStatus.innerHTML = `
-          <i class="fas fa-spinner fa-spin"></i>
-          <p>Searching for devices...</p>
+// Setup events for embedded app interfaces
+function setupEmbeddedAppListeners(featureId, app) {
+  // Console clear buttons
+  const consoleClearBtn = featureContent.querySelector('.console-clear-btn');
+  if (consoleClearBtn) {
+    consoleClearBtn.addEventListener('click', () => {
+      const consoleContent = featureContent.querySelector(`#app-console-${featureId}`);
+      if (consoleContent) {
+        consoleContent.innerHTML = `
+          <div class="console-line">
+            <span class="timestamp">[${new Date().toLocaleTimeString()}]</span>
+            <span class="message">Console cleared</span>
+          </div>
         `;
-        
-        setTimeout(() => {
-          connectionStatus.innerHTML = `
-            <i class="fas fa-mobile-alt connected"></i>
-            <p>Device connected: Pixel 7</p>
-            <div class="device-details">
-              <p><strong>Model:</strong> Google Pixel 7</p>
-              <p><strong>OS:</strong> Android 14</p>
-              <p><strong>Storage:</strong> 128GB (45% used)</p>
-            </div>
-          `;
-          
-          // Enable buttons
-          const buttons = featureContent.querySelectorAll('.connection-btn.disabled');
-          buttons.forEach(btn => btn.classList.remove('disabled'));
-          
-          showToast('Connected', 'Phone connected successfully', 'success');
-        }, 2000);
       }
     });
   }
   
-  // For health report view buttons
-  const reportViewBtns = featureContent.querySelectorAll('.report-view-btn');
-  if (reportViewBtns.length) {
-    reportViewBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const reportTitle = btn.closest('.report-item').querySelector('h4').textContent;
-        showToast('Report', `Opening ${reportTitle}`, 'info');
-      });
+  // Download functionality
+  const downloadBtn = featureContent.querySelector('.download-btn');
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', () => {
+      const urlInput = featureContent.querySelector('#url-input');
+      if (urlInput && urlInput.value.trim()) {
+        startDownloadProcess(featureId, urlInput.value.trim());
+        urlInput.value = '';
+      } else {
+        showToast('Error', 'Please enter a valid URL', 'error');
+      }
     });
   }
+  
+  // Connection functionality for phone info
+  const scanBtn = featureContent.querySelector('.scan-btn');
+  if (scanBtn) {
+    scanBtn.addEventListener('click', () => {
+      startDeviceScan(featureId);
+    });
+  }
+  
+  // General control buttons
+  const restartBtn = featureContent.querySelector('.restart-btn');
+  const stopBtn = featureContent.querySelector('.stop-btn');
+  
+  if (restartBtn) {
+    restartBtn.addEventListener('click', () => {
+      restartApp(featureId);
+    });
+  }
+  
+  if (stopBtn) {
+    stopBtn.addEventListener('click', () => {
+      stopApp(featureId);
+    });
+  }
+}
+
+// Helper functions for embedded app functionality
+function startDownloadProcess(featureId, url) {
+  // Add to console
+  addToConsole(featureId, `Starting download for: ${url}`);
+  
+  // Get quality setting from the interface
+  const qualitySelect = featureContent.querySelector(`#quality-${featureId}`);
+  const quality = qualitySelect ? qualitySelect.value : 'best';
+  
+  // Get download list
+  const downloadList = featureContent.querySelector(`#download-list-${featureId}`);
+  if (downloadList) {
+    // Remove "no downloads" message
+    const noDownloads = downloadList.querySelector('.no-downloads');
+    if (noDownloads) noDownloads.remove();
+    
+    // Create download item
+    const downloadItem = document.createElement('div');
+    downloadItem.className = 'download-item';
+    downloadItem.innerHTML = `
+      <div class="download-info">
+        <div class="download-name">Loading video info...</div>
+        <div class="download-progress">
+          <div class="progress-bar" style="width: 0%"></div>
+        </div>
+        <div class="download-status">Connecting...</div>
+      </div>
+      <button class="download-cancel-btn">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
+    
+    downloadList.appendChild(downloadItem);
+    
+    const progressBar = downloadItem.querySelector('.progress-bar');
+    const statusElement = downloadItem.querySelector('.download-status');
+    const nameElement = downloadItem.querySelector('.download-name');
+    
+    // Start the actual Python download process using electronAPI
+    window.electronAPI.startDownload(featureId, url, quality)
+      .then(success => {
+        if (success) {
+          addToConsole(featureId, `Download process started for: ${url}`);
+        } else {
+          statusElement.textContent = 'Failed to start';
+          showToast('Error', 'Failed to start download process', 'error');
+        }
+      })
+      .catch(error => {
+        console.error(`Failed to start download:`, error);
+        statusElement.textContent = 'Failed to start';
+        showToast('Error', 'Failed to start download process', 'error');
+      });
+    
+    // Cancel button
+    downloadItem.querySelector('.download-cancel-btn').addEventListener('click', () => {
+      window.electronAPI.cancelDownload(featureId)
+        .then(() => {
+          downloadItem.remove();
+          addToConsole(featureId, `Download cancelled: ${url}`);
+          showToast('Cancelled', 'Download cancelled', 'warning');
+        });
+      
+      // Show "no downloads" if this was the last one
+      if (downloadList.children.length === 0) {
+        const noDownloads = document.createElement('p');
+        noDownloads.className = 'no-downloads';
+        noDownloads.textContent = 'No active downloads';
+        downloadList.appendChild(noDownloads);
+      }
+    });
+  }
+  
+  showToast('Started', `Download started for ${url}`, 'info');
+}
+
+function startDeviceScan(featureId) {
+  addToConsole(featureId, 'Scanning for devices...');
+  
+  const scanBtn = featureContent.querySelector('.scan-btn');
+  if (scanBtn) {
+    scanBtn.disabled = true;
+    scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+    
+    setTimeout(() => {
+      scanBtn.disabled = false;
+      scanBtn.innerHTML = '<i class="fas fa-search"></i> Scan for Devices';
+      
+      addToConsole(featureId, 'Device found: Android Device (USB)');
+      
+      // Show device info
+      const deviceInfo = featureContent.querySelector(`#device-info-${featureId}`);
+      if (deviceInfo) {
+        deviceInfo.style.display = 'block';
+        
+        // Update device details
+        document.getElementById('device-model').textContent = 'Samsung Galaxy S21';
+        document.getElementById('device-os').textContent = 'Android 13';
+        document.getElementById('device-storage').textContent = '128GB (67% used)';
+        document.getElementById('device-battery').textContent = '87%';
+      }
+      
+      showToast('Connected', 'Device connected successfully', 'success');
+    }, 2000);
+  }
+}
+
+function addToConsole(featureId, message) {
+  const consoleContent = featureContent.querySelector(`#app-console-${featureId}`);
+  if (consoleContent) {
+    const consoleLine = document.createElement('div');
+    consoleLine.className = 'console-line';
+    consoleLine.innerHTML = `
+      <span class="timestamp">[${new Date().toLocaleTimeString()}]</span>
+      <span class="message">${message}</span>
+    `;
+    consoleContent.appendChild(consoleLine);
+    
+    // Auto-scroll to bottom
+    consoleContent.scrollTop = consoleContent.scrollHeight;
+  }
+}
+
+function restartApp(featureId) {
+  addToConsole(featureId, 'Restarting application...');
+  showToast('Restart', 'Application restarted', 'info');
+  
+  // Update status indicator
+  const statusIndicator = featureContent.querySelector('.status-indicator');
+  if (statusIndicator) {
+    statusIndicator.className = 'fas fa-circle status-indicator running';
+  }
+}
+
+function stopApp(featureId) {
+  addToConsole(featureId, 'Stopping application...');
+  showToast('Stopped', 'Application stopped', 'warning');
+  
+  // Update status indicator
+  const statusIndicator = featureContent.querySelector('.status-indicator');
+  if (statusIndicator) {
+    statusIndicator.className = 'fas fa-circle status-indicator stopped';
+  }
+  
+  // Close feature viewer
+  setTimeout(() => {
+    featureViewer.classList.remove('active');
+  }, 1000);
 }
 
 // Close current active feature
@@ -784,10 +1117,30 @@ function startResourceMonitoring() {
     const cpuUsage = Math.floor(Math.random() * 8) + 1;
     cpuStatus.textContent = `CPU: ${cpuUsage}%`;
     
+    // Update widget panel CPU bar if exists
+    const cpuBar = document.getElementById('cpuBar');
+    const cpuValue = document.getElementById('cpuValue');
+    if (cpuBar) cpuBar.style.width = `${cpuUsage}%`;
+    if (cpuValue) cpuValue.textContent = `${cpuUsage}%`;
+    
     // Simulate memory usage between 450-550MB
     const memoryUsage = Math.floor(Math.random() * 100) + 450;
+    const memoryPercent = Math.floor((memoryUsage / 2048) * 100); // Assuming 2GB total
     memoryStatus.textContent = `Memory: ${memoryUsage}MB`;
-  }, 5000);
+    
+    // Update widget panel memory bar if exists
+    const memBar = document.getElementById('memBar');
+    const memValue = document.getElementById('memValue');
+    if (memBar) memBar.style.width = `${memoryPercent}%`;
+    if (memValue) memValue.textContent = `${memoryUsage}MB`;
+    
+    // Simulate GPU usage between 0-15%
+    const gpuUsage = Math.floor(Math.random() * 15);
+    const gpuBar = document.getElementById('gpuBar');
+    const gpuValue = document.getElementById('gpuValue');
+    if (gpuBar) gpuBar.style.width = `${gpuUsage}%`;
+    if (gpuValue) gpuValue.textContent = `${gpuUsage}%`;
+  }, 3000); // Update every 3 seconds
 }
 
 // Set up event listeners
@@ -839,34 +1192,229 @@ function setupEventListeners() {
       showToast('Closed', `${app.name} has been closed.`, 'info');
     }
   });
+
+  // Python process events
+  window.electronAPI.onPythonOutput((data) => {
+    const { appId, message, type } = data;
+    addToConsole(appId, message);
+    
+    // Update UI based on message content
+    const activeDownloadItems = document.querySelectorAll(`#download-list-${appId} .download-item`);
+    const latestDownloadItem = activeDownloadItems[activeDownloadItems.length - 1];
+    
+    if (latestDownloadItem) {
+      const nameElement = latestDownloadItem.querySelector('.download-name');
+      const statusElement = latestDownloadItem.querySelector('.download-status');
+      
+      // Update download name if we get title info
+      if (message.includes('Title:')) {
+        const title = message.split('Title: ')[1];
+        if (title && nameElement) {
+          nameElement.textContent = title;
+        }
+      }
+      
+      // Update status based on message
+      if (statusElement) {
+        if (message.includes('Starting download') || message.includes('🎬')) {
+          statusElement.textContent = 'Starting download...';
+        } else if (message.includes('Duration:') || message.includes('⏱️')) {
+          statusElement.textContent = 'Getting video info...';
+        }
+      }
+    }
+  });
+
+  window.electronAPI.onDownloadProgress((data) => {
+    const { appId, progress, message } = data;
+    
+    // Find the latest download item for this app
+    const activeDownloadItems = document.querySelectorAll(`#download-list-${appId} .download-item`);
+    const latestDownloadItem = activeDownloadItems[activeDownloadItems.length - 1];
+    
+    if (latestDownloadItem) {
+      const progressBar = latestDownloadItem.querySelector('.progress-bar');
+      const statusElement = latestDownloadItem.querySelector('.download-status');
+      
+      if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+      }
+      if (statusElement) {
+        statusElement.textContent = `Downloading... ${progress.toFixed(1)}%`;
+      }
+    }
+  });
+
+  window.electronAPI.onDownloadComplete((data) => {
+    const { appId, message } = data;
+    
+    // Find the latest download item for this app
+    const activeDownloadItems = document.querySelectorAll(`#download-list-${appId} .download-item`);
+    const latestDownloadItem = activeDownloadItems[activeDownloadItems.length - 1];
+    
+    if (latestDownloadItem) {
+      const progressBar = latestDownloadItem.querySelector('.progress-bar');
+      const statusElement = latestDownloadItem.querySelector('.download-status');
+      
+      if (progressBar) {
+        progressBar.style.width = '100%';
+      }
+      if (statusElement) {
+        statusElement.textContent = 'Complete';
+      }
+    }
+    
+    showToast('Success', 'Download completed successfully!', 'success');
+  });
+
+  window.electronAPI.onDownloadError((data) => {
+    const { appId, error } = data;
+    
+    // Find the latest download item for this app
+    const activeDownloadItems = document.querySelectorAll(`#download-list-${appId} .download-item`);
+    const latestDownloadItem = activeDownloadItems[activeDownloadItems.length - 1];
+    
+    if (latestDownloadItem) {
+      const progressBar = latestDownloadItem.querySelector('.progress-bar');
+      const statusElement = latestDownloadItem.querySelector('.download-status');
+      
+      if (progressBar) {
+        progressBar.style.width = '0%';
+      }
+      if (statusElement) {
+        statusElement.textContent = 'Error occurred';
+      }
+    }
+    
+    showToast('Error', `Download failed: ${error}`, 'error');
+  });
+
+  window.electronAPI.onDownloadInfo((data) => {
+    const { appId, title } = data;
+    
+    // Find the latest download item for this app and update the title
+    const activeDownloadItems = document.querySelectorAll(`#download-list-${appId} .download-item`);
+    const latestDownloadItem = activeDownloadItems[activeDownloadItems.length - 1];
+    
+    if (latestDownloadItem && title) {
+      const nameElement = latestDownloadItem.querySelector('.download-name');
+      if (nameElement) {
+        nameElement.textContent = title;
+      }
+    }
+  });
   
-  // Settings toggles
+  // Settings event listeners - General Settings
   const darkModeToggle = document.getElementById('darkModeToggle');
   if (darkModeToggle) {
-    darkModeToggle.addEventListener('change', () => {
-      showToast('Settings', 'Dark mode setting saved', 'info');
+    darkModeToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      showToast('Settings', `Dark mode ${enabled ? 'enabled' : 'disabled'}`, 'success');
+      // Could apply theme here if implementing light mode
     });
   }
   
   const notificationsToggle = document.getElementById('notificationsToggle');
   if (notificationsToggle) {
-    notificationsToggle.addEventListener('change', () => {
-      showToast('Settings', 'Notification settings saved', 'info');
+    notificationsToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      showToast('Settings', `Notifications ${enabled ? 'enabled' : 'disabled'}`, 'success');
     });
   }
   
-  // Camera and model settings
+  const autoStartToggle = document.getElementById('autoStartToggle');
+  if (autoStartToggle) {
+    autoStartToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      showToast('Settings', `Auto-start ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    });
+  }
+  
+  // Camera Settings
   const cameraSelect = document.getElementById('cameraSelect');
   if (cameraSelect) {
-    cameraSelect.addEventListener('change', () => {
-      showToast('Settings', 'Camera source updated', 'info');
+    cameraSelect.addEventListener('change', (e) => {
+      const value = e.target.value;
+      const option = e.target.options[e.target.selectedIndex].text;
+      showToast('Camera', `Camera source set to: ${option}`, 'success');
     });
   }
   
+  const resolutionSelect = document.getElementById('resolutionSelect');
+  if (resolutionSelect) {
+    resolutionSelect.addEventListener('change', (e) => {
+      const value = e.target.value;
+      showToast('Camera', `Resolution set to: ${value}`, 'success');
+    });
+  }
+  
+  const fpsSelect = document.getElementById('fpsSelect');
+  if (fpsSelect) {
+    fpsSelect.addEventListener('change', (e) => {
+      const value = e.target.value;
+      showToast('Camera', `Frame rate set to: ${value} FPS`, 'success');
+    });
+  }
+  
+  // AI Model Settings
   const modelPrecisionSelect = document.getElementById('modelPrecisionSelect');
   if (modelPrecisionSelect) {
-    modelPrecisionSelect.addEventListener('change', () => {
-      showToast('Settings', 'AI model precision updated', 'info');
+    modelPrecisionSelect.addEventListener('change', (e) => {
+      const value = e.target.value;
+      const option = e.target.options[e.target.selectedIndex].text;
+      showToast('AI Models', `Model precision set to: ${option}`, 'success');
+    });
+  }
+  
+  const gpuAccelerationToggle = document.getElementById('gpuAccelerationToggle');
+  if (gpuAccelerationToggle) {
+    gpuAccelerationToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      showToast('AI Models', `GPU acceleration ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    });
+  }
+  
+  const confidenceThreshold = document.getElementById('confidenceThreshold');
+  if (confidenceThreshold) {
+    confidenceThreshold.addEventListener('change', (e) => {
+      const value = e.target.value;
+      const option = e.target.options[e.target.selectedIndex].text;
+      showToast('AI Models', `Confidence threshold set to: ${option}`, 'success');
+    });
+  }
+  
+  // Performance Settings
+  const resourceUsageSelect = document.getElementById('resourceUsageSelect');
+  if (resourceUsageSelect) {
+    resourceUsageSelect.addEventListener('change', (e) => {
+      const value = e.target.value;
+      const option = e.target.options[e.target.selectedIndex].text;
+      showToast('Performance', `Resource usage mode: ${option}`, 'success');
+    });
+  }
+  
+  const cachingToggle = document.getElementById('cachingToggle');
+  if (cachingToggle) {
+    cachingToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      showToast('Performance', `Model caching ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    });
+  }
+  
+  // Storage Settings
+  const saveFacesToggle = document.getElementById('saveFacesToggle');
+  if (saveFacesToggle) {
+    saveFacesToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      showToast('Storage', `Save recognized faces ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    });
+  }
+  
+  const saveReportsToggle = document.getElementById('saveReportsToggle');
+  if (saveReportsToggle) {
+    saveReportsToggle.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      showToast('Storage', `Save analysis reports ${enabled ? 'enabled' : 'disabled'}`, 'success');
     });
   }
   

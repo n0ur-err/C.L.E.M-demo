@@ -8,6 +8,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   launchApp: (appId) => ipcRenderer.invoke('launch-app', appId),
   terminateApp: (appId) => ipcRenderer.invoke('terminate-app', appId),
   
+  // Python process management
+  startDownload: (appId, url, quality) => ipcRenderer.invoke('start-download', appId, url, quality),
+  cancelDownload: (appId) => ipcRenderer.invoke('cancel-download', appId),
+  startPythonApp: (appId, args) => ipcRenderer.invoke('start-python-app', appId, args),
+  stopPythonApp: (appId) => ipcRenderer.invoke('stop-python-app', appId),
+  
   // Window control
   closeApp: () => ipcRenderer.invoke('close-app'),
   minimizeApp: () => ipcRenderer.invoke('minimize-app'),
@@ -24,6 +30,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('app-closed', (_, data) => callback(data)),
   onAllAppsInitialized: (callback) =>
     ipcRenderer.on('all-apps-initialized', () => callback()),
+  onDownloadProgress: (callback) =>
+    ipcRenderer.on('download-progress', (_, data) => callback(data)),
+  onDownloadComplete: (callback) =>
+    ipcRenderer.on('download-complete', (_, data) => callback(data)),
+  onDownloadError: (callback) =>
+    ipcRenderer.on('download-error', (_, data) => callback(data)),
+  onDownloadInfo: (callback) =>
+    ipcRenderer.on('download-info', (_, data) => callback(data)),
+  onPythonOutput: (callback) =>
+    ipcRenderer.on('python-output', (_, data) => callback(data)),
     
   // Remove event listeners
   removeAllListeners: (channel) => {

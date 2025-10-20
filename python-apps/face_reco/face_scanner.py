@@ -260,16 +260,50 @@ def main():
         print("  - Press 'a' to toggle auto-capture mode")
         print("  - Press 'q' to quit")
         
-        # Initialize webcam
-        video_capture = cv2.VideoCapture(0)
-        if not video_capture.isOpened():
-            error_msg = "Could not open webcam. Please check camera permissions."
+        # Initialize webcam with better error handling
+        print("Initializing camera...")
+        
+        # Try different camera backends and indices
+        video_capture = None
+        camera_backends = [
+            (cv2.CAP_DSHOW, "DirectShow"),  # Windows preferred
+            (cv2.CAP_MSMF, "Windows Media Foundation"),
+            (cv2.CAP_ANY, "Any available")
+        ]
+        
+        for backend, backend_name in camera_backends:
+            for camera_index in range(3):  # Try first 3 camera indices
+                try:
+                    print(f"Trying camera {camera_index} with {backend_name} backend...")
+                    cap = cv2.VideoCapture(camera_index, backend)
+                    
+                    # Wait a moment for camera to initialize
+                    time.sleep(0.5)
+                    
+                    # Try to read a frame to verify camera works
+                    ret, test_frame = cap.read()
+                    if ret and test_frame is not None:
+                        print(f"Successfully initialized camera {camera_index} with {backend_name}")
+                        video_capture = cap
+                        break
+                    else:
+                        cap.release()
+                except Exception as e:
+                    print(f"Failed with camera {camera_index} and {backend_name}: {e}")
+                    continue
+            
+            if video_capture is not None:
+                break
+        
+        if video_capture is None:
+            error_msg = "Could not open webcam. Please check:\n1. Camera is connected\n2. No other app is using the camera\n3. Camera permissions are granted"
             print(error_msg)
             messagebox.showerror("Camera Error", error_msg)
             return
             
         video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        video_capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         
         # Variables for FPS calculation
         prev_time = time.time()

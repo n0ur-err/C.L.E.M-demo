@@ -4,9 +4,9 @@
     "description": "Futuristic launcher for Python applications",
     "main": "main.js",
     "scripts": {
-      "start": "electron . --enable-logging=false",
-      "start-dev": "electron .",
-      "create-exe": "nexe main.js -o CLEM.exe"
+        "start": "electron . --enable-logging=false",
+        "start-dev": "electron .",
+        "create-exe": "nexe main.js -o CLEM.exe"
     },
     "author": "",
     "license": "MIT",
@@ -17,5 +17,14 @@
         "electron-store": "^8.1.0",
         "node-hide-console-window": "^2.2.0",
         "python-shell": "^5.0.0"
-    }
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/nour23019870/C.L.E.M-demo.git"
+    },
+    "keywords": [],
+    "bugs": {
+        "url": "https://github.com/nour23019870/C.L.E.M-demo/issues"
+    },
+    "homepage": "https://github.com/nour23019870/C.L.E.M-demo#readme"
 }
