@@ -1,6 +1,11 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+const { exec } = require('child_process');
+const util = require('util');
+const execPromise = util.promisify(exec);
+const si = require('systeminformation');
 const { PythonShell } = require('python-shell');
 const Store = require('electron-store');
 
@@ -12,6 +17,61 @@ const pythonProcesses = {};
 
 // Read app configuration
 const appsConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'config', 'apps.json'), 'utf8'));
+
+// Function to get CPU usage via Windows performance counter
+async function getWindowsCpuUsage() {
+  try {
+    const { stdout } = await execPromise('wmic cpu get loadpercentage /value');
+    const match = stdout.match(/LoadPercentage=(\d+)/);
+    return match ? parseInt(match[1]) : 0;
+  } catch (error) {
+    console.error('Error getting CPU from wmic:', error);
+    return 0;
+  }
+}
+
+// Function to get real system metrics
+async function getSystemMetrics() {
+  try {
+    // Get CPU usage from Windows performance counter (most accurate)
+    const cpuPercent = await getWindowsCpuUsage();
+    
+    // Get memory information from systeminformation (this is accurate)
+    const memory = await si.mem();
+    const memoryUsageMB = Math.round(memory.used / (1024 * 1024));
+    const memoryUsagePercent = Math.round((memory.used / memory.total) * 100);
+    const memoryTotalGB = (memory.total / (1024 * 1024 * 1024)).toFixed(1);
+    
+    return {
+      cpu: {
+        usage: cpuPercent,
+        cores: os.cpus().length
+      },
+      memory: {
+        total: memory.total,
+        free: memory.free,
+        used: memory.used,
+        usagePercent: memoryUsagePercent,
+        usageMB: memoryUsageMB,
+        totalGB: memoryTotalGB
+      },
+      gpu: {
+        usage: 0  // GPU monitoring disabled - too CPU intensive
+      },
+      platform: os.platform(),
+      uptime: os.uptime()
+    };
+  } catch (error) {
+    console.error('Error getting system metrics:', error);
+    return {
+      cpu: { usage: 0, cores: os.cpus().length },
+      memory: { total: 0, free: 0, used: 0, usagePercent: 0, usageMB: 0, totalGB: '0' },
+      gpu: { usage: 0 },
+      platform: os.platform(),
+      uptime: os.uptime()
+    };
+  }
+}
 
 function createWindow() {
   // Create icons directory if it doesn't exist
@@ -52,7 +112,7 @@ function createWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    frame: true, 
+    frame: false, 
     transparent: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -634,6 +694,11 @@ app.whenReady().then(() => {
       return true;
     }
     return false;
+  });
+
+  // System metrics handler
+  ipcMain.handle('get-system-metrics', () => {
+    return getSystemMetrics();
   });
   
   // macOS-specific behavior

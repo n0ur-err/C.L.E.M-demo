@@ -22,16 +22,16 @@ def initialize_camera():
     print("Searching for available cameras...")
     
     # Try different camera indices and backends
-    # Based on diagnostics, prioritize camera index 1 (OBS Virtual Camera)
+    # Prioritize regular cameras (0, 2, 3) before OBS Virtual Camera (1)
     camera_configs = [
-        (1, None),           # Camera 1 - OBS Virtual Camera (works!)
-        (1, cv2.CAP_DSHOW),  # Camera 1 with DirectShow
-        (0, None),           # Fallback to camera 0
+        (0, None),           # Camera 0 - Default camera (usually built-in or USB)
+        (0, cv2.CAP_DSHOW),  # Camera 0 with DirectShow
         (2, None),           # Third camera
-        (0, cv2.CAP_DSHOW),  # Camera 0 DirectShow backend
         (2, cv2.CAP_DSHOW),  # Third camera with DirectShow
         (3, None),           # Fourth camera
         (3, cv2.CAP_DSHOW),  # Fourth camera with DirectShow
+        (1, None),           # Camera 1 - OBS Virtual Camera (fallback)
+        (1, cv2.CAP_DSHOW),  # Camera 1 with DirectShow
     ]
     
     for cam_idx, backend in camera_configs:
@@ -46,24 +46,33 @@ def initialize_camera():
                 backend_name = "default"
             
             if cap.isOpened():
-                # Give camera time to initialize (OBS Virtual Camera needs this)
-                time.sleep(1.0)  # Increased delay for OBS
+                # Try to set resolution BEFORE reading (important for some cameras)
+                cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+                cap.set(cv2.CAP_PROP_FPS, 30)
                 
-                # Try to read a test frame multiple times
-                for attempt in range(3):
-                    ret, test_frame = cap.read()
-                    if ret and test_frame is not None and test_frame.size > 0:
-                        print(f"SUCCESS! Camera found at index {cam_idx} using {backend_name} backend")
-                        
-                        # Try to set resolution (may not work with OBS, but that's okay)
-                        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-                        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-                        
-                        # Give additional time for settings to apply
-                        time.sleep(0.5)
-                        
-                        return cap
-                    time.sleep(0.2)
+                # Give camera time to initialize
+                time.sleep(1.5)
+                
+                # Try to read a test frame multiple times with validation
+                for attempt in range(5):
+                    try:
+                        ret, test_frame = cap.read()
+                        if ret and test_frame is not None and test_frame.size > 0:
+                            # Validate frame dimensions and data
+                            h, w = test_frame.shape[:2]
+                            if h > 0 and w > 0 and test_frame.dtype == np.uint8:
+                                print(f"SUCCESS! Camera found at index {cam_idx} using {backend_name} backend")
+                                print(f"Camera resolution: {w}x{h}")
+                                
+                                # One more read to ensure stability
+                                time.sleep(0.3)
+                                ret2, test_frame2 = cap.read()
+                                if ret2 and test_frame2 is not None and test_frame2.size > 0:
+                                    return cap
+                    except Exception as frame_error:
+                        print(f"Frame read attempt {attempt + 1} failed: {str(frame_error)}")
+                    time.sleep(0.3)
                 
                 cap.release()
         except Exception as e:
@@ -120,16 +129,41 @@ def erase_by_thumb(thumb_pos):
 
 with mp_hands.Hands(min_detection_confidence=0.85, min_tracking_confidence=0.5, max_num_hands=1) as hands:
     frame_count = 0
+    error_count = 0
     while cap.isOpened():
-        success, frame = cap.read()
-        if not success:
-            frame_count += 1
-            if frame_count > 10:  # If we fail to read 10 times in a row, exit
-                print("Error: Lost connection to camera")
+        try:
+            success, frame = cap.read()
+            if not success or frame is None or frame.size == 0:
+                frame_count += 1
+                if frame_count > 10:  # If we fail to read 10 times in a row, exit
+                    print("Error: Lost connection to camera")
+                    break
+                time.sleep(0.1)
+                continue
+            
+            # Validate frame data
+            if not isinstance(frame, np.ndarray) or frame.dtype != np.uint8:
+                print("Warning: Invalid frame data type, skipping frame")
+                continue
+                
+            frame_count = 0  # Reset counter on successful read
+            error_count = 0  # Reset error counter
+        except cv2.error as e:
+            error_count += 1
+            print(f"OpenCV error reading frame: {str(e)}")
+            if error_count > 10:
+                print("Too many OpenCV errors, exiting...")
                 break
+            time.sleep(0.1)
             continue
-        
-        frame_count = 0  # Reset counter on successful read
+        except Exception as e:
+            error_count += 1
+            print(f"Unexpected error reading frame: {str(e)}")
+            if error_count > 10:
+                print("Too many errors, exiting...")
+                break
+            time.sleep(0.1)
+            continue
 
         frame = cv2.flip(frame, 1)
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

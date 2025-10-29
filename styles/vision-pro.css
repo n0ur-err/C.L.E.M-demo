@@ -1139,6 +1139,18 @@ body, html {
   transition: all 0.4s var(--ease-out);
 }
 
+/* Feature icon app images */
+.feature-icon .app-icon {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  filter: drop-shadow(0 4px 16px rgba(0, 122, 255, 0.6));
+  position: relative;
+  z-index: 2;
+  transition: all 0.4s var(--ease-out);
+}
+
 .feature-card:hover .feature-icon {
   transform: scale(1.08) rotate(5deg);
   box-shadow: 
@@ -1147,6 +1159,11 @@ body, html {
 }
 
 .feature-card:hover .feature-icon i {
+  filter: drop-shadow(0 8px 24px rgba(0, 122, 255, 0.8));
+  transform: scale(1.1);
+}
+
+.feature-card:hover .feature-icon .app-icon {
   filter: drop-shadow(0 8px 24px rgba(0, 122, 255, 0.8));
   transform: scale(1.1);
 }
@@ -1344,12 +1361,48 @@ body, html {
   box-shadow: var(--shadow-md), var(--shadow-inner);
 }
 
-.quick-actions h3, .recent-activities h3 {
-  font-size: 20px;
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: var(--space-6);
+}
+
+.quick-actions h3, .recent-activities h3, .section-header h3 {
+  font-size: 20px;
+  margin-bottom: 0;
   color: var(--text-primary);
   font-weight: 600;
   letter-spacing: -0.02em;
+}
+
+.clear-activities-btn {
+  background: rgba(255, 59, 48, 0.1);
+  border: 0.5px solid rgba(255, 59, 48, 0.2);
+  color: #ff3b30;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-out);
+  font-size: 14px;
+}
+
+.clear-activities-btn:hover {
+  background: rgba(255, 59, 48, 0.2);
+  border-color: rgba(255, 59, 48, 0.4);
+  transform: scale(1.05);
+}
+
+.clear-activities-btn:active {
+  transform: scale(0.95);
+}
+
+.quick-actions h3 {
+  margin-bottom: var(--space-6);
 }
 
 .action-buttons {
@@ -1396,6 +1449,21 @@ body, html {
   transform: scale(1.15);
 }
 
+/* Action button icon images */
+.action-btn .action-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  filter: drop-shadow(0 4px 12px rgba(0, 122, 255, 0.4));
+  transition: all 0.3s var(--ease-out);
+}
+
+.action-btn:hover .action-icon {
+  filter: drop-shadow(0 8px 20px rgba(0, 122, 255, 0.7));
+  transform: scale(1.15);
+}
+
 .action-btn span {
   font-size: 13px;
   font-weight: 600;
@@ -1407,6 +1475,28 @@ body, html {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.no-activity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.no-activity i {
+  font-size: 32px;
+  margin-bottom: var(--space-3);
+  opacity: 0.3;
+}
+
+.no-activity p {
+  font-size: 13px;
+  font-weight: 400;
+  margin: 0;
 }
 
 .activity-item {
@@ -1578,8 +1668,12 @@ body, html {
 
 .toggle-switch input {
   opacity: 0;
-  width: 0;
-  height: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0;
 }
 
 .toggle-slider {
@@ -1591,6 +1685,7 @@ body, html {
   border-radius: 32px;
   border: 0.5px solid rgba(255, 255, 255, 0.2);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
 }
 
 .toggle-slider::before {
@@ -2609,4 +2704,112 @@ textarea.form-control {
   .dashboard-stats {
     grid-template-columns: 1fr;
   }
+}
+
+/* ============================================
+   LIGHT MODE THEME
+   ============================================ */
+body.light-mode {
+  --vision-bg-primary: #F5F5F7;
+  --vision-bg-secondary: #FFFFFF;
+  --vision-surface: rgba(0, 0, 0, 0.05);
+  --vision-surface-hover: rgba(0, 0, 0, 0.08);
+  --vision-surface-active: rgba(0, 0, 0, 0.12);
+  
+  /* Glass Materials for light mode */
+  --glass-ultra-thin: rgba(255, 255, 255, 0.6);
+  --glass-thin: rgba(255, 255, 255, 0.7);
+  --glass-regular: rgba(255, 255, 255, 0.8);
+  --glass-thick: rgba(255, 255, 255, 0.9);
+  --glass-ultra-thick: rgba(255, 255, 255, 0.95);
+  
+  /* Text Colors for light mode */
+  --text-primary: rgba(0, 0, 0, 0.9);
+  --text-secondary: rgba(0, 0, 0, 0.65);
+  --text-tertiary: rgba(0, 0, 0, 0.45);
+  --text-quaternary: rgba(0, 0, 0, 0.25);
+  
+  /* Shadows for light mode */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 64px rgba(0, 0, 0, 0.15);
+}
+
+body.light-mode .background {
+  background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);
+}
+
+body.light-mode .gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 122, 255, 0.05) 0%,
+    rgba(88, 86, 214, 0.05) 50%,
+    rgba(191, 90, 242, 0.05) 100%
+  );
+}
+
+body.light-mode .grid {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+}
+
+body.light-mode .particle {
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.15) 0%, transparent 70%);
+}
+
+body.light-mode .sidebar,
+body.light-mode .widget-card,
+body.light-mode .stat-card,
+body.light-mode .feature-card,
+body.light-mode .settings-group {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+body.light-mode .title-bar {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .control-btn {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+body.light-mode .control-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+body.light-mode .status-bar {
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .toggle-slider {
+  background: rgba(0, 0, 0, 0.15);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+body.light-mode input:checked + .toggle-slider {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+}
+
+body.light-mode .setting-item select {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: var(--text-primary);
+}
+
+body.light-mode ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+body.light-mode ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
 }

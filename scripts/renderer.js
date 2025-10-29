@@ -180,48 +180,156 @@ function switchSection(sectionId) {
     targetSection.classList.add('active');
     activeSection = sectionId;
     
-    // If switching to settings, ensure settings listeners are attached
+    // If switching to settings, ensure listeners are set up
     if (sectionId === 'settings') {
-      setupSettingsListeners();
+      console.log('Switching to settings section - ensuring listeners are attached');
+      // Call setup again to ensure listeners are attached
+      // The function checks if already initialized
+      setTimeout(() => {
+        setupSettingsListeners();
+      }, 100);
     }
   }
 }
 
+// Track if settings listeners have been set up
+let settingsListenersInitialized = false;
+
+// Settings state
+let settings = {
+  darkMode: true,
+  notifications: true,
+  autoStart: false,
+  cameraSource: '0',
+  resolution: '1080p',
+  fps: '30',
+  modelPrecision: 'standard',
+  gpuAcceleration: true,
+  confidenceThreshold: '0.7',
+  resourceUsage: 'balanced',
+  caching: true,
+  saveFaces: true,
+  saveReports: true
+};
+
+// Load settings from localStorage
+function loadSettings() {
+  const saved = localStorage.getItem('clemSettings');
+  if (saved) {
+    try {
+      settings = { ...settings, ...JSON.parse(saved) };
+      console.log('Loaded settings:', settings);
+    } catch (e) {
+      console.error('Error loading settings:', e);
+    }
+  }
+  return settings;
+}
+
+// Save settings to localStorage
+function saveSettings() {
+  localStorage.setItem('clemSettings', JSON.stringify(settings));
+  console.log('Settings saved:', settings);
+}
+
+// Apply dark mode
+function applyDarkMode(enabled) {
+  const body = document.body;
+  if (enabled) {
+    body.classList.remove('light-mode');
+    body.classList.add('dark-mode');
+    console.log('✓ Dark mode applied');
+  } else {
+    body.classList.remove('dark-mode');
+    body.classList.add('light-mode');
+    console.log('✓ Light mode applied');
+  }
+}
+
+// Update notification status indicator
+function updateNotificationStatus(enabled) {
+  // Find the notification bell in header
+  const notificationBell = document.querySelector('.header-actions .header-btn[title="Notifications"]');
+  if (notificationBell) {
+    if (!enabled) {
+      // Add a strike-through or mute indicator
+      notificationBell.style.opacity = '0.4';
+      notificationBell.style.textDecoration = 'line-through';
+      notificationBell.title = 'Notifications (Disabled)';
+    } else {
+      notificationBell.style.opacity = '1';
+      notificationBell.style.textDecoration = 'none';
+      notificationBell.title = 'Notifications';
+    }
+  }
+  
+  console.log(`Notification status updated: ${enabled ? 'enabled' : 'disabled'}`);
+}
+
 // Setup settings event listeners
 function setupSettingsListeners() {
-  console.log('Setting up settings listeners...');
+  console.log('=== Setting up settings listeners ===');
+  
+  // Prevent duplicate initialization
+  if (settingsListenersInitialized) {
+    console.log('Settings listeners already initialized, skipping');
+    return;
+  }
+  
+  // Load saved settings
+  loadSettings();
+  
+  // Apply initial dark mode
+  applyDarkMode(settings.darkMode);
+  
+  // Apply initial notification status
+  updateNotificationStatus(settings.notifications);
   
   // General Settings
   const darkModeToggle = document.getElementById('darkModeToggle');
+  console.log('darkModeToggle element:', darkModeToggle);
   if (darkModeToggle) {
-    // Remove any existing listener
-    darkModeToggle.replaceWith(darkModeToggle.cloneNode(true));
-    const newDarkModeToggle = document.getElementById('darkModeToggle');
-    newDarkModeToggle.addEventListener('change', (e) => {
+    // Set initial state from settings
+    darkModeToggle.checked = settings.darkMode;
+    applyDarkMode(settings.darkMode);
+    
+    darkModeToggle.addEventListener('change', (e) => {
       const enabled = e.target.checked;
-      console.log('Dark mode toggled:', enabled);
-      showToast('Settings', `Dark mode ${enabled ? 'enabled' : 'disabled'}`, 'success');
+      console.log('!!! Dark mode toggled:', enabled);
+      settings.darkMode = enabled;
+      saveSettings();
+      applyDarkMode(enabled);
+      // Always show dark mode toggle notification
+      showToast('Settings', `${enabled ? 'Dark' : 'Light'} mode activated`, 'success', true);
     });
-    console.log('Dark mode toggle attached');
+    console.log('✓ Dark mode toggle listener attached');
+  } else {
+    console.error('✗ darkModeToggle element not found!');
   }
   
   const notificationsToggle = document.getElementById('notificationsToggle');
   if (notificationsToggle) {
-    notificationsToggle.replaceWith(notificationsToggle.cloneNode(true));
-    const newNotificationsToggle = document.getElementById('notificationsToggle');
-    newNotificationsToggle.addEventListener('change', (e) => {
+    // Set initial state from settings
+    notificationsToggle.checked = settings.notifications;
+    
+    notificationsToggle.addEventListener('change', (e) => {
       const enabled = e.target.checked;
       console.log('Notifications toggled:', enabled);
-      showToast('Settings', `Notifications ${enabled ? 'enabled' : 'disabled'}`, 'success');
+      settings.notifications = enabled;
+      saveSettings();
+      
+      // Update notification status in UI if needed
+      updateNotificationStatus(enabled);
+      
+      // Always show this notification regardless of setting (to confirm the change)
+      showToast('Settings', `Notifications ${enabled ? 'enabled' : 'disabled'}`, 'success', true);
     });
-    console.log('Notifications toggle attached');
+    console.log('✓ Notifications toggle listener attached');
   }
   
   const autoStartToggle = document.getElementById('autoStartToggle');
   if (autoStartToggle) {
-    autoStartToggle.replaceWith(autoStartToggle.cloneNode(true));
-    const newAutoStartToggle = document.getElementById('autoStartToggle');
-    newAutoStartToggle.addEventListener('change', (e) => {
+    autoStartToggle.addEventListener('change', (e) => {
       const enabled = e.target.checked;
       console.log('Auto-start toggled:', enabled);
       showToast('Settings', `Auto-start ${enabled ? 'enabled' : 'disabled'}`, 'success');
@@ -232,9 +340,7 @@ function setupSettingsListeners() {
   // Camera Settings
   const cameraSelect = document.getElementById('cameraSelect');
   if (cameraSelect) {
-    cameraSelect.replaceWith(cameraSelect.cloneNode(true));
-    const newCameraSelect = document.getElementById('cameraSelect');
-    newCameraSelect.addEventListener('change', (e) => {
+    cameraSelect.addEventListener('change', (e) => {
       const option = e.target.options[e.target.selectedIndex].text;
       console.log('Camera changed:', option);
       showToast('Camera', `Camera source set to: ${option}`, 'success');
@@ -244,9 +350,7 @@ function setupSettingsListeners() {
   
   const resolutionSelect = document.getElementById('resolutionSelect');
   if (resolutionSelect) {
-    resolutionSelect.replaceWith(resolutionSelect.cloneNode(true));
-    const newResolutionSelect = document.getElementById('resolutionSelect');
-    newResolutionSelect.addEventListener('change', (e) => {
+    resolutionSelect.addEventListener('change', (e) => {
       const value = e.target.value;
       console.log('Resolution changed:', value);
       showToast('Camera', `Resolution set to: ${value}`, 'success');
@@ -256,9 +360,7 @@ function setupSettingsListeners() {
   
   const fpsSelect = document.getElementById('fpsSelect');
   if (fpsSelect) {
-    fpsSelect.replaceWith(fpsSelect.cloneNode(true));
-    const newFpsSelect = document.getElementById('fpsSelect');
-    newFpsSelect.addEventListener('change', (e) => {
+    fpsSelect.addEventListener('change', (e) => {
       const value = e.target.value;
       console.log('FPS changed:', value);
       showToast('Camera', `Frame rate set to: ${value} FPS`, 'success');
@@ -269,9 +371,7 @@ function setupSettingsListeners() {
   // AI Model Settings
   const modelPrecisionSelect = document.getElementById('modelPrecisionSelect');
   if (modelPrecisionSelect) {
-    modelPrecisionSelect.replaceWith(modelPrecisionSelect.cloneNode(true));
-    const newModelPrecisionSelect = document.getElementById('modelPrecisionSelect');
-    newModelPrecisionSelect.addEventListener('change', (e) => {
+    modelPrecisionSelect.addEventListener('change', (e) => {
       const option = e.target.options[e.target.selectedIndex].text;
       console.log('Model precision changed:', option);
       showToast('AI Models', `Model precision set to: ${option}`, 'success');
@@ -281,9 +381,7 @@ function setupSettingsListeners() {
   
   const gpuAccelerationToggle = document.getElementById('gpuAccelerationToggle');
   if (gpuAccelerationToggle) {
-    gpuAccelerationToggle.replaceWith(gpuAccelerationToggle.cloneNode(true));
-    const newGpuAccelerationToggle = document.getElementById('gpuAccelerationToggle');
-    newGpuAccelerationToggle.addEventListener('change', (e) => {
+    gpuAccelerationToggle.addEventListener('change', (e) => {
       const enabled = e.target.checked;
       console.log('GPU acceleration toggled:', enabled);
       showToast('AI Models', `GPU acceleration ${enabled ? 'enabled' : 'disabled'}`, 'success');
@@ -293,9 +391,7 @@ function setupSettingsListeners() {
   
   const confidenceThreshold = document.getElementById('confidenceThreshold');
   if (confidenceThreshold) {
-    confidenceThreshold.replaceWith(confidenceThreshold.cloneNode(true));
-    const newConfidenceThreshold = document.getElementById('confidenceThreshold');
-    newConfidenceThreshold.addEventListener('change', (e) => {
+    confidenceThreshold.addEventListener('change', (e) => {
       const option = e.target.options[e.target.selectedIndex].text;
       console.log('Confidence threshold changed:', option);
       showToast('AI Models', `Confidence threshold set to: ${option}`, 'success');
@@ -306,9 +402,7 @@ function setupSettingsListeners() {
   // Performance Settings
   const resourceUsageSelect = document.getElementById('resourceUsageSelect');
   if (resourceUsageSelect) {
-    resourceUsageSelect.replaceWith(resourceUsageSelect.cloneNode(true));
-    const newResourceUsageSelect = document.getElementById('resourceUsageSelect');
-    newResourceUsageSelect.addEventListener('change', (e) => {
+    resourceUsageSelect.addEventListener('change', (e) => {
       const option = e.target.options[e.target.selectedIndex].text;
       console.log('Resource usage changed:', option);
       showToast('Performance', `Resource usage mode: ${option}`, 'success');
@@ -318,9 +412,7 @@ function setupSettingsListeners() {
   
   const cachingToggle = document.getElementById('cachingToggle');
   if (cachingToggle) {
-    cachingToggle.replaceWith(cachingToggle.cloneNode(true));
-    const newCachingToggle = document.getElementById('cachingToggle');
-    newCachingToggle.addEventListener('change', (e) => {
+    cachingToggle.addEventListener('change', (e) => {
       const enabled = e.target.checked;
       console.log('Caching toggled:', enabled);
       showToast('Performance', `Model caching ${enabled ? 'enabled' : 'disabled'}`, 'success');
@@ -331,9 +423,7 @@ function setupSettingsListeners() {
   // Storage Settings
   const saveFacesToggle = document.getElementById('saveFacesToggle');
   if (saveFacesToggle) {
-    saveFacesToggle.replaceWith(saveFacesToggle.cloneNode(true));
-    const newSaveFacesToggle = document.getElementById('saveFacesToggle');
-    newSaveFacesToggle.addEventListener('change', (e) => {
+    saveFacesToggle.addEventListener('change', (e) => {
       const enabled = e.target.checked;
       console.log('Save faces toggled:', enabled);
       showToast('Storage', `Save recognized faces ${enabled ? 'enabled' : 'disabled'}`, 'success');
@@ -343,9 +433,7 @@ function setupSettingsListeners() {
   
   const saveReportsToggle = document.getElementById('saveReportsToggle');
   if (saveReportsToggle) {
-    saveReportsToggle.replaceWith(saveReportsToggle.cloneNode(true));
-    const newSaveReportsToggle = document.getElementById('saveReportsToggle');
-    newSaveReportsToggle.addEventListener('change', (e) => {
+    saveReportsToggle.addEventListener('change', (e) => {
       const enabled = e.target.checked;
       console.log('Save reports toggled:', enabled);
       showToast('Storage', `Save analysis reports ${enabled ? 'enabled' : 'disabled'}`, 'success');
@@ -353,6 +441,8 @@ function setupSettingsListeners() {
     console.log('Save reports toggle attached');
   }
   
+  // Mark as initialized
+  settingsListenersInitialized = true;
   console.log('Settings listeners setup complete');
   showToast('Settings', 'Settings panel loaded - all controls are active', 'info');
 }
@@ -950,82 +1040,136 @@ function closeFeature() {
 
 // Add an entry to recent activities
 function addRecentActivity(name, id) {
-  // Create activity item
-  const activityItem = document.createElement('div');
-  activityItem.className = 'activity-item';
-  
   // Get icon based on id
   let icon = 'fa-cube';
-  if (id.includes('face') || id === 'analyse') icon = 'fa-user';
+  if (id.includes('face') || id === 'analyse') icon = 'fa-user-check';
   if (id === 'emotions') icon = 'fa-smile';
   if (id === 'SignLang') icon = 'fa-sign-language';
   if (id === 'media-control') icon = 'fa-music';
   if (id === 'item-detection') icon = 'fa-box';
   if (id.includes('download')) icon = 'fa-download';
-  if (id === 'phone-info') icon = 'fa-mobile-alt';
+  if (id === 'phoneInfo') icon = 'fa-mobile-alt';
   if (id === 'air-writing') icon = 'fa-pencil-alt';
   
   // Create timestamp
   const now = new Date();
-  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
   
-  // Populate activity item
-  activityItem.innerHTML = `
-    <div class="activity-icon">
-      <i class="fas ${icon}"></i>
-    </div>
-    <div class="activity-details">
-      <div class="activity-title">${name} activated</div>
-      <div class="activity-time">${timeStr}</div>
-    </div>
-  `;
+  // Save to localStorage
+  const activities = getStoredActivities();
+  activities.unshift({
+    name: name,
+    id: id,
+    icon: icon,
+    timestamp: now.getTime()
+  });
   
-  // Add to list (prepend)
+  // Keep only the last 10 activities in storage
+  if (activities.length > 10) {
+    activities.length = 10;
+  }
+  
+  saveActivities(activities);
+  
+  // Re-render the activity lists
+  renderActivities();
+}
+
+// Get stored activities from localStorage
+function getStoredActivities() {
+  try {
+    const stored = localStorage.getItem('recentActivities');
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Error loading activities:', error);
+    return [];
+  }
+}
+
+// Save activities to localStorage
+function saveActivities(activities) {
+  try {
+    localStorage.setItem('recentActivities', JSON.stringify(activities));
+  } catch (error) {
+    console.error('Error saving activities:', error);
+  }
+}
+
+// Render activities in both lists
+function renderActivities() {
+  const activities = getStoredActivities();
+  
+  // Render dashboard list
   if (recentActivitiesList) {
-    recentActivitiesList.insertBefore(activityItem, recentActivitiesList.firstChild);
+    recentActivitiesList.innerHTML = '';
     
-    // Limit to 5 items
-    while (recentActivitiesList.children.length > 5) {
-      recentActivitiesList.removeChild(recentActivitiesList.lastChild);
+    if (activities.length === 0) {
+      recentActivitiesList.innerHTML = `
+        <div class="no-activity">
+          <i class="fas fa-clock"></i>
+          <p>No recent activity</p>
+        </div>
+      `;
+    } else {
+      activities.slice(0, 5).forEach(activity => {
+        const activityItem = createActivityElement(activity);
+        recentActivitiesList.appendChild(activityItem);
+      });
+    }
+  }
+  
+  // Render widget list
+  const widgetActivityList = document.getElementById('widgetActivityList');
+  if (widgetActivityList) {
+    widgetActivityList.innerHTML = '';
+    
+    if (activities.length === 0) {
+      widgetActivityList.innerHTML = `
+        <div class="no-activity">
+          <i class="fas fa-clock"></i>
+          <p>No recent activity</p>
+        </div>
+      `;
+    } else {
+      activities.slice(0, 3).forEach(activity => {
+        const activityItem = createActivityElement(activity);
+        widgetActivityList.appendChild(activityItem);
+      });
     }
   }
 }
 
+// Create an activity element
+function createActivityElement(activity) {
+  const activityItem = document.createElement('div');
+  activityItem.className = 'activity-item';
+  
+  const relativeTime = getRelativeTime(activity.timestamp);
+  
+  activityItem.innerHTML = `
+    <div class="activity-icon">
+      <i class="fas ${activity.icon}"></i>
+    </div>
+    <div class="activity-details">
+      <div class="activity-title">${activity.name}</div>
+      <div class="activity-time">${relativeTime}</div>
+    </div>
+  `;
+  
+  activityItem.dataset.timestamp = activity.timestamp;
+  
+  return activityItem;
+}
+
 // Populate initial recent activities
 function populateRecentActivities() {
-  // Add some dummy recent activities to start with
-  const dummyActivities = [
-    { name: 'System', activity: 'started', time: 'Today' },
-    { name: 'Face Recognition', activity: 'trained new model', time: 'Yesterday' },
-    { name: 'ASL Translator', activity: 'updated dictionary', time: 'Apr 28' }
-  ];
-  
-  if (recentActivitiesList) {
-    recentActivitiesList.innerHTML = '';
-    
-    dummyActivities.forEach(activity => {
-      const activityItem = document.createElement('div');
-      activityItem.className = 'activity-item';
-      
-      // Get appropriate icon
-      let icon = 'fa-cube';
-      if (activity.name === 'Face Recognition') icon = 'fa-user';
-      if (activity.name === 'ASL Translator') icon = 'fa-sign-language';
-      if (activity.name === 'System') icon = 'fa-microchip';
-      
-      activityItem.innerHTML = `
-        <div class="activity-icon">
-          <i class="fas ${icon}"></i>
-        </div>
-        <div class="activity-details">
-          <div class="activity-title">${activity.name} ${activity.activity}</div>
-          <div class="activity-time">${activity.time}</div>
-        </div>
-      `;
-      
-      recentActivitiesList.appendChild(activityItem);
-    });
-  }
+  // Load and render activities from localStorage
+  renderActivities();
+}
+
+// Clear all activities
+function clearActivities() {
+  localStorage.removeItem('recentActivities');
+  renderActivities();
 }
 
 // Add status message
@@ -1041,7 +1185,13 @@ function addStatusMessage(message, type = 'info') {
 }
 
 // Show toast notification
-function showToast(title, message, type = 'info') {
+function showToast(title, message, type = 'info', forceShow = false) {
+  // Check if notifications are enabled (unless forced)
+  if (!forceShow && settings && !settings.notifications) {
+    console.log('Toast notification suppressed (notifications disabled):', title, message);
+    return;
+  }
+  
   if (!toastTemplate || !notificationArea) return;
   
   const toastClone = toastTemplate.content.cloneNode(true);
@@ -1109,38 +1259,86 @@ function hideLoading() {
   startResourceMonitoring();
 }
 
-// Simulate system resource monitoring
+// Real system resource monitoring using systeminformation
 function startResourceMonitoring() {
   // Update CPU and memory usage periodically
-  setInterval(() => {
-    // Simulate CPU usage between 1-8%
-    const cpuUsage = Math.floor(Math.random() * 8) + 1;
-    cpuStatus.textContent = `CPU: ${cpuUsage}%`;
-    
-    // Update widget panel CPU bar if exists
-    const cpuBar = document.getElementById('cpuBar');
-    const cpuValue = document.getElementById('cpuValue');
-    if (cpuBar) cpuBar.style.width = `${cpuUsage}%`;
-    if (cpuValue) cpuValue.textContent = `${cpuUsage}%`;
-    
-    // Simulate memory usage between 450-550MB
-    const memoryUsage = Math.floor(Math.random() * 100) + 450;
-    const memoryPercent = Math.floor((memoryUsage / 2048) * 100); // Assuming 2GB total
-    memoryStatus.textContent = `Memory: ${memoryUsage}MB`;
-    
-    // Update widget panel memory bar if exists
-    const memBar = document.getElementById('memBar');
-    const memValue = document.getElementById('memValue');
-    if (memBar) memBar.style.width = `${memoryPercent}%`;
-    if (memValue) memValue.textContent = `${memoryUsage}MB`;
-    
-    // Simulate GPU usage between 0-15%
-    const gpuUsage = Math.floor(Math.random() * 15);
-    const gpuBar = document.getElementById('gpuBar');
-    const gpuValue = document.getElementById('gpuValue');
-    if (gpuBar) gpuBar.style.width = `${gpuUsage}%`;
-    if (gpuValue) gpuValue.textContent = `${gpuUsage}%`;
-  }, 3000); // Update every 3 seconds
+  setInterval(async () => {
+    try {
+      const metrics = await window.electronAPI.getSystemMetrics();
+      
+      // Update CPU
+      const cpuUsage = metrics.cpu.usage;
+      cpuStatus.textContent = `CPU: ${cpuUsage}%`;
+      
+      // Update widget panel CPU bar if exists
+      const cpuBar = document.getElementById('cpuBar');
+      const cpuValue = document.getElementById('cpuValue');
+      if (cpuBar) cpuBar.style.width = `${cpuUsage}%`;
+      if (cpuValue) cpuValue.textContent = `${cpuUsage}%`;
+      
+      // Update memory
+      const memoryUsageMB = metrics.memory.usageMB;
+      const memoryPercent = metrics.memory.usagePercent;
+      memoryStatus.textContent = `Memory: ${memoryUsageMB}MB (${memoryPercent}%)`;
+      
+      // Update widget panel memory bar if exists
+      const memBar = document.getElementById('memBar');
+      const memValue = document.getElementById('memValue');
+      if (memBar) memBar.style.width = `${memoryPercent}%`;
+      if (memValue) memValue.textContent = `${memoryUsageMB}MB`;
+      
+      // Update GPU (now with real data if available)
+      const gpuUsage = metrics.gpu.usage;
+      const gpuBar = document.getElementById('gpuBar');
+      const gpuValue = document.getElementById('gpuValue');
+      if (gpuBar) gpuBar.style.width = `${gpuUsage}%`;
+      if (gpuValue) gpuValue.textContent = `${gpuUsage}%`;
+    } catch (error) {
+      console.error('Error fetching system metrics:', error);
+    }
+  }, 3000); // Update every 3 seconds to reduce CPU usage
+  
+  // Update activity timestamps every 30 seconds
+  setInterval(updateActivityTimestamps, 30000);
+}
+
+// Update activity timestamps to show relative time
+function updateActivityTimestamps() {
+  const allActivityItems = [
+    ...document.querySelectorAll('#recentActivitiesList .activity-item'),
+    ...document.querySelectorAll('#widgetActivityList .activity-item')
+  ];
+  
+  allActivityItems.forEach(item => {
+    const timestamp = parseInt(item.dataset.timestamp);
+    if (timestamp) {
+      const timeElement = item.querySelector('.activity-time');
+      if (timeElement) {
+        const relativeTime = getRelativeTime(timestamp);
+        timeElement.textContent = relativeTime;
+      }
+    }
+  });
+}
+
+// Get relative time string (e.g., "Just now", "2 min ago", "1 hour ago")
+function getRelativeTime(timestamp) {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  
+  if (seconds < 30) return 'Just now';
+  if (seconds < 60) return `${seconds} sec ago`;
+  if (minutes < 60) return `${minutes} min ago`;
+  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+  
+  // For older activities, show date
+  const date = new Date(timestamp);
+  return date.toLocaleDateString();
 }
 
 // Set up event listeners
@@ -1152,6 +1350,17 @@ function setupEventListeners() {
   
   // Close feature button
   closeFeatureBtn.addEventListener('click', closeFeature);
+  
+  // Clear activities button
+  const clearActivitiesBtn = document.getElementById('clearActivitiesBtn');
+  if (clearActivitiesBtn) {
+    clearActivitiesBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear all recent activities?')) {
+        clearActivities();
+        showToast('Cleared', 'All activities have been cleared', 'info');
+      }
+    });
+  }
   
   // App status updates
   window.electronAPI.onAppStatusUpdate((data) => {
@@ -1304,120 +1513,6 @@ function setupEventListeners() {
     }
   });
   
-  // Settings event listeners - General Settings
-  const darkModeToggle = document.getElementById('darkModeToggle');
-  if (darkModeToggle) {
-    darkModeToggle.addEventListener('change', (e) => {
-      const enabled = e.target.checked;
-      showToast('Settings', `Dark mode ${enabled ? 'enabled' : 'disabled'}`, 'success');
-      // Could apply theme here if implementing light mode
-    });
-  }
-  
-  const notificationsToggle = document.getElementById('notificationsToggle');
-  if (notificationsToggle) {
-    notificationsToggle.addEventListener('change', (e) => {
-      const enabled = e.target.checked;
-      showToast('Settings', `Notifications ${enabled ? 'enabled' : 'disabled'}`, 'success');
-    });
-  }
-  
-  const autoStartToggle = document.getElementById('autoStartToggle');
-  if (autoStartToggle) {
-    autoStartToggle.addEventListener('change', (e) => {
-      const enabled = e.target.checked;
-      showToast('Settings', `Auto-start ${enabled ? 'enabled' : 'disabled'}`, 'success');
-    });
-  }
-  
-  // Camera Settings
-  const cameraSelect = document.getElementById('cameraSelect');
-  if (cameraSelect) {
-    cameraSelect.addEventListener('change', (e) => {
-      const value = e.target.value;
-      const option = e.target.options[e.target.selectedIndex].text;
-      showToast('Camera', `Camera source set to: ${option}`, 'success');
-    });
-  }
-  
-  const resolutionSelect = document.getElementById('resolutionSelect');
-  if (resolutionSelect) {
-    resolutionSelect.addEventListener('change', (e) => {
-      const value = e.target.value;
-      showToast('Camera', `Resolution set to: ${value}`, 'success');
-    });
-  }
-  
-  const fpsSelect = document.getElementById('fpsSelect');
-  if (fpsSelect) {
-    fpsSelect.addEventListener('change', (e) => {
-      const value = e.target.value;
-      showToast('Camera', `Frame rate set to: ${value} FPS`, 'success');
-    });
-  }
-  
-  // AI Model Settings
-  const modelPrecisionSelect = document.getElementById('modelPrecisionSelect');
-  if (modelPrecisionSelect) {
-    modelPrecisionSelect.addEventListener('change', (e) => {
-      const value = e.target.value;
-      const option = e.target.options[e.target.selectedIndex].text;
-      showToast('AI Models', `Model precision set to: ${option}`, 'success');
-    });
-  }
-  
-  const gpuAccelerationToggle = document.getElementById('gpuAccelerationToggle');
-  if (gpuAccelerationToggle) {
-    gpuAccelerationToggle.addEventListener('change', (e) => {
-      const enabled = e.target.checked;
-      showToast('AI Models', `GPU acceleration ${enabled ? 'enabled' : 'disabled'}`, 'success');
-    });
-  }
-  
-  const confidenceThreshold = document.getElementById('confidenceThreshold');
-  if (confidenceThreshold) {
-    confidenceThreshold.addEventListener('change', (e) => {
-      const value = e.target.value;
-      const option = e.target.options[e.target.selectedIndex].text;
-      showToast('AI Models', `Confidence threshold set to: ${option}`, 'success');
-    });
-  }
-  
-  // Performance Settings
-  const resourceUsageSelect = document.getElementById('resourceUsageSelect');
-  if (resourceUsageSelect) {
-    resourceUsageSelect.addEventListener('change', (e) => {
-      const value = e.target.value;
-      const option = e.target.options[e.target.selectedIndex].text;
-      showToast('Performance', `Resource usage mode: ${option}`, 'success');
-    });
-  }
-  
-  const cachingToggle = document.getElementById('cachingToggle');
-  if (cachingToggle) {
-    cachingToggle.addEventListener('change', (e) => {
-      const enabled = e.target.checked;
-      showToast('Performance', `Model caching ${enabled ? 'enabled' : 'disabled'}`, 'success');
-    });
-  }
-  
-  // Storage Settings
-  const saveFacesToggle = document.getElementById('saveFacesToggle');
-  if (saveFacesToggle) {
-    saveFacesToggle.addEventListener('change', (e) => {
-      const enabled = e.target.checked;
-      showToast('Storage', `Save recognized faces ${enabled ? 'enabled' : 'disabled'}`, 'success');
-    });
-  }
-  
-  const saveReportsToggle = document.getElementById('saveReportsToggle');
-  if (saveReportsToggle) {
-    saveReportsToggle.addEventListener('change', (e) => {
-      const enabled = e.target.checked;
-      showToast('Storage', `Save analysis reports ${enabled ? 'enabled' : 'disabled'}`, 'success');
-    });
-  }
-  
   // Handle fullscreen change
   document.addEventListener('fullscreenchange', () => {
     const fullscreenBtn = document.querySelector('.fullscreen-btn');
@@ -1528,4 +1623,45 @@ function loadAppIcons() {
 document.addEventListener('DOMContentLoaded', () => {
   animateGrid();
   initializeUI();
+  
+  // Direct test for dark mode toggle - simplest possible approach
+  setTimeout(() => {
+    console.log('=== TESTING DARK MODE TOGGLE ===');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    console.log('Dark mode toggle element:', darkModeToggle);
+    console.log('Element exists:', !!darkModeToggle);
+    
+    if (darkModeToggle) {
+      console.log('Initial checked state:', darkModeToggle.checked);
+      
+      // Add listener with explicit logging
+      darkModeToggle.addEventListener('change', function(event) {
+        console.log('!!!!! DARK MODE CHANGED !!!!!');
+        console.log('Event:', event);
+        console.log('Target:', event.target);
+        console.log('Checked:', event.target.checked);
+        
+        const enabled = event.target.checked;
+        showToast('Dark Mode', `Dark mode ${enabled ? 'enabled' : 'disabled'}`, 'success');
+        
+        // Could add actual dark mode logic here
+        if (enabled) {
+          console.log('Dark mode is now ON');
+        } else {
+          console.log('Dark mode is now OFF');
+        }
+      });
+      
+      console.log('✓ Dark mode event listener attached successfully');
+      
+      // Test if clicking programmatically works
+      console.log('Testing programmatic click...');
+      setTimeout(() => {
+        darkModeToggle.click();
+        console.log('Programmatic click executed, new state:', darkModeToggle.checked);
+      }, 1000);
+    } else {
+      console.error('✗ Dark mode toggle NOT FOUND in DOM');
+    }
+  }, 1000);
 });

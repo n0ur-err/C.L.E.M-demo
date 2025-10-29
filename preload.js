@@ -19,6 +19,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   minimizeApp: () => ipcRenderer.invoke('minimize-app'),
   maximizeApp: () => ipcRenderer.invoke('maximize-app'),
   
+  // System metrics
+  getSystemMetrics: () => ipcRenderer.invoke('get-system-metrics'),
+  
   // Event subscriptions
   onAppStatusUpdate: (callback) => 
     ipcRenderer.on('app-status-update', (_, data) => callback(data)),

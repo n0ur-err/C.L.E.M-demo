@@ -179,23 +179,9 @@
             </div>
           </div>
           <div class="activity-list" id="widgetActivityList">
-            <div class="activity-item">
-              <div class="activity-icon">
-                <i class="fas fa-user-check"></i>
-              </div>
-              <div class="activity-details">
-                <div class="activity-title">Face Recognition</div>
-                <div class="activity-time">2 min ago</div>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-icon">
-                <i class="fas fa-smile"></i>
-              </div>
-              <div class="activity-details">
-                <div class="activity-title">Emotion Detection</div>
-                <div class="activity-time">15 min ago</div>
-              </div>
+            <div class="no-activity">
+              <i class="fas fa-clock"></i>
+              <p>No recent activity</p>
             </div>
           </div>
         </div>
@@ -300,7 +286,12 @@
           </div>
           
           <div class="recent-activities">
-            <h3>Recent Activities</h3>
+            <div class="section-header">
+              <h3>Recent Activities</h3>
+              <button class="clear-activities-btn" id="clearActivitiesBtn" title="Clear all activities">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
             <div class="activity-list" id="recentActivitiesList">
               <!-- Will be populated dynamically -->
             </div>

@@ -1,8 +1,19 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Add the CLEM environment to Python's path
 import sys
 import os
 from collections.abc import Sequence
+
+# Set UTF-8 encoding for console output on Windows
+if sys.platform == 'win32':
+    try:
+        import codecs
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+    except:
+        # If UTF-8 setup fails, continue with default encoding
+        pass
 
 # Add our local Python installation to the path
 clem_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -142,11 +153,11 @@ except Exception as e:
 
 # Initialize webcam with higher resolution and camera index search
 def initialize_camera():
-    """Find and initialize working camera (supports OBS Virtual Camera)"""
+    """Find and initialize working camera (supports OBS Virtual Camera and all available cameras)"""
     print("Searching for available cameras...")
     
-    # Try different camera indices
-    for cam_idx in [1, 0, 2, 3]:  # Prioritize index 1 (OBS Virtual Camera)
+    # Try different camera indices - check 0-9 to cover most systems
+    for cam_idx in range(10):
         try:
             print(f"Trying camera index {cam_idx}...")
             cap = cv2.VideoCapture(cam_idx)
@@ -159,11 +170,48 @@ def initialize_camera():
                 if ret and test_frame is not None and test_frame.size > 0:
                     print(f"SUCCESS! Camera found at index {cam_idx}")
                     
-                    # Set optimal camera parameters
+                    # Get camera info
+                    backend = cap.getBackendName()
+                    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                    print(f"Camera info - Backend: {backend}, Resolution: {width}x{height}")
+                    
+                    # For MSMF backend, we need to be more careful with resolution changes
+                    if backend == "MSMF":
+                        print("MSMF backend detected, using DirectShow instead for better compatibility...")
+                        cap.release()
+                        # Reopen with DirectShow (DSHOW) backend which is more stable
+                        cap = cv2.VideoCapture(cam_idx, cv2.CAP_DSHOW)
+                        time.sleep(0.5)
+                        
+                        # Verify it still works
+                        ret_test, frame_test = cap.read()
+                        if not ret_test or frame_test is None:
+                            print("DirectShow failed, trying without resolution change...")
+                            cap.release()
+                            cap = cv2.VideoCapture(cam_idx)
+                            time.sleep(0.3)
+                            actual_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                            actual_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                            print(f"Using default resolution: {actual_width}x{actual_height}")
+                            return cap
+                    
+                    # Try to set optimal camera parameters
+                    print(f"Attempting to set resolution to {wCam}x{hCam}...")
                     cap.set(cv2.CAP_PROP_FRAME_WIDTH, wCam)
                     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, hCam)
                     cap.set(cv2.CAP_PROP_FPS, 30)  # Request 30 FPS
-                    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))  # Use MJPG for better performance
+                    
+                    # Verify the settings were applied and camera still works
+                    time.sleep(0.3)
+                    ret_verify, test_frame2 = cap.read()
+                    if not ret_verify or test_frame2 is None or test_frame2.size == 0:
+                        print("Resolution change failed, keeping default settings...")
+                    
+                    # Get actual resolution after settings
+                    actual_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                    actual_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                    print(f"Using resolution: {actual_width}x{actual_height}")
                     
                     return cap
                 else:
@@ -178,8 +226,10 @@ def initialize_camera():
     
     print("\nError: No working camera found!")
     print("Please check:")
-    print("1. OBS Virtual Camera is started (OBS > Tools > Virtual Camera)")
-    print("2. Camera permissions are granted")
+    print("1. Camera is connected and drivers are installed")
+    print("2. No other application is using the camera")
+    print("3. Camera permissions are granted")
+    print("4. If using OBS Virtual Camera, make sure it's started (OBS > Tools > Virtual Camera)")
     return None
 
 cap = initialize_camera()
@@ -397,8 +447,18 @@ def calculate_volume_from_hand(thumb_tip, index_tip):
 showHelp = True
 helpTimeout = time.time() + 5  # Only show help briefly
 last_frame_time = time.time()
+frame_count = 0
+
+print("\n" + "="*50)
+print("Starting main loop...")
+print("Camera window should appear now.")
+print("Press 'q' to quit")
+print("="*50 + "\n")
 
 while True:
+    frame_count += 1
+    if frame_count == 1:
+        print(f"Reading frame {frame_count}...")
     # Track CPU usage
     cpu_percent = psutil.cpu_percent(interval=None)
     cpu_values.append(cpu_percent)
@@ -422,9 +482,26 @@ while True:
     
     # Read frame
     success, img = cap.read()
-    if not success:
-        print("Failed to read from webcam")
-        break
+    if not success or img is None:
+        print(f"Failed to read frame {frame_count} from webcam")
+        print("Attempting to reconnect...")
+        cap.release()
+        time.sleep(1)
+        cap = initialize_camera()
+        if cap is None:
+            print("Could not reconnect to camera. Exiting...")
+            break
+        continue
+    
+    # Validate frame data
+    if img.size == 0:
+        print(f"Warning: Empty frame {frame_count} received, skipping...")
+        continue
+    
+    # Debug: Print first successful frame read
+    if frame_count == 1:
+        print(f"[OK] Successfully read first frame! Shape: {img.shape}")
+        print(f"[OK] Opening camera window...")
     
     # Process with GPU if available
     if use_gpu and hasattr(cv2, 'cuda') and 'cuda_devices' in locals() and cuda_devices > 0:
@@ -726,6 +803,10 @@ while True:
     
     # Show image
     cv2.imshow("Hand Gesture Media Control", img)
+    
+    # Debug: Confirm window is shown on first frame
+    if frame_count == 1:
+        print(f"[OK] Camera window displayed! Look for 'Hand Gesture Media Control' window.")
     
     # Exit on 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
