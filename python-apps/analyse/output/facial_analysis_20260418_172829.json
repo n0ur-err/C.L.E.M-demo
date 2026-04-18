@@ -1,0 +1,345 @@
+[
+  {
+    "timestamp": "20260418_172829",
+    "frame_id": 120,
+    "face_id": 0,
+    "features": {
+      "bbox": [
+        679,
+        202,
+        410,
+        410
+      ],
+      "landmarks": [
+        [
+          706,
+          357
+        ],
+        [
+          705,
+          400
+        ],
+        [
+          706,
+          443
+        ],
+        [
+          713,
+          485
+        ],
+        [
+          731,
+          526
+        ],
+        [
+          754,
+          566
+        ],
+        [
+          783,
+          602
+        ],
+        [
+          821,
+          626
+        ],
+        [
+          865,
+          633
+        ],
+        [
+          909,
+          631
+        ],
+        [
+          941,
+          606
+        ],
+        [
+          962,
+          574
+        ],
+        [
+          983,
+          539
+        ],
+        [
+          1002,
+          502
+        ],
+        [
+          1014,
+          463
+        ],
+        [
+          1023,
+          422
+        ],
+        [
+          1026,
+          382
+        ],
+        [
+          749,
+          322
+        ],
+        [
+          769,
+          301
+        ],
+        [
+          800,
+          292
+        ],
+        [
+          835,
+          292
+        ],
+        [
+          868,
+          301
+        ],
+        [
+          919,
+          311
+        ],
+        [
+          946,
+          305
+        ],
+        [
+          974,
+          310
+        ],
+        [
+          997,
+          323
+        ],
+        [
+          1005,
+          349
+        ],
+        [
+          891,
+          357
+        ],
+        [
+          892,
+          388
+        ],
+        [
+          892,
+          419
+        ],
+        [
+          893,
+          450
+        ],
+        [
+          851,
+          466
+        ],
+        [
+          868,
+          472
+        ],
+        [
+          885,
+          477
+        ],
+        [
+          900,
+          475
+        ],
+        [
+          914,
+          472
+        ],
+        [
+          785,
+          362
+        ],
+        [
+          803,
+          356
+        ],
+        [
+          823,
+          358
+        ],
+        [
+          839,
+          367
+        ],
+        [
+          820,
+          370
+        ],
+        [
+          800,
+          369
+        ],
+        [
+          923,
+          376
+        ],
+        [
+          941,
+          370
+        ],
+        [
+          961,
+          373
+        ],
+        [
+          975,
+          382
+        ],
+        [
+          959,
+          386
+        ],
+        [
+          940,
+          384
+        ],
+        [
+          820,
+          523
+        ],
+        [
+          837,
+          511
+        ],
+        [
+          860,
+          509
+        ],
+        [
+          880,
+          516
+        ],
+        [
+          898,
+          512
+        ],
+        [
+          917,
+          520
+        ],
+        [
+          928,
+          535
+        ],
+        [
+          915,
+          553
+        ],
+        [
+          895,
+          559
+        ],
+        [
+          875,
+          558
+        ],
+        [
+          856,
+          554
+        ],
+        [
+          834,
+          542
+        ],
+        [
+          828,
+          523
+        ],
+        [
+          858,
+          526
+        ],
+        [
+          878,
+          530
+        ],
+        [
+          897,
+          530
+        ],
+        [
+          920,
+          534
+        ],
+        [
+          897,
+          529
+        ],
+        [
+          878,
+          530
+        ],
+        [
+          858,
+          526
+        ]
+      ],
+      "metrics": {
+        "left_eye_width": 54.230987548828125,
+        "right_eye_width": 52.345008850097656,
+        "eye_width_ratio": 1.0360298156738281,
+        "face_width": 320.9750671386719,
+        "face_height": 277.221923828125,
+        "face_width_height_ratio": 1.1578271389007568
+      },
+      "symmetry": {
+        "eyes_level": 0.3840579710144927,
+        "overall_symmetry": 0.7557231789191161
+      },
+      "skin": {
+        "skin_tone": {
+          "hue": 41.3466796875,
+          "saturation": 81.6220703125,
+          "value": 156.90625
+        },
+        "texture": 14.378389764739477
+      },
+      "facial_ratios": {
+        "top_third_ratio": 0.37984204342659567,
+        "top_golden_ratio_diff": 1.2381579565734044,
+        "middle_third_ratio": 1.351163660341505,
+        "middle_golden_ratio_diff": 0.2668363396584952,
+        "eye_spacing_ratio": 1.5853619878071596
+      }
+    },
+    "health_analysis": {
+      "facial_symmetry": 0.7557231789191161,
+      "symmetry_evaluation": "Moderate symmetry",
+      "eyes_level_symmetry": 0.3840579710144927,
+      "note_eye_level": "Eye level asymmetry noted - may indicate musculoskeletal alignment factors",
+      "skin_tone_note": "Normal skin tone variation detected",
+      "skin_texture": 14.378389764739477,
+      "texture_note": "Smooth skin texture detected - good hydration indicators",
+      "facial_fullness": 1.0,
+      "fullness_evaluation": "High facial fullness - within normal variation",
+      "golden_ratio_harmony": 0,
+      "estimated_stress_level": {
+        "value": 15.2,
+        "unit": "proxy score",
+        "note": "Estimated from facial tension patterns, not actual lab value"
+      },
+      "sleep_quality_estimate": {
+        "value": 6.0,
+        "unit": "quality score",
+        "note": "Estimated from eye appearance and facial relaxation indicators"
+      },
+      "symmetry_stability": "Stable",
+      "analysis_timestamp": "2026-04-18 17:28:29"
+    },
+    "health_status": "Concerning",
+    "health_score": 5.1,
+    "recommendations": [
+      "Monitor for fluid retention/edema"
+    ]
+  }
+]

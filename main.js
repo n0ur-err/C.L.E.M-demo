@@ -602,6 +602,13 @@ function startPythonApp(appId, args = []) {
     pythonProcesses[appId] = pyshell;
 
     pyshell.on('message', function (message) {
+      // Route frame data to dedicated channel to avoid flooding the text console
+      if (message.startsWith('FRAME:')) {
+        if (mainWindow) {
+          mainWindow.webContents.send('python-frame', { appId, frame: message.slice(6) });
+        }
+        return;
+      }
       console.log(`[${appId}]`, message);
       if (mainWindow) {
         mainWindow.webContents.send('python-output', { 

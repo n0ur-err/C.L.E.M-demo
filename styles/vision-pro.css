@@ -306,6 +306,7 @@ body, html {
   );
   opacity: 0;
   transition: opacity 0.3s var(--ease-out);
+  pointer-events: none;
 }
 
 .app-header:hover::before {

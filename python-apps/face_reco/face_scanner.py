@@ -3,8 +3,10 @@ import os
 import time
 import numpy as np
 import json
+import base64
+import threading
+import queue
 from datetime import datetime
-import random
 import sys
 
 # Use a global flag to track application state
@@ -94,7 +96,6 @@ def main():
     print("Starting Face Scanner...")
 
     try:
-        # Expect: sys.argv[1] = JSON profile, sys.argv[2] = JSON capture settings
         if len(sys.argv) < 2:
             print("ERROR: No profile data provided. Launch face-scanner from the CLEM interface.")
             sys.exit(1)
@@ -109,251 +110,192 @@ def main():
 
         profile_info["last_seen"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         profile_info["sightings"] = 1
-        
-        # Save profile information
         save_profile_info(profile_info)
-        
-        # Create dataset directory if it doesn't exist
+
         dataset_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset")
         os.makedirs(dataset_dir, exist_ok=True)
-        
-        # Create person's directory if it doesn't exist
         person_dir = os.path.join(dataset_dir, person_name)
         os.makedirs(person_dir, exist_ok=True)
-        
-        # Count existing files to continue numbering
+
         existing_files = [f for f in os.listdir(person_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
         start_index = len(existing_files) + 1
-        
-        print(f"\nFound {len(existing_files)} existing images for {person_name}")
+        print(f"Found {len(existing_files)} existing images for {person_name}")
         print(f"Saving new images to {person_dir}")
-        
-        # Process settings
+
         auto_capture = capture_settings.get("auto_capture", "Yes") == "Yes"
         try:
             interval = float(capture_settings.get("interval", "3.0"))
         except ValueError:
             interval = 3.0
-            
         try:
             target_count = int(capture_settings.get("target_count", "10"))
         except ValueError:
             target_count = 10
-        
-        if auto_capture:
-            print(f"Auto-capture enabled: Will capture an image every {interval} seconds when a face is detected")
-        else:
-            print("Press 'c' to capture an image")
-        
-        print("\nCONTROLS:")
-        print("  - Press 'c' to manually capture an image")
-        print("  - Press 'a' to toggle auto-capture mode")
-        print("  - Press 'q' to quit")
-        
-        # Initialize webcam with better error handling
-        print("Initializing camera...")
-        
-        # Try different camera backends and indices
-        video_capture = None
-        camera_backends = [
-            (cv2.CAP_DSHOW, "DirectShow"),  # Windows preferred
-            (cv2.CAP_MSMF, "Windows Media Foundation"),
-            (cv2.CAP_ANY, "Any available")
-        ]
-        
-        for backend, backend_name in camera_backends:
-            for camera_index in range(3):  # Try first 3 camera indices
+
+        # --- stdin command listener (receives CAPTURE / TOGGLE_AUTO / QUIT) ---
+        cmd_queue = queue.Queue()
+        def _stdin_reader():
+            while True:
                 try:
-                    print(f"Trying camera {camera_index} with {backend_name} backend...")
-                    cap = cv2.VideoCapture(camera_index, backend)
-                    
-                    # Wait a moment for camera to initialize
+                    line = sys.stdin.readline()
+                    if line:
+                        cmd_queue.put(line.strip())
+                except Exception:
+                    break
+        threading.Thread(target=_stdin_reader, daemon=True).start()
+
+        # --- Open camera ---
+        print("Initializing camera...")
+        video_capture = None
+        for backend, name in [(cv2.CAP_DSHOW, "DirectShow"), (cv2.CAP_MSMF, "MSMF"), (cv2.CAP_ANY, "Any")]:
+            for idx in range(3):
+                try:
+                    cap = cv2.VideoCapture(idx, backend)
                     time.sleep(0.5)
-                    
-                    # Try to read a frame to verify camera works
                     ret, test_frame = cap.read()
                     if ret and test_frame is not None:
-                        print(f"Successfully initialized camera {camera_index} with {backend_name}")
+                        print(f"Camera {idx} opened via {name}")
                         video_capture = cap
                         break
-                    else:
-                        cap.release()
+                    cap.release()
                 except Exception as e:
-                    print(f"Failed with camera {camera_index} and {backend_name}: {e}")
-                    continue
-            
-            if video_capture is not None:
+                    print(f"Camera {idx}/{name} failed: {e}")
+            if video_capture:
                 break
-        
+
         if video_capture is None:
-            print("ERROR: Could not open webcam. Please check:")
-            print("  1. Camera is connected")
-            print("  2. No other app is using the camera")
-            print("  3. Camera permissions are granted")
+            print("ERROR: Could not open webcam.")
             return
-            
+
         video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         video_capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-        
-        # Variables for FPS calculation
+
         prev_time = time.time()
         frame_count = 0
         fps = 0
-        
-        # Counter for captured images
         capture_count = 0
-        
-        # Countdown variables
         countdown_active = False
         countdown_start = 0
-        countdown_duration = 3  # seconds
-        
-        # Auto-capture variables
+        countdown_duration = 3
         last_auto_capture_time = time.time()
-        
-        # Set window properties for better UI
-        cv2.namedWindow('Face Scanner', cv2.WINDOW_NORMAL)
-        cv2.setWindowProperty('Face Scanner', cv2.WND_PROP_TOPMOST, 1)
-        
+
+        # Frame-rate limiter for streaming (15 fps)
+        stream_interval = 1.0 / 15
+        last_stream_time = 0.0
+
+        print("Camera ready. Streaming to CLEM interface.")
+
         while True:
-            # Capture frame-by-frame
             ret, frame = video_capture.read()
-            
             if not ret:
                 print("Failed to grab frame")
                 break
-            
-            # Calculate FPS
+
+            # FPS calculation
             frame_count += 1
             current_time = time.time()
             if current_time - prev_time >= 1.0:
                 fps = frame_count / (current_time - prev_time)
                 prev_time = current_time
                 frame_count = 0
-            
-            # Create a copy of the frame for display
+
+            # Process commands from stdin
+            try:
+                while True:
+                    cmd = cmd_queue.get_nowait()
+                    if cmd == 'CAPTURE' and not countdown_active:
+                        countdown_active = True
+                        countdown_start = current_time
+                        print("Manual capture countdown started...")
+                    elif cmd == 'TOGGLE_AUTO':
+                        auto_capture = not auto_capture
+                        print(f"Auto-capture: {'ON' if auto_capture else 'OFF'}")
+                    elif cmd == 'QUIT':
+                        raise StopIteration
+            except queue.Empty:
+                pass
+            except StopIteration:
+                break
+
             display_frame = frame.copy()
-            
-            # Detect faces in the frame
             face_boxes = detect_faces(frame)
-            
-            # Draw rectangles around detected faces
+
             for (left, top, right, bottom) in face_boxes:
                 cv2.rectangle(display_frame, (left, top), (right, bottom), (0, 255, 0), 2)
-            
-            # Check for auto-capture
+
+            # Auto-capture trigger
             if auto_capture and len(face_boxes) > 0 and (current_time - last_auto_capture_time) >= interval:
-                if not countdown_active:  # Only start auto-capture if not already counting down
+                if not countdown_active:
                     countdown_active = True
                     countdown_start = current_time
-                    print("Starting auto-capture countdown...")
-            
-            # Handle countdown
+
+            # Countdown handling
             if countdown_active:
                 seconds_left = max(0, int(countdown_duration - (current_time - countdown_start)))
                 if seconds_left > 0:
-                    # Show countdown
-                    cv2.putText(display_frame, f"Capturing in: {seconds_left}", 
-                                (display_frame.shape[1]//2 - 100, display_frame.shape[0]//2), 
+                    cv2.putText(display_frame, f"Capturing in: {seconds_left}",
+                                (display_frame.shape[1]//2 - 100, display_frame.shape[0]//2),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
                 else:
-                    # Save the frame if at least one face is detected
                     if len(face_boxes) > 0:
-                        # Get the largest face (assuming it's the main subject)
-                        largest_face = max(face_boxes, key=lambda box: (box[2]-box[0])*(box[3]-box[1]))
+                        largest_face = max(face_boxes, key=lambda b: (b[2]-b[0])*(b[3]-b[1]))
                         left, top, right, bottom = largest_face
-                        
-                        # Extract face with some margin (20%)
-                        margin_x = int((right - left) * 0.2)
-                        margin_y = int((bottom - top) * 0.2)
+                        mx = int((right - left) * 0.2)
+                        my = int((bottom - top) * 0.2)
                         face_img = frame[
-                            max(0, top - margin_y):min(frame.shape[0], bottom + margin_y),
-                            max(0, left - margin_x):min(frame.shape[1], right + margin_x)
+                            max(0, top - my):min(frame.shape[0], bottom + my),
+                            max(0, left - mx):min(frame.shape[1], right + mx)
                         ]
-                        
-                        # Save the face image
                         image_path = os.path.join(person_dir, f"{person_name}_{start_index + capture_count}.jpg")
                         cv2.imwrite(image_path, face_img)
-                        print(f"Saved {image_path}")
+                        print(f"CAPTURED:{image_path}")
                         capture_count += 1
-                        
-                        # Update last auto-capture time
                         last_auto_capture_time = current_time
-                        
-                        # Flash effect for feedback
-                        flash_frame = np.ones_like(display_frame) * 255
-                        cv2.imshow('Face Scanner', flash_frame)
-                        cv2.waitKey(50)  # Flash for 50ms
-                        
                         if capture_count >= target_count:
-                            print(f"Captured {capture_count} images. Finished!")
+                            print(f"Done! {capture_count} images saved.")
                             break
                     else:
                         print("No face detected, skipping capture")
-                    
                     countdown_active = False
-            
-            # Show the number of faces detected
-            cv2.putText(display_frame, f"Detected: {len(face_boxes)} face(s)", 
+
+            # Overlay text on frame
+            cv2.putText(display_frame, f"Faces: {len(face_boxes)}",
                         (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-            
-            # Show FPS
-            cv2.putText(display_frame, f"FPS: {fps:.1f}", 
+            cv2.putText(display_frame, f"FPS: {fps:.1f}",
                         (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-            
-            # Show capture count
-            cv2.putText(display_frame, f"Captured: {capture_count}/{target_count}", 
-                        (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-            
-            # Show person name and profile info
-            cv2.putText(display_frame, f"Person: {person_name}", 
+            cv2.putText(display_frame, f"Captured: {capture_count}/{target_count}",
+                        (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+            cv2.putText(display_frame, f"Person: {person_name}",
                         (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
-            
-            # Add key instructions at the bottom of the screen
-            cv2.putText(display_frame, "Press 'c' to capture", 
-                        (10, display_frame.shape[0] - 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-            
-            # Show auto-capture status
-            auto_status = "ON" if auto_capture else "OFF"
-            cv2.putText(display_frame, f"Auto-capture: {auto_status}", 
-                        (10, display_frame.shape[0] - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, 
+            auto_status = "Auto: ON" if auto_capture else "Auto: OFF"
+            cv2.putText(display_frame, auto_status,
+                        (10, display_frame.shape[0] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
                         (0, 255, 0) if auto_capture else (0, 0, 255), 2)
-            
-            # Display frame
-            cv2.imshow('Face Scanner', display_frame)
-            
-            # Handle keypresses
-            key = cv2.waitKey(1) & 0xFF
-            
-            # Press 'q' to quit
-            if key == ord('q'):
-                break
-            
-            # Press 'c' to start countdown for capture
-            if key == ord('c') and not countdown_active:
-                countdown_active = True
-                countdown_start = current_time
-                print("Countdown started...")
-            
-            # Press 'a' to toggle auto-capture mode
-            if key == ord('a'):
-                auto_capture = not auto_capture
-                if auto_capture:
-                    print("Auto-capture mode enabled")
-                else:
-                    print("Auto-capture mode disabled")
-        
-        # Release resources
+
+            # Stream frame to Electron at limited rate
+            if current_time - last_stream_time >= stream_interval:
+                ret2, buf = cv2.imencode('.jpg', display_frame, [cv2.IMWRITE_JPEG_QUALITY, 55])
+                if ret2:
+                    b64 = base64.b64encode(buf).decode('ascii')
+                    sys.stdout.write(f'FRAME:{b64}\n')
+                    sys.stdout.flush()
+                last_stream_time = current_time
+
+            # Send status update (parsed by renderer)
+            status = json.dumps({"faces": len(face_boxes), "fps": round(fps, 1),
+                                 "captured": capture_count, "target": target_count,
+                                 "auto": auto_capture})
+            sys.stdout.write(f'STATUS:{status}\n')
+            sys.stdout.flush()
+
         video_capture.release()
-        cv2.destroyAllWindows()
-        
-        print(f"\nFace scanning complete. {capture_count} images saved to {person_dir}")
-        print("The profile has been created and saved.")
-        print("\nYou can now use Face Recognition to identify this person in the future.")
+        print(f"Face scanning complete. {capture_count} images saved to {person_dir}")
 
     except Exception as e:
-        print(f"ERROR: An error occurred: {str(e)}")
+        print(f"ERROR: {str(e)}")
+
 
 if __name__ == "__main__":
     main()
+

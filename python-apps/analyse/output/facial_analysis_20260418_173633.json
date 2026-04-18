@@ -1,0 +1,352 @@
+[
+  {
+    "timestamp": "20260418_173633",
+    "frame_id": 723,
+    "face_id": 0,
+    "features": {
+      "bbox": [
+        475,
+        265,
+        292,
+        292
+      ],
+      "landmarks": [
+        [
+          504,
+          382
+        ],
+        [
+          505,
+          413
+        ],
+        [
+          510,
+          445
+        ],
+        [
+          517,
+          474
+        ],
+        [
+          530,
+          503
+        ],
+        [
+          548,
+          531
+        ],
+        [
+          567,
+          556
+        ],
+        [
+          592,
+          574
+        ],
+        [
+          625,
+          576
+        ],
+        [
+          658,
+          571
+        ],
+        [
+          682,
+          550
+        ],
+        [
+          697,
+          523
+        ],
+        [
+          712,
+          494
+        ],
+        [
+          722,
+          466
+        ],
+        [
+          727,
+          437
+        ],
+        [
+          730,
+          407
+        ],
+        [
+          730,
+          377
+        ],
+        [
+          522,
+          368
+        ],
+        [
+          533,
+          349
+        ],
+        [
+          553,
+          340
+        ],
+        [
+          577,
+          338
+        ],
+        [
+          602,
+          342
+        ],
+        [
+          635,
+          342
+        ],
+        [
+          657,
+          336
+        ],
+        [
+          681,
+          337
+        ],
+        [
+          701,
+          344
+        ],
+        [
+          712,
+          360
+        ],
+        [
+          620,
+          378
+        ],
+        [
+          621,
+          400
+        ],
+        [
+          622,
+          422
+        ],
+        [
+          623,
+          444
+        ],
+        [
+          601,
+          461
+        ],
+        [
+          611,
+          462
+        ],
+        [
+          623,
+          464
+        ],
+        [
+          634,
+          461
+        ],
+        [
+          644,
+          459
+        ],
+        [
+          550,
+          391
+        ],
+        [
+          562,
+          384
+        ],
+        [
+          578,
+          382
+        ],
+        [
+          591,
+          389
+        ],
+        [
+          577,
+          394
+        ],
+        [
+          562,
+          395
+        ],
+        [
+          648,
+          386
+        ],
+        [
+          660,
+          379
+        ],
+        [
+          675,
+          378
+        ],
+        [
+          686,
+          384
+        ],
+        [
+          676,
+          390
+        ],
+        [
+          661,
+          390
+        ],
+        [
+          587,
+          503
+        ],
+        [
+          597,
+          494
+        ],
+        [
+          611,
+          490
+        ],
+        [
+          623,
+          493
+        ],
+        [
+          635,
+          489
+        ],
+        [
+          650,
+          492
+        ],
+        [
+          663,
+          499
+        ],
+        [
+          652,
+          513
+        ],
+        [
+          636,
+          520
+        ],
+        [
+          624,
+          521
+        ],
+        [
+          611,
+          521
+        ],
+        [
+          597,
+          516
+        ],
+        [
+          594,
+          502
+        ],
+        [
+          611,
+          501
+        ],
+        [
+          623,
+          502
+        ],
+        [
+          635,
+          500
+        ],
+        [
+          657,
+          500
+        ],
+        [
+          636,
+          499
+        ],
+        [
+          623,
+          501
+        ],
+        [
+          611,
+          500
+        ]
+      ],
+      "metrics": {
+        "left_eye_width": 41.04875183105469,
+        "right_eye_width": 38.05259704589844,
+        "eye_width_ratio": 1.0787371397018433,
+        "face_width": 226.0552978515625,
+        "face_height": 198.06312561035156,
+        "face_width_height_ratio": 1.1413295269012451
+      },
+      "symmetry": {
+        "eyes_level": 0.696969696969697,
+        "overall_symmetry": 0.9034545613595975
+      },
+      "skin": {
+        "skin_tone": {
+          "hue": 40.83011937557392,
+          "saturation": 89.89807162534436,
+          "value": 151.56290174471994
+        },
+        "texture": 49.218344727319554
+      },
+      "facial_ratios": {
+        "top_third_ratio": 0.349874219070681,
+        "top_golden_ratio_diff": 1.2681257809293192,
+        "middle_third_ratio": 1.3856113301212765,
+        "middle_golden_ratio_diff": 0.23238866987872364,
+        "eye_spacing_ratio": 1.4431838436085092
+      }
+    },
+    "health_analysis": {
+      "facial_symmetry": 0.9034545613595975,
+      "symmetry_evaluation": "High symmetry",
+      "eyes_level_symmetry": 0.696969696969697,
+      "note_eye_level": "Eye level asymmetry noted - may indicate musculoskeletal alignment factors",
+      "skin_tone_note": "Normal skin tone variation detected",
+      "skin_texture": 49.218344727319554,
+      "texture_note": "Moderate skin texture variation - may indicate mild dehydration",
+      "facial_fullness": 1.0,
+      "fullness_evaluation": "High facial fullness - within normal variation",
+      "golden_ratio_harmony": 0,
+      "health_patterns": [
+        {
+          "pattern": "thyroid",
+          "description": "Possible thyroid dysfunction indicators"
+        }
+      ],
+      "estimated_stress_level": {
+        "value": 13.3,
+        "unit": "proxy score",
+        "note": "Estimated from facial tension patterns, not actual lab value"
+      },
+      "sleep_quality_estimate": {
+        "value": 7.8,
+        "unit": "quality score",
+        "note": "Estimated from eye appearance and facial relaxation indicators"
+      },
+      "symmetry_stability": "Stable",
+      "analysis_timestamp": "2026-04-18 17:36:33"
+    },
+    "health_status": "Concerning",
+    "health_score": 4.7,
+    "recommendations": [
+      "Consider hydration and skincare routine",
+      "Monitor for fluid retention/edema"
+    ]
+  }
+]

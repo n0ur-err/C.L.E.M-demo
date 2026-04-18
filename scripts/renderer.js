@@ -753,10 +753,92 @@ async function activateFeature(featureId) {
         statusText.textContent = 'Running';
         addToConsole('face-scanner', `Starting face scan for: ${name}`);
 
-        await window.electronAPI.startPythonApp('face-scanner', [
+        const ok = await window.electronAPI.startPythonApp('face-scanner', [
           JSON.stringify(profile),
           JSON.stringify(settings)
         ]);
+
+        if (!ok) {
+          startBtn.disabled = false;
+          startBtn.innerHTML = '<i class="fas fa-play"></i> Start Face Scanner';
+          statusDot.className = 'fas fa-circle status-indicator';
+          statusText.textContent = 'Ready';
+          return;
+        }
+
+        // Switch to camera view
+        const targetCount = parseInt(settings.target_count) || 10;
+        featureContent.innerHTML = '';
+        featureContent.style.padding = '0';
+        featureContent.innerHTML = `
+          <div style="display:flex;flex-direction:column;height:100%;background:var(--vision-bg-primary);border-radius:var(--radius-2xl);overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+              <span style="font-weight:600;font-size:15px;">Face Scanner — ${name}</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-circle" style="color:#2ecc71;font-size:8px;"></i>
+                <span style="font-size:13px;color:#aaa;" id="fs-live-status">Initializing...</span>
+              </div>
+            </div>
+            <div style="position:relative;flex:1;background:#000;min-height:0;">
+              <canvas id="face-scanner-canvas" style="width:100%;height:100%;display:block;object-fit:contain;"></canvas>
+              <div id="fs-loading-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;color:#aaa;gap:12px;">
+                <i class="fas fa-spinner fa-spin" style="font-size:28px;"></i>
+                <span>Opening camera...</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;padding:8px 16px;border-top:1px solid rgba(255,255,255,0.06);font-size:13px;color:#aaa;">
+              <span id="fs-stat-faces">Faces: 0</span>
+              <span style="opacity:0.3;">|</span>
+              <span id="fs-stat-fps">FPS: 0</span>
+              <span style="opacity:0.3;">|</span>
+              <span id="fs-stat-captured" style="color:#4af;">Captured: 0/${targetCount}</span>
+              <span style="opacity:0.3;">|</span>
+              <span id="fs-stat-auto" style="color:#2ecc71;">Auto: ${settings.auto_capture === 'Yes' ? 'ON' : 'OFF'}</span>
+            </div>
+            <div style="display:flex;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.06);">
+              <button id="fs-btn-capture" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(74,144,255,0.15);color:#fff;cursor:pointer;font-size:13px;">
+                <i class="fas fa-camera"></i> Capture
+              </button>
+              <button id="fs-btn-toggle-auto" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(46,204,113,0.15);color:#fff;cursor:pointer;font-size:13px;">
+                <i class="fas fa-sync"></i> Toggle Auto
+              </button>
+              <button id="fs-btn-stop" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(231,76,60,0.15);color:#fff;cursor:pointer;font-size:13px;">
+                <i class="fas fa-stop"></i> Stop
+              </button>
+            </div>
+            <div style="padding:0 16px 10px;">
+              <div class="console-content" id="app-console-face-scanner" style="max-height:80px;font-size:11px;"></div>
+            </div>
+          </div>
+        `;
+
+        // Wire control buttons
+        document.getElementById('fs-btn-capture').addEventListener('click', () => {
+          window.electronAPI.sendInput('face-scanner', 'CAPTURE');
+        });
+        document.getElementById('fs-btn-toggle-auto').addEventListener('click', () => {
+          window.electronAPI.sendInput('face-scanner', 'TOGGLE_AUTO');
+        });
+        document.getElementById('fs-btn-stop').addEventListener('click', () => {
+          window.electronAPI.sendInput('face-scanner', 'QUIT');
+        });
+
+        // Render frames from Python onto the canvas
+        const canvas = document.getElementById('face-scanner-canvas');
+        const ctx = canvas.getContext('2d');
+        window.electronAPI.removeAllListeners('python-frame');
+        window.electronAPI.onPythonFrame((data) => {
+          if (data.appId !== 'face-scanner') return;
+          const overlay = document.getElementById('fs-loading-overlay');
+          if (overlay) overlay.style.display = 'none';
+          const img = new Image();
+          img.onload = () => {
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            ctx.drawImage(img, 0, 0);
+          };
+          img.src = 'data:image/jpeg;base64,' + data.frame;
+        });
       });
 
       const consoleClearBtn = contentContainer.querySelector('.console-clear-btn');
@@ -769,6 +851,202 @@ async function activateFeature(featureId) {
       return;
     }
 
+    // Emotions: launch app then stream camera + emotion bar chart in-app
+    if (featureId === 'emotions') {
+      showToast('Ready', 'Starting Emotion Recognition...', 'info');
+      featureContent.innerHTML = '';
+      featureContent.style.padding = '0';
+
+      const LABELS = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise'];
+      const COLORS = {
+        angry:'#e74c3c', disgust:'#8e44ad', fear:'#e67e22',
+        happy:'#2ecc71', neutral:'#95a5a6', sad:'#3498db', surprise:'#f1c40f'
+      };
+
+      featureContent.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:100%;background:var(--vision-bg-primary);border-radius:var(--radius-2xl);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <span style="font-weight:600;font-size:15px;">Emotion Recognition</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i class="fas fa-circle" style="color:#2ecc71;font-size:8px;" id="em-dot"></i>
+              <span style="font-size:13px;color:#aaa;" id="em-status-text">Initializing...</span>
+            </div>
+          </div>
+          <div style="display:flex;flex:1;min-height:0;gap:0;">
+            <div style="position:relative;flex:1;background:#000;min-height:0;">
+              <canvas id="em-canvas" style="width:100%;height:100%;display:block;object-fit:contain;"></canvas>
+              <div id="em-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;color:#aaa;gap:12px;">
+                <i class="fas fa-spinner fa-spin" style="font-size:28px;"></i>
+                <span>Loading model &amp; opening camera...</span>
+              </div>
+            </div>
+            <div style="width:200px;padding:16px 12px;border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;gap:10px;overflow:hidden;">
+              <div style="font-size:12px;color:#aaa;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">Emotion Probabilities</div>
+              <div id="em-top-label" style="font-size:22px;font-weight:700;text-align:center;margin-bottom:8px;color:#fff;">—</div>
+              ${LABELS.map(l => `
+                <div style="display:flex;flex-direction:column;gap:3px;">
+                  <div style="display:flex;justify-content:space-between;font-size:11px;">
+                    <span style="color:${COLORS[l] || '#aaa'};text-transform:capitalize;">${l}</span>
+                    <span id="em-pct-${l}" style="color:#aaa;">0%</span>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.07);border-radius:4px;height:6px;overflow:hidden;">
+                    <div id="em-bar-${l}" style="height:100%;width:0%;background:${COLORS[l] || '#aaa'};border-radius:4px;transition:width 0.15s ease;"></div>
+                  </div>
+                </div>`).join('')}
+              <div style="margin-top:auto;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:11px;color:#555;" id="em-fps-stat">FPS: —</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.06);">
+            <button id="em-btn-stop" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(231,76,60,0.15);color:#fff;cursor:pointer;font-size:13px;">
+              <i class="fas fa-stop"></i> Stop
+            </button>
+          </div>
+          <div style="padding:0 16px 8px;">
+            <div class="console-content" id="app-console-emotions" style="max-height:60px;font-size:11px;"></div>
+          </div>
+        </div>
+      `;
+
+      // Launch the app
+      const ok = await window.electronAPI.startPythonApp('emotions', []);
+      if (!ok) {
+        addToConsole('emotions', 'Failed to start emotion recognition.');
+        return;
+      }
+
+      document.getElementById('em-btn-stop').addEventListener('click', () => {
+        window.electronAPI.sendInput('emotions', 'QUIT');
+      });
+
+      const canvas = document.getElementById('em-canvas');
+      const ctx = canvas.getContext('2d');
+
+      window.electronAPI.removeAllListeners('python-frame');
+      window.electronAPI.onPythonFrame((data) => {
+        if (data.appId !== 'emotions') return;
+        const overlay = document.getElementById('em-loading');
+        if (overlay) overlay.style.display = 'none';
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = 'data:image/jpeg;base64,' + data.frame;
+      });
+
+      return;
+    }
+
+    // Facial Analysis: stream camera + health metrics panel in-app
+    if (featureId === 'analyse') {
+      showToast('Ready', 'Starting Facial Analysis...', 'info');
+      featureContent.innerHTML = '';
+      featureContent.style.padding = '0';
+
+      featureContent.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:100%;background:var(--vision-bg-primary);border-radius:var(--radius-2xl);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <span style="font-weight:600;font-size:15px;">Facial Health Analysis</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i class="fas fa-circle" style="color:#2ecc71;font-size:8px;" id="fa-dot"></i>
+              <span style="font-size:13px;color:#aaa;" id="fa-status-text">Initializing...</span>
+            </div>
+          </div>
+          <div style="display:flex;flex:1;min-height:0;gap:0;">
+            <div style="position:relative;flex:1;background:#000;min-height:0;">
+              <canvas id="fa-canvas" style="width:100%;height:100%;display:block;object-fit:contain;"></canvas>
+              <div id="fa-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;color:#aaa;gap:12px;">
+                <i class="fas fa-spinner fa-spin" style="font-size:28px;"></i>
+                <span>Loading model &amp; opening camera...</span>
+              </div>
+            </div>
+            <div style="width:220px;padding:16px 12px;border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;gap:10px;overflow:hidden;">
+              <div style="font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;">Health Metrics</div>
+
+              <div style="display:flex;flex-direction:column;align-items:center;padding:12px;background:rgba(255,255,255,0.05);border-radius:10px;gap:4px;">
+                <div style="font-size:32px;font-weight:700;color:#7af;" id="fa-score">—</div>
+                <div style="font-size:11px;color:#aaa;">/10 Health Score</div>
+                <div style="font-size:13px;font-weight:600;color:#2ecc71;" id="fa-health-status">Analyzing...</div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="color:#aaa;">Symmetry</span>
+                  <span id="fa-symmetry" style="color:#fff;">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="color:#aaa;">Eye Fatigue</span>
+                  <span id="fa-eye-fatigue" style="color:#fff;">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="color:#aaa;">Skin Texture</span>
+                  <span id="fa-skin-texture" style="color:#fff;">—</span>
+                </div>
+              </div>
+
+              <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px;">
+                <div style="font-size:11px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Recommendations</div>
+                <div id="fa-recs" style="font-size:11px;color:#ccc;line-height:1.5;">—</div>
+              </div>
+
+              <div style="margin-top:auto;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:11px;color:#555;" id="fa-fps">FPS: —</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.06);">
+            <button id="fa-btn-capture" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(46,204,113,0.15);color:#fff;cursor:pointer;font-size:13px;">
+              <i class="fas fa-camera"></i> Capture
+            </button>
+            <button id="fa-btn-stop" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(231,76,60,0.15);color:#fff;cursor:pointer;font-size:13px;">
+              <i class="fas fa-stop"></i> Stop
+            </button>
+          </div>
+          <div style="padding:0 16px 8px;">
+            <div class="console-content" id="app-console-analyse" style="max-height:60px;font-size:11px;"></div>
+          </div>
+        </div>
+      `;
+
+      const ok = await window.electronAPI.startPythonApp('analyse', ['--method', 'opencv']);
+      if (!ok) {
+        addToConsole('analyse', 'Failed to start facial analysis.');
+        return;
+      }
+
+      document.getElementById('fa-btn-capture').addEventListener('click', () => {
+        window.electronAPI.sendInput('analyse', 'CAPTURE');
+        const btn = document.getElementById('fa-btn-capture');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; }
+        setTimeout(() => {
+          const b = document.getElementById('fa-btn-capture');
+          if (b) { b.disabled = false; b.innerHTML = '<i class="fas fa-camera"></i> Capture'; }
+        }, 3000);
+      });
+
+      document.getElementById('fa-btn-stop').addEventListener('click', () => {
+        window.electronAPI.sendInput('analyse', 'QUIT');
+      });
+
+      const canvas = document.getElementById('fa-canvas');
+      const ctx = canvas.getContext('2d');
+
+      window.electronAPI.removeAllListeners('python-frame');
+      window.electronAPI.onPythonFrame((data) => {
+        if (data.appId !== 'analyse') return;
+        const overlay = document.getElementById('fa-loading');
+        if (overlay) overlay.style.display = 'none';
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = 'data:image/jpeg;base64,' + data.frame;
+      });
+
+      return;
+    }
+
     // Health Report: read JSON files directly and render in-app UI
     if (featureId === 'health-report') {
       showToast('Loading', 'Loading health reports...', 'info');
@@ -776,6 +1054,11 @@ async function activateFeature(featureId) {
       const contentContainer = document.createElement('div');
       contentContainer.className = 'feature-content-container';
       featureContent.appendChild(contentContainer);
+
+      // Delegated back-button handler (robust regardless of innerHTML timing)
+      contentContainer.addEventListener('click', e => {
+        if (e.target.closest && e.target.closest('#hr-back-btn')) renderHealthReportList();
+      });
 
       async function renderHealthReportList() {
         const reports = await window.electronAPI.listHealthReports();
@@ -851,49 +1134,202 @@ async function activateFeature(featureId) {
         }
 
         function renderRecord(rec, idx) {
-          const score = rec.overall_health_score ?? rec.health_score ?? '—';
-          const status = rec.overall_health_status ?? rec.health_status ?? '—';
-          const ts = rec.timestamp ?? '—';
-          const recs = rec.recommendations ?? [];
-          const fa = rec.facial_analysis ?? {};
-          const ha = fa.health_analysis ?? {};
+          const score  = rec.overall_health_score ?? rec.health_score ?? 0;
+          const status = rec.overall_health_status ?? rec.health_status ?? '--';
+          const ts     = rec.timestamp ?? '--';
+          const recs   = rec.recommendations ?? [];
+          const ha     = (rec.facial_analysis ?? {}).health_analysis ?? {};
+          const cats   = rec.category_scores ?? {};
+          const raw    = rec.raw_data ?? {};
 
-          const metricRow = (label, val, unit='') => `
-            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.06);">
-              <span style="color:#aaa;font-size:13px;">${label}</span>
-              <span style="color:#eee;font-size:13px;font-weight:500;">${typeof val === 'number' ? val.toFixed(2) : val}${unit ? ' '+unit : ''}</span>
+          const sc = v => typeof v === 'number' ? v.toFixed(2) : (v ?? '--');
+          const pct = (v, max=10) => Math.round((v/max)*100);
+
+          const row = (label, val, unit='') => val != null && val !== '' ? `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid rgba(255,255,255,0.06);">
+              <span style="color:#999;font-size:12px;">${label}</span>
+              <span style="color:#eee;font-size:12px;font-weight:500;">${typeof val==='number'?val.toFixed(3):val}${unit?' '+unit:''}</span>
+            </div>` : '';
+
+          const catBar = (label, val, color='#7af') => {
+            if (val == null) return '';
+            const p = pct(val);
+            return `<div style="margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:12px;color:#ccc;">${label}</span>
+                <span style="font-size:12px;font-weight:600;color:${scoreColor(val)};">${val}/10</span>
+              </div>
+              <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+                <div style="height:100%;width:${p}%;background:${scoreColor(val)};border-radius:3px;transition:width 0.4s;"></div>
+              </div>
             </div>`;
+          };
 
-          const faceMetrics = ha ? [
-            ha.facial_symmetry != null ? metricRow('Facial Symmetry', ha.facial_symmetry) : '',
-            ha.symmetry_evaluation ? metricRow('Symmetry Evaluation', ha.symmetry_evaluation) : '',
-            ha.skin_tone_note ? metricRow('Skin Tone', ha.skin_tone_note) : '',
-            ha.texture_note ? metricRow('Skin Texture', ha.texture_note) : '',
-            ha.fullness_evaluation ? metricRow('Facial Fullness', ha.fullness_evaluation) : '',
-            ha.estimated_stress_level?.value != null ? metricRow('Est. Stress Level', ha.estimated_stress_level.value, ha.estimated_stress_level.unit) : '',
-            ha.sleep_quality_estimate?.value != null ? metricRow('Est. Sleep Quality', ha.sleep_quality_estimate.value, ha.sleep_quality_estimate.unit) : '',
-          ].filter(Boolean).join('') : '';
+          const sectionHead = t => `<div style="font-size:11px;color:#7af;text-transform:uppercase;letter-spacing:0.07em;font-weight:700;margin:14px 0 8px;">${t}</div>`;
+
+          // Category scores section
+          const catSection = (cats.symmetry!=null||cats.fatigue!=null) ? `
+            ${sectionHead('Category Scores')}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+              ${catBar('Symmetry',    cats.symmetry)}
+              ${catBar('Fatigue',     cats.fatigue)}
+              ${catBar('Stress',      cats.stress)}
+              ${catBar('Skin',        cats.skin)}
+              ${catBar('Structural',  cats.structural)}
+              ${catBar('Circulation',cats.circulation)}
+            </div>` : '';
+
+          // Symmetry section
+          const symSection = ha.facial_symmetry != null ? `
+            ${sectionHead('Symmetry Analysis')}
+            ${row('Overall Symmetry',      ha.facial_symmetry)}
+            ${row('Evaluation',            ha.symmetry_evaluation)}
+            ${row('Eye Level Symmetry',    ha.eyes_level_symmetry)}
+            ${row('Nose Deviation',        ha.nose_deviation)}
+            ${row('Chin Deviation',        ha.chin_deviation)}
+            ${ha.note_symmetry    ? `<div style="font-size:11px;color:#fa8;padding:6px 0;">${ha.note_symmetry}</div>` : ''}
+            ${ha.jaw_alignment_note ? `<div style="font-size:11px;color:#fa8;padding:4px 0;">${ha.jaw_alignment_note}</div>` : ''}` : '';
+
+          // Eye & Fatigue section
+          const eyeSection = ha.eye_fatigue ? `
+            ${sectionHead('Eye & Fatigue')}
+            ${row('Fatigue Level',    ha.eye_fatigue)}
+            ${row('Avg Eye Aspect Ratio', ha.eye_aspect_ratio)}
+            ${row('Left EAR',         ha.left_ear)}
+            ${row('Right EAR',        ha.right_ear)}
+            ${row('EAR Asymmetry',    ha.ear_asymmetry)}
+            ${row('L Eye Openness',   ha.left_eye_openness_px,  'px')}
+            ${row('R Eye Openness',   ha.right_eye_openness_px, 'px')}
+            ${row('Brow Height Ratio',ha.brow_height_ratio)}
+            ${ha.eye_health_note      ? `<div style="font-size:11px;color:#fa8;padding:4px 0;">${ha.eye_health_note}</div>` : ''}
+            ${ha.ear_asymmetry_note   ? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.ear_asymmetry_note}</div>` : ''}
+            ${ha.brow_position_note   ? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.brow_position_note}</div>` : ''}` : '';
+
+          // Stress section
+          const stressSection = ha.stress_level ? `
+            ${sectionHead('Stress & Tension')}
+            ${row('Stress Level',       ha.stress_level)}
+            ${row('Composite Score',    ha.stress_composite)}
+            ${row('Inner Brow Distance',ha.inner_brow_distance)}
+            ${row('Brow Asymmetry',     ha.brow_asymmetry)}
+            ${row('Brow Arch',          ha.brow_arch)}
+            ${row('Mouth Aspect Ratio', ha.mouth_aspect_ratio)}
+            ${row('Smile Index',        ha.smile_index)}
+            ${row('Jaw Angle',          ha.jaw_angle, 'deg')}
+            ${ha.stress_note     ? `<div style="font-size:11px;color:#fa8;padding:4px 0;">${ha.stress_note}</div>` : ''}
+            ${ha.brow_furrow_note? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.brow_furrow_note}</div>` : ''}
+            ${ha.lip_tension_note? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.lip_tension_note}</div>` : ''}
+            ${ha.jaw_tension_note? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.jaw_tension_note}</div>` : ''}
+            ${ha.mouth_expression? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.mouth_expression}</div>` : ''}` : '';
+
+          // Skin section
+          const skinRegions = ha.skin_regions_summary
+            ? Object.entries(ha.skin_regions_summary).map(([name,r]) =>
+                `<div style="padding:6px 0;border-bottom:0.5px solid rgba(255,255,255,0.05);">
+                  <div style="font-size:11px;font-weight:600;color:#7cf;text-transform:capitalize;margin-bottom:3px;">${name.replace('_',' ')}</div>
+                  ${row('Brightness', r.brightness)} ${row('Redness', r.redness)} ${row('Yellowness', r.yellowness)} ${row('Texture', r.texture)}
+                </div>`).join('') : '';
+
+          const skinSection = ha.skin_texture != null || ha.skin_tone_note ? `
+            ${sectionHead('Skin Health')}
+            ${row('Skin Texture',    ha.skin_texture)}
+            ${row('Brightness',      ha.skin_brightness ?? ha.avg_skin_brightness)}
+            ${row('Saturation',      ha.skin_saturation)}
+            ${row('Peak Redness',    ha.peak_redness)}
+            ${row('Avg Yellowness',  ha.avg_yellowness)}
+            ${row('Skin Uniformity', ha.skin_uniformity)}
+            ${row('Hydration Est.',  ha.skin_hydration_estimate)}
+            ${ha.skin_tone_note     ? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.skin_tone_note}</div>` : ''}
+            ${ha.texture_note       ? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.texture_note}</div>` : ''}
+            ${ha.pallor_screen      ? `<div style="font-size:11px;color:#fa8;padding:4px 0;">${ha.pallor_screen}</div>` : ''}
+            ${ha.jaundice_screen    ? `<div style="font-size:11px;color:#fa8;padding:4px 0;">${ha.jaundice_screen}</div>` : ''}
+            ${ha.redness_note       ? `<div style="font-size:11px;color:#fa8;padding:4px 0;">${ha.redness_note}</div>` : ''}
+            ${ha.hydration_note     ? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.hydration_note}</div>` : ''}
+            ${ha.uniformity_note    ? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.uniformity_note}</div>` : ''}
+            ${skinRegions ? `<div style="margin-top:8px;font-size:11px;color:#777;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Regional Breakdown</div>${skinRegions}` : ''}` : '';
+
+          // Structure section
+          const structSection = ha.face_shape ? `
+            ${sectionHead('Structural Harmony')}
+            ${row('Face Shape',          ha.face_shape)}
+            ${row('Golden Ratio Harmony',ha.golden_ratio_harmony)}
+            ${row('Golden Ratio Diff',   ha.golden_ratio_diff)}
+            ${row('Eye Spacing Ratio',   ha.eye_spacing_ratio)}
+            ${row('Jaw Width Ratio',     ha.jaw_width_ratio)}
+            ${row('Chin Height Ratio',   ha.chin_height_ratio)}
+            ${row('Nose Width Ratio',    ha.nose_width_ratio)}
+            ${row('Nose Length',         ha.nose_length_px, 'px')}
+            ${row('Face W/H Ratio',      ha.face_width_height_ratio)}
+            ${row('Facial Fullness',     ha.facial_fullness)}
+            ${ha.face_shape_note      ? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.face_shape_note}</div>` : ''}
+            ${ha.golden_ratio_note    ? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.golden_ratio_note}</div>` : ''}
+            ${ha.eye_spacing_note     ? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.eye_spacing_note}</div>` : ''}
+            ${ha.jaw_note             ? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.jaw_note}</div>` : ''}
+            ${ha.nose_note            ? `<div style="font-size:11px;color:#adf;padding:4px 0;">${ha.nose_note}</div>` : ''}
+            ${ha.fullness_evaluation  ? `<div style="font-size:11px;color:#fa8;padding:4px 0;">${ha.fullness_evaluation}</div>` : ''}` : '';
+
+          // Circulation section
+          const circSection = ha.lip_redness_index != null ? `
+            ${sectionHead('Circulatory Screening')}
+            ${row('Lip Redness Index', ha.lip_redness_index)}
+            ${row('Lip Brightness',    ha.lip_brightness)}
+            ${row('Lip Hue',           ha.lip_hue)}
+            ${row('Lip Saturation',    ha.lip_saturation)}
+            ${ha.lip_rgb ? row('Lip RGB', `R:${ha.lip_rgb.r} G:${ha.lip_rgb.g} B:${ha.lip_rgb.b}`) : ''}
+            ${ha.lip_color_note     ? `<div style="font-size:11px;color:#fa8;padding:4px 0;">${ha.lip_color_note}</div>` : ''}
+            ${ha.cyanosis_screen    ? `<div style="font-size:11px;color:#fa8;padding:4px 0;">${ha.cyanosis_screen}</div>` : ''}
+            ${ha.lip_jaundice_screen? `<div style="font-size:11px;color:#fa8;padding:4px 0;">${ha.lip_jaundice_screen}</div>` : ''}` : '';
+
+          // Raw measurements (collapsible)
+          const rawKeys = Object.keys(raw).filter(k => !['skin_regions','lip_rgb'].includes(k));
+          const rawSection = rawKeys.length ? `
+            ${sectionHead('Raw Measurements')}
+            <details style="margin-top:4px;">
+              <summary style="font-size:12px;color:#888;cursor:pointer;padding:4px 0;">Show / Hide raw data (${rawKeys.length} groups)</summary>
+              <div style="margin-top:8px;font-size:11px;color:#aaa;font-family:monospace;white-space:pre-wrap;max-height:300px;overflow-y:auto;background:rgba(0,0,0,0.3);padding:10px;border-radius:6px;">${JSON.stringify(raw, null, 2)}</div>
+            </details>` : '';
+
+          // Trends
+          const trendsHtml = (ha.fatigue_trend||ha.stress_trend||ha.symmetry_trend) ? `
+            ${sectionHead('Trends (Session)')}
+            ${row('Symmetry Trend', ha.symmetry_trend)}
+            ${row('Fatigue Trend',  ha.fatigue_trend)}
+            ${row('Stress Trend',   ha.stress_trend)}
+            ${row('Skin Trend',     ha.skin_trend)}` : '';
 
           const recsHTML = recs.length
-            ? recs.map(r => `<li style="padding:4px 0;color:#ccc;font-size:13px;">${r}</li>`).join('')
-            : '<li style="color:#888;font-size:13px;">No recommendations</li>';
+            ? recs.map(r => `<li style="padding:4px 0;color:#ccc;font-size:12px;">${r}</li>`).join('')
+            : '<li style="color:#666;font-size:12px;">No recommendations at this time</li>';
 
           return `
             <div style="background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-bottom:16px;">
+              <!-- HEADER -->
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
                 <div>
-                  <div style="font-size:12px;color:#888;">Record ${idx+1} &bull; ${ts}</div>
-                  <div style="font-size:22px;font-weight:700;color:${scoreColor(score)};margin-top:4px;">${score}/10 <span style="font-size:14px;font-weight:400;color:#ccc;">${status}</span></div>
+                  <div style="font-size:11px;color:#666;letter-spacing:0.04em;">RECORD ${idx+1} &bull; ${ts}</div>
+                  <div style="font-size:22px;font-weight:700;color:${scoreColor(score)};margin-top:4px;">${score}<span style="font-size:13px;color:#888;">/10</span></div>
+                  <div style="font-size:13px;color:#bbb;margin-top:2px;">${status}</div>
                 </div>
-                <div style="width:64px;height:64px;border-radius:50%;background:conic-gradient(${scoreColor(score)} ${score*36}deg, rgba(255,255,255,0.08) 0deg);display:flex;align-items:center;justify-content:center;position:relative;">
-                  <div style="width:50px;height:50px;border-radius:50%;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${scoreColor(score)};">${score}</div>
+                <div style="position:relative;width:68px;height:68px;">
+                  <svg viewBox="0 0 68 68" style="width:68px;height:68px;transform:rotate(-90deg);">
+                    <circle cx="34" cy="34" r="28" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="7"/>
+                    <circle cx="34" cy="34" r="28" fill="none" stroke="${scoreColor(score)}" stroke-width="7"
+                      stroke-dasharray="${Math.round(2*Math.PI*28*score/10)} 999" stroke-linecap="round"/>
+                  </svg>
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:${scoreColor(score)};">${score}</div>
                 </div>
               </div>
-              ${faceMetrics ? `<div style="margin-bottom:16px;"><div style="font-size:12px;color:#7af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;font-weight:600;">Facial Metrics</div>${faceMetrics}</div>` : ''}
-              <div>
-                <div style="font-size:12px;color:#7af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;font-weight:600;">Recommendations</div>
-                <ul style="margin:0;padding-left:18px;">${recsHTML}</ul>
-              </div>
+              <!-- CATEGORIES -->
+              ${catSection}
+              <!-- ANALYSIS SECTIONS -->
+              ${symSection}${eyeSection}${stressSection}${skinSection}${structSection}${circSection}
+              <!-- TRENDS -->
+              ${trendsHtml}
+              <!-- RECOMMENDATIONS -->
+              ${sectionHead('Recommendations')}
+              <ul style="margin:0;padding-left:18px;">${recsHTML}</ul>
+              <!-- RAW DATA -->
+              ${rawSection}
             </div>`;
         }
 
@@ -901,8 +1337,8 @@ async function activateFeature(featureId) {
         contentContainer.innerHTML = `
           <div class="embedded-app-interface">
             <div class="app-header" style="gap:12px;">
-              <button id="hr-back-btn" style="background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);color:#eee;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;">
-                <i class="fas fa-arrow-left"></i> Back
+              <button id="hr-back-btn" style="background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);color:#eee;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;pointer-events:auto;-webkit-text-fill-color:#eee;">
+                &#8592; Back
               </button>
               <h3 style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;">${fileName}</h3>
             </div>
@@ -911,7 +1347,9 @@ async function activateFeature(featureId) {
             </div>
           </div>`;
 
-        contentContainer.querySelector('#hr-back-btn').addEventListener('click', renderHealthReportList);
+        // Back button: direct listener (delegated listener on contentContainer also handles it)
+        const backBtn = contentContainer.querySelector('#hr-back-btn');
+        if (backBtn) backBtn.onclick = () => renderHealthReportList();
       }
 
       await renderHealthReportList();
@@ -1432,7 +1870,10 @@ function stopApp(featureId) {
 // Close current active feature
 function closeFeature() {
   if (!activeFeature) return;
-  
+
+  // Clean up frame listener if face-scanner was active
+  window.electronAPI.removeAllListeners('python-frame');
+
   featureViewer.classList.remove('active');
   document.querySelector('.content').classList.remove('has-viewer');
   document.querySelectorAll('.content-section').forEach(s => s.style.display = '');
@@ -1815,6 +2256,81 @@ function setupEventListeners() {
   // Python process events
   window.electronAPI.onPythonOutput((data) => {
     const { appId, message, type } = data;
+
+    // Parse face-scanner STATUS lines — update UI, don't log to console
+    if (appId === 'face-scanner' && message && message.startsWith('STATUS:')) {
+      try {
+        const s = JSON.parse(message.slice(7));
+        const el = (id) => document.getElementById(id);
+        if (el('fs-stat-faces'))   el('fs-stat-faces').textContent   = `Faces: ${s.faces}`;
+        if (el('fs-stat-fps'))     el('fs-stat-fps').textContent     = `FPS: ${s.fps}`;
+        if (el('fs-stat-captured'))el('fs-stat-captured').textContent= `Captured: ${s.captured}/${s.target}`;
+        if (el('fs-stat-auto')) {
+          el('fs-stat-auto').textContent = `Auto: ${s.auto ? 'ON' : 'OFF'}`;
+          el('fs-stat-auto').style.color = s.auto ? '#2ecc71' : '#e74c3c';
+        }
+        if (el('fs-live-status'))  el('fs-live-status').textContent  = 'Live';
+      } catch(e) {}
+      return;
+    }
+
+    // Capture confirmation / failure from analyse app
+    if (appId === 'analyse' && message && message.startsWith('CAPTURED:')) {
+      const btn = document.getElementById('fa-btn-capture');
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Captured!'; setTimeout(() => { const b = document.getElementById('fa-btn-capture'); if (b) { b.disabled = false; b.innerHTML = '<i class="fas fa-camera"></i> Capture'; } }, 2500); }
+      showToast('Saved', 'Health report captured. Open Health Reports to view it.', 'success');
+      return;
+    }
+    if (appId === 'analyse' && message && message.startsWith('CAPTURE_FAILED:')) {
+      const btn = document.getElementById('fa-btn-capture');
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Capture'; }
+      showToast('Capture Failed', message.slice(15) || 'No face detected yet.', 'warning');
+      return;
+    }
+
+    // Parse facial-analysis STATUS lines — update health metrics UI
+    if (appId === 'analyse' && message && message.startsWith('STATUS:')) {
+      try {
+        const s = JSON.parse(message.slice(7));
+        const el = (id) => document.getElementById(id);
+        if (el('fa-score')) el('fa-score').textContent = s.score !== undefined ? s.score : '—';
+        if (el('fa-health-status')) el('fa-health-status').textContent = s.status || '—';
+        if (el('fa-symmetry')) el('fa-symmetry').textContent = s.symmetry !== undefined ? s.symmetry : '—';
+        if (el('fa-eye-fatigue')) el('fa-eye-fatigue').textContent = s.eye_fatigue || '—';
+        if (el('fa-skin-texture')) el('fa-skin-texture').textContent = s.skin_texture !== undefined ? s.skin_texture : '—';
+        if (el('fa-fps')) el('fa-fps').textContent = `FPS: ${s.fps}`;
+        if (el('fa-status-text')) el('fa-status-text').textContent = s.face ? 'Face Detected' : 'Searching...';
+        if (el('fa-recs') && s.recommendations && s.recommendations.length) {
+          el('fa-recs').innerHTML = s.recommendations.map(r => `• ${r}`).join('<br>');
+        }
+      } catch(e) {}
+      return;
+    }
+
+    // Parse emotions STATUS lines — update bar chart UI
+    if (appId === 'emotions' && message && message.startsWith('STATUS:')) {
+      try {
+        const s = JSON.parse(message.slice(7));
+        const LABELS = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise'];
+        const el = (id) => document.getElementById(id);
+        if (el('em-top-label') && s.label !== 'none') {
+          el('em-top-label').textContent = s.label.charAt(0).toUpperCase() + s.label.slice(1);
+        }
+        if (el('em-fps-stat')) el('em-fps-stat').textContent = `FPS: ${s.fps}`;
+        if (el('em-status-text')) el('em-status-text').textContent = 'Live';
+        if (s.probs && s.probs.length === LABELS.length) {
+          LABELS.forEach((l, i) => {
+            const pct = Math.round(s.probs[i] * 100);
+            const bar = el(`em-bar-${l}`);
+            const pctEl = el(`em-pct-${l}`);
+            if (bar) bar.style.width = pct + '%';
+            if (pctEl) pctEl.textContent = pct + '%';
+          });
+        }
+      } catch(e) {}
+      return;
+    }
+
     addToConsole(appId, message);
 
     // Reset phone-info lookup button when process closes

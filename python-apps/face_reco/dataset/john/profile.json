@@ -1,0 +1,12 @@
+{
+    "name": "john",
+    "age": "25",
+    "gender": "Male",
+    "occupation": "Unknown",
+    "nationality": "Unknown",
+    "status": "CIVILIAN",
+    "threat_level": "LOW",
+    "notes": "Profile created via CLEM.",
+    "last_seen": "2026-04-18 16:58:11",
+    "sightings": 1
+}

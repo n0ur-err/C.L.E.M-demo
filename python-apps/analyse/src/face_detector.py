@@ -148,7 +148,11 @@ class FaceDetector:
             minNeighbors=5,
             minSize=(30, 30)
         )
-        return faces
+        # detectMultiScale returns a numpy array (faces found) or empty tuple (none found).
+        # Convert to a plain list so `if faces:` is always unambiguous.
+        if isinstance(faces, np.ndarray) and len(faces) > 0:
+            return [tuple(int(v) for v in f) for f in faces]
+        return []
     
     def _detect_dlib(self, image):
         """Detect faces using dlib"""

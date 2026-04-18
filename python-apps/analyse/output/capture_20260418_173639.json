@@ -1,0 +1,37 @@
+[
+  {
+    "timestamp": "2026-04-18 17:36:39",
+    "health_score": 4.7,
+    "health_status": "Concerning",
+    "recommendations": [
+      "Consider hydration and skincare routine",
+      "Monitor for fluid retention/edema"
+    ],
+    "facial_analysis": {
+      "health_analysis": {
+        "facial_symmetry": 0.8957140023307878,
+        "symmetry_evaluation": "High symmetry",
+        "eyes_level_symmetry": 0.6984924623115578,
+        "note_eye_level": "Eye level asymmetry noted - may indicate musculoskeletal alignment factors",
+        "skin_tone_note": "Normal skin tone variation detected",
+        "skin_texture": 53.5770625412518,
+        "texture_note": "Moderate skin texture variation - may indicate mild dehydration",
+        "facial_fullness": 1.0,
+        "fullness_evaluation": "High facial fullness - within normal variation",
+        "golden_ratio_harmony": 0,
+        "estimated_stress_level": {
+          "value": 13.4,
+          "unit": "proxy score",
+          "note": "Estimated from facial tension patterns, not actual lab value"
+        },
+        "sleep_quality_estimate": {
+          "value": 5.9,
+          "unit": "quality score",
+          "note": "Estimated from eye appearance and facial relaxation indicators"
+        },
+        "symmetry_stability": "Stable",
+        "analysis_timestamp": "2026-04-18 17:36:39"
+      }
+    }
+  }
+]

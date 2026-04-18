@@ -44,6 +44,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('download-info', (_, data) => callback(data)),
   onPythonOutput: (callback) =>
     ipcRenderer.on('python-output', (_, data) => callback(data)),
+  onPythonFrame: (callback) =>
+    ipcRenderer.on('python-frame', (_, data) => callback(data)),
     
   // Remove event listeners
   removeAllListeners: (channel) => {

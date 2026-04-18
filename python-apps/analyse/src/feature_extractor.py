@@ -139,6 +139,16 @@ class FeatureExtractor:
             
             # Calculate facial ratios (golden ratio analysis)
             features['facial_ratios'] = self._calculate_facial_ratios(landmarks)
+
+            # Extended metrics for executive health analysis
+            features['eye_metrics']     = self._calculate_eye_metrics(landmarks)
+            features['mouth_metrics']   = self._calculate_mouth_metrics(landmarks)
+            features['eyebrow_metrics'] = self._calculate_eyebrow_metrics(landmarks)
+            features['jaw_metrics']     = self._calculate_jaw_metrics(landmarks)
+            features['nose_metrics']    = self._calculate_nose_metrics(landmarks)
+            features['lip_color']       = self._analyze_lip_color(frame, landmarks)
+            features['skin_regions']    = self._analyze_skin_regions(frame, landmarks)
+            features['face_shape']      = self._classify_face_shape(landmarks)
         except Exception as e:
             print(f"Error extracting facial features: {e}")
         
@@ -397,6 +407,218 @@ class FeatureExtractor:
         
         return ratios
         
+    def _calculate_eye_metrics(self, landmarks):
+        """Eye Aspect Ratio (EAR) and openness metrics from dlib 68 landmarks."""
+        try:
+            if len(landmarks) < 48:
+                return {}
+            def _ear(pts):
+                A = np.linalg.norm(np.array(pts[1]) - np.array(pts[5]))
+                B = np.linalg.norm(np.array(pts[2]) - np.array(pts[4]))
+                C = np.linalg.norm(np.array(pts[0]) - np.array(pts[3]))
+                return float((A + B) / (2.0 * C)) if C > 0 else 0.0
+            l_pts = [landmarks[i] for i in range(36, 42)]
+            r_pts = [landmarks[i] for i in range(42, 48)]
+            l_ear = _ear(l_pts)
+            r_ear = _ear(r_pts)
+            avg   = (l_ear + r_ear) / 2
+            asym  = abs(l_ear - r_ear) / avg if avg > 0 else 0
+            l_h = (np.linalg.norm(np.array(landmarks[37]) - np.array(landmarks[41])) +
+                   np.linalg.norm(np.array(landmarks[38]) - np.array(landmarks[40]))) / 2
+            r_h = (np.linalg.norm(np.array(landmarks[43]) - np.array(landmarks[47])) +
+                   np.linalg.norm(np.array(landmarks[44]) - np.array(landmarks[46]))) / 2
+            return {
+                'left_ear': round(l_ear, 4), 'right_ear': round(r_ear, 4),
+                'avg_ear': round(avg, 4), 'ear_asymmetry': round(asym, 4),
+                'left_height': round(float(l_h), 2), 'right_height': round(float(r_h), 2),
+            }
+        except Exception:
+            return {}
+
+    def _calculate_mouth_metrics(self, landmarks):
+        """Mouth Aspect Ratio (MAR), lip heights and smile index."""
+        try:
+            if len(landmarks) < 68:
+                return {}
+            mw  = float(np.linalg.norm(np.array(landmarks[48]) - np.array(landmarks[54])))
+            mh  = float((np.linalg.norm(np.array(landmarks[50]) - np.array(landmarks[58])) +
+                         np.linalg.norm(np.array(landmarks[51]) - np.array(landmarks[57])) +
+                         np.linalg.norm(np.array(landmarks[52]) - np.array(landmarks[56]))) / 3)
+            mar = mh / mw if mw > 0 else 0
+            ul  = float(np.linalg.norm(np.array(landmarks[51]) - np.array(landmarks[62])))
+            ll  = float(np.linalg.norm(np.array(landmarks[57]) - np.array(landmarks[66])))
+            cy  = (landmarks[48][1] + landmarks[54][1]) / 2
+            si  = cy - (landmarks[48][1] + landmarks[54][1]) / 2  # left+right deviation
+            # real smile: how far corners are ABOVE or BELOW mouth center
+            left_up  = cy - landmarks[48][1]
+            right_up = cy - landmarks[54][1]
+            si = (left_up + right_up) / 2
+            fh = float(np.linalg.norm(np.array(landmarks[8]) - np.array(landmarks[27])))
+            si_norm = si / fh if fh > 0 else 0
+            return {
+                'mouth_width': round(mw, 2), 'mouth_height': round(mh, 2),
+                'mar': round(float(mar), 4),
+                'upper_lip_height': round(ul, 2), 'lower_lip_height': round(ll, 2),
+                'smile_index': round(float(si_norm), 4),
+            }
+        except Exception:
+            return {}
+
+    def _calculate_eyebrow_metrics(self, landmarks):
+        """Brow height, arch, inner distance, and tension indicators."""
+        try:
+            if len(landmarks) < 27:
+                return {}
+            l_eye_cy = float(np.mean([landmarks[i][1] for i in range(36, 42)]))
+            r_eye_cy = float(np.mean([landmarks[i][1] for i in range(42, 48)]))
+            l_brow_cy = float(np.mean([landmarks[i][1] for i in range(17, 22)]))
+            r_brow_cy = float(np.mean([landmarks[i][1] for i in range(22, 27)]))
+            lbh = l_eye_cy - l_brow_cy
+            rbh = r_eye_cy - r_brow_cy
+            ba  = abs(lbh - rbh)
+            ibd = float(np.linalg.norm(np.array(landmarks[21]) - np.array(landmarks[22])))
+            fh  = float(np.linalg.norm(np.array(landmarks[8]) - np.array(landmarks[27])))
+            n   = fh if fh > 0 else 1
+            def arch(pts):
+                s, e = pts[0], pts[-1]; m = pts[2]
+                mid_line_y = (s[1] + e[1]) / 2
+                return float(mid_line_y - m[1])
+            la = arch([landmarks[i] for i in range(17, 22)])
+            ra = arch([landmarks[i] for i in range(22, 27)])
+            return {
+                'left_brow_height': round(lbh / n, 4), 'right_brow_height': round(rbh / n, 4),
+                'avg_brow_height': round(((lbh + rbh) / 2) / n, 4),
+                'brow_asymmetry': round(ba / n, 4),
+                'inner_brow_distance': round(ibd / n, 4),
+                'left_brow_arch': round(la / n, 4), 'right_brow_arch': round(ra / n, 4),
+            }
+        except Exception:
+            return {}
+
+    def _calculate_jaw_metrics(self, landmarks):
+        """Jaw width ratio, chin deviation, jaw angle, chin height ratio."""
+        try:
+            if len(landmarks) < 17:
+                return {}
+            jaw_w  = float(np.linalg.norm(np.array(landmarks[4])  - np.array(landmarks[12])))
+            temp_w = float(np.linalg.norm(np.array(landmarks[0])  - np.array(landmarks[16])))
+            jtr    = jaw_w / temp_w if temp_w > 0 else 0
+            chin_x = landmarks[8][0]; nose_x = landmarks[30][0]
+            cd     = (chin_x - nose_x) / temp_w if temp_w > 0 else 0
+            chin_h = float(np.linalg.norm(np.array(landmarks[57]) - np.array(landmarks[8])))
+            fh     = float(np.linalg.norm(np.array(landmarks[8])  - np.array(landmarks[27])))
+            chr_   = chin_h / fh if fh > 0 else 0
+            v1 = np.array(landmarks[2]) - np.array(landmarks[4])
+            v2 = np.array(landmarks[6]) - np.array(landmarks[4])
+            cos_a = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2) + 1e-6)
+            jaw_angle = float(np.degrees(np.arccos(np.clip(cos_a, -1, 1))))
+            return {
+                'jaw_width_ratio': round(jtr, 4), 'chin_deviation': round(float(cd), 4),
+                'chin_height_ratio': round(chr_, 4), 'jaw_angle': round(jaw_angle, 2),
+            }
+        except Exception:
+            return {}
+
+    def _calculate_nose_metrics(self, landmarks):
+        """Nose length, width, proportional ratio, and tip deviation."""
+        try:
+            if len(landmarks) < 36:
+                return {}
+            nl  = float(np.linalg.norm(np.array(landmarks[27]) - np.array(landmarks[30])))
+            nw  = float(np.linalg.norm(np.array(landmarks[31]) - np.array(landmarks[35])))
+            nr  = nw / nl if nl > 0 else 0
+            mid = (landmarks[27][0] + landmarks[8][0]) / 2
+            fw  = float(np.linalg.norm(np.array(landmarks[0]) - np.array(landmarks[16])))
+            dev = (landmarks[30][0] - mid) / fw if fw > 0 else 0
+            return {
+                'nose_length': round(nl, 2), 'nose_width': round(nw, 2),
+                'nose_width_ratio': round(float(nr), 4), 'nose_deviation': round(float(dev), 4),
+            }
+        except Exception:
+            return {}
+
+    def _analyze_lip_color(self, frame, landmarks):
+        """Extract mean BGR + HSV of the lip region for pallor/cyanosis screening."""
+        try:
+            if len(landmarks) < 68:
+                return {}
+            lip_pts = np.array([landmarks[i] for i in range(48, 60)], dtype=np.int32)
+            h, w = frame.shape[:2]
+            mask = np.zeros((h, w), dtype=np.uint8)
+            cv2.fillPoly(mask, [lip_pts], 255)
+            bgr = cv2.mean(frame, mask=mask)[:3]
+            b, g, r = bgr
+            px = np.uint8([[[int(b), int(g), int(r)]]])
+            hsv = cv2.cvtColor(px, cv2.COLOR_BGR2HSV)[0][0]
+            redness = r - (g + b) / 2
+            return {
+                'r': round(float(r), 1), 'g': round(float(g), 1), 'b': round(float(b), 1),
+                'hue': round(float(hsv[0]), 1), 'saturation': round(float(hsv[1]), 1),
+                'brightness': round(float(hsv[2]), 1), 'redness_index': round(float(redness), 1),
+            }
+        except Exception:
+            return {}
+
+    def _analyze_skin_regions(self, frame, landmarks):
+        """Per-region skin colour and texture: forehead, cheeks, nose bridge."""
+        def _stats(frame, pts_list):
+            try:
+                pts = np.array(pts_list, dtype=np.int32)
+                x, y, rw, rh = cv2.boundingRect(pts)
+                x, y = max(0, x), max(0, y)
+                rw = min(rw, frame.shape[1] - x)
+                rh = min(rh, frame.shape[0] - y)
+                if rw < 4 or rh < 4:
+                    return {}
+                roi = frame[y:y+rh, x:x+rw]
+                gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+                lap  = cv2.Laplacian(gray, cv2.CV_64F)
+                b_m, g_m, r_m = float(np.mean(roi[:,:,0])), float(np.mean(roi[:,:,1])), float(np.mean(roi[:,:,2]))
+                return {
+                    'r': round(r_m,1), 'g': round(g_m,1), 'b': round(b_m,1),
+                    'brightness': round((r_m+g_m+b_m)/3, 1),
+                    'redness': round(r_m - (g_m+b_m)/2, 1),
+                    'yellowness': round((r_m+g_m)/2 - b_m, 1),
+                    'texture': round(float(np.var(lap)), 2),
+                }
+            except Exception:
+                return {}
+        try:
+            if len(landmarks) < 68:
+                return {}
+            lm = landmarks
+            brow_y   = int((lm[19][1] + lm[24][1]) / 2)
+            nose_y   = int(lm[27][1])
+            fh_up    = max(0, brow_y - abs(brow_y - nose_y))
+            regions  = {}
+            regions['forehead']    = _stats(frame, [lm[17], lm[26], (lm[26][0], fh_up), (lm[17][0], fh_up)])
+            regions['left_cheek']  = _stats(frame, [lm[1], lm[3],  lm[31], lm[39]])
+            regions['right_cheek'] = _stats(frame, [lm[13], lm[15], lm[35], lm[42]])
+            regions['nose_bridge'] = _stats(frame, [lm[27], lm[28], lm[29], lm[30]])
+            return regions
+        except Exception:
+            return {}
+
+    def _classify_face_shape(self, landmarks):
+        """Classify face shape: oval, round, oblong, square, heart, diamond."""
+        try:
+            if len(landmarks) < 17:
+                return 'unknown'
+            fw   = float(np.linalg.norm(np.array(landmarks[0])  - np.array(landmarks[16])))
+            fh   = float(np.linalg.norm(np.array(landmarks[8])  - np.array(landmarks[27])))
+            forw = float(np.linalg.norm(np.array(landmarks[17]) - np.array(landmarks[26])))
+            jaww = float(np.linalg.norm(np.array(landmarks[4])  - np.array(landmarks[12])))
+            if fw == 0: return 'unknown'
+            ratio = fh / fw
+            jtf   = jaww / forw if forw > 0 else 1
+            ftwj  = fw / jaww   if jaww > 0 else 1
+            if ratio > 1.5:   return 'oblong'
+            if ratio > 1.25:  return 'heart' if jtf < 0.75 else 'oval'
+            if ratio > 1.0:   return 'diamond' if ftwj > 1.3 else 'oval'
+            return 'round' if ftwj > 1.2 else 'square'
+        except Exception:
+            return 'unknown'
+
     def get_processing_stats(self):
         """Return processing statistics for display"""
         return {

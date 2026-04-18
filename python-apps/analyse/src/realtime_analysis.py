@@ -155,6 +155,7 @@ class RealtimeFacialAnalyzer:
     
     def _processing_worker(self):
         """Background worker thread for face detection and analysis"""
+        import sys, traceback
         frame_times = []
         max_times = 30  # For rolling average
         face_detection_count = 0
@@ -163,127 +164,135 @@ class RealtimeFacialAnalyzer:
             # Get the current frame with thread safety
             with self.lock:
                 if self.current_frame is None:
-                    time.sleep(0.01)
-                    continue
-                
-                frame = self.current_frame.copy()
-            
-            start_time = time.time()
-            
-            # Detect faces
-            faces = self.detector.detect(frame)
-            
-            # Find primary face (largest in the frame, assumed to be the user)
-            primary_face = None
-            primary_face_size = 0
-            
-            if faces:
-                # Find largest face (assumed to be the user/closest to camera)
-                for face_bbox in faces:
-                    x, y, w, h = face_bbox
-                    face_size = w * h
-                    if face_size > primary_face_size:
-                        primary_face = face_bbox
-                        primary_face_size = face_size
-                
-                # Only process the primary face
-                if primary_face:
-                    face_detection_count += 1
-                    
-                    # Extract features for the primary face
-                    features = self.feature_extractor.extract_features_from_frame(frame, primary_face)
-                    
-                    # Analyze health indicators
-                    health_data = self.health_analyzer.analyze(features)
-                    
-                    # Update the primary face attributes
-                    self.primary_face = primary_face
-                    self.primary_face_features = features
-                    
-                    # Update health tracking data
-                    self._update_health_tracking(health_data)
-                    
-                    # Prepare data for storage (only store one record per save interval)
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    result = {
-                        'timestamp': timestamp,
-                        'frame_id': self.frame_count,
-                        'face_id': 0,  # Always 0 for primary face
-                        'features': features,
-                        'health_analysis': health_data,
-                        'health_status': self.health_status,
-                        'health_score': self.overall_health_score,
-                        'recommendations': self.health_recommendations
-                    }
-                    
-                    # Store only one record per save interval
-                    self.accumulated_data.append(result)
-                    
-                    # Queue the latest data for display
-                    display_data = (primary_face, features, health_data)
-            
-            # Process the frame for display
-            display_frame = frame.copy()
-            
-            # Add faces to current faces list with thread safety
-            with self.lock:
-                if faces:
-                    self.current_faces = [primary_face] if primary_face else []
+                    frame = None
                 else:
-                    self.current_faces = []
-            
-            # Draw only the primary face
-            if primary_face:
-                x, y, w, h = primary_face
-                # Use blue for primary face
-                cv2.rectangle(display_frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+                    frame = self.current_frame.copy()
+
+            # Release lock before sleeping to avoid blocking the display loop
+            if frame is None:
+                time.sleep(0.01)
+                continue
+
+            try:
+                start_time = time.time()
                 
-                # Draw landmarks if available and requested
-                if self.display_landmarks and 'landmarks' in features and features['landmarks']:
-                    # Draw facial landmarks
-                    for point in features['landmarks']:
-                        cv2.circle(display_frame, (int(point[0]), int(point[1])), 2, (0, 0, 255), -1)
+                # Detect faces
+                faces = self.detector.detect(frame)
+                
+                # Find primary face (largest in the frame, assumed to be the user)
+                primary_face = None
+                primary_face_size = 0
+                features = {}
+                health_data = {}
+                
+                if faces:
+                    # Find largest face (assumed to be the user/closest to camera)
+                    for face_bbox in faces:
+                        x, y, w, h = face_bbox
+                        face_size = w * h
+                        if face_size > primary_face_size:
+                            primary_face = face_bbox
+                            primary_face_size = face_size
                     
-                    # Add key measurements and health indicators as text
-                    self._draw_health_indicators(display_frame, primary_face, health_data)
+                    # Only process the primary face
+                    if primary_face:
+                        face_detection_count += 1
+                        
+                        # Extract features for the primary face
+                        features = self.feature_extractor.extract_features_from_frame(frame, primary_face)
+                        
+                        # Analyze health indicators
+                        health_data = self.health_analyzer.analyze(features)
+                        
+                        # Update the primary face attributes
+                        self.primary_face = primary_face
+                        self.primary_face_features = features
+                        
+                        # Update health tracking data
+                        self._update_health_tracking(health_data)
+                        
+                        # Prepare data for storage (only store one record per save interval)
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        result = {
+                            'timestamp': timestamp,
+                            'frame_id': self.frame_count,
+                            'face_id': 0,  # Always 0 for primary face
+                            'features': features,
+                            'health_analysis': health_data,
+                            'health_status': self.health_status,
+                            'health_score': self.overall_health_score,
+                            'recommendations': self.health_recommendations
+                        }
+                        
+                        # Store only one record per save interval
+                        self.accumulated_data.append(result)
+                
+                # Process the frame for display
+                display_frame = frame.copy()
+                
+                # Add faces to current faces list with thread safety
+                with self.lock:
+                    if faces:
+                        self.current_faces = [primary_face] if primary_face else []
+                    else:
+                        self.current_faces = []
+                
+                # Draw only the primary face
+                if primary_face:
+                    x, y, w, h = primary_face
+                    # Use blue for primary face
+                    cv2.rectangle(display_frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
                     
-                    # Add overall health status on top of the frame
-                    cv2.putText(display_frame, f"Health Status: {self.health_status}", 
-                                (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-                    
-                    # Display health score
-                    cv2.putText(display_frame, f"Health Score: {self.overall_health_score:.1f}/10", 
-                                (10, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-                    
-                    # Display top recommendation if available
-                    if self.health_recommendations:
-                        cv2.putText(display_frame, f"Recommendation: {self.health_recommendations[0]}", 
-                                    (10, 210), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-            
-            # Calculate FPS
-            end_time = time.time()
-            processing_time = end_time - start_time
-            
-            # Update rolling FPS average
-            frame_times.append(processing_time)
-            if len(frame_times) > max_times:
-                frame_times.pop(0)
-            
-            avg_time = sum(frame_times) / len(frame_times)
-            self.processing_fps = 1.0 / avg_time if avg_time > 0 else 0
-            
-            # Update the processed frame for display
-            with self.lock:
-                self.processed_frame = display_frame
-            
-            # Check if it's time to save data
-            current_time = time.time()
-            if (current_time - self.last_health_update >= self.save_interval and 
-                len(self.accumulated_data) > 0):
-                # Queue only the most recent data point for saving (prevents multiple faces being saved)
-                self.storage.queue_data_for_saving(self.accumulated_data[-1])
-                self.last_health_update = current_time
-                self.accumulated_data = []  # Clear accumulated data after saving
+                    # Draw landmarks if available and requested
+                    if self.display_landmarks and 'landmarks' in features and features['landmarks']:
+                        # Draw facial landmarks
+                        for point in features['landmarks']:
+                            cv2.circle(display_frame, (int(point[0]), int(point[1])), 2, (0, 0, 255), -1)
+                        
+                        # Add key measurements and health indicators as text
+                        self._draw_health_indicators(display_frame, primary_face, health_data)
+                        
+                        # Add overall health status on top of the frame
+                        cv2.putText(display_frame, f"Health Status: {self.health_status}", 
+                                    (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+                        
+                        # Display health score
+                        cv2.putText(display_frame, f"Health Score: {self.overall_health_score:.1f}/10", 
+                                    (10, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+                        
+                        # Display top recommendation if available
+                        if self.health_recommendations:
+                            cv2.putText(display_frame, f"Recommendation: {self.health_recommendations[0]}", 
+                                        (10, 210), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                
+                # Calculate FPS
+                end_time = time.time()
+                processing_time = end_time - start_time
+                
+                # Update rolling FPS average
+                frame_times.append(processing_time)
+                if len(frame_times) > max_times:
+                    frame_times.pop(0)
+                
+                avg_time = sum(frame_times) / len(frame_times)
+                self.processing_fps = 1.0 / avg_time if avg_time > 0 else 0
+                
+                # Update the processed frame for display
+                with self.lock:
+                    self.processed_frame = display_frame
+                
+                # Check if it's time to save data
+                current_time = time.time()
+                if (current_time - self.last_health_update >= self.save_interval and 
+                    len(self.accumulated_data) > 0):
+                    # Queue only the most recent data point for saving (prevents multiple faces being saved)
+                    self.storage.queue_data_for_saving(self.accumulated_data[-1])
+                    self.last_health_update = current_time
+                    self.accumulated_data = []  # Clear accumulated data after saving
+
+            except Exception as e:
+                print(f"Processing worker error: {e}\n{traceback.format_exc()}", file=sys.stderr)
+                time.sleep(0.1)  # Brief pause before retrying
                 
     def _draw_health_indicators(self, frame, face_bbox, health_data):
         """Draw health indicators on the frame for the primary face"""
@@ -407,6 +416,12 @@ class RealtimeFacialAnalyzer:
         
         # Get most recent health data
         health = self.health_history[-1]
+
+        # Use composite score computed by HealthAnalyzer if available
+        if 'overall_composite_score' in health:
+            self.overall_health_score = health['overall_composite_score']
+            return
+
         score = 0
         components = 0
         
