@@ -773,7 +773,6 @@ body, html {
     0 1px 0 rgba(255, 255, 255, 0.15) inset;
   position: relative;
   overflow: hidden;
-  transform-style: preserve-3d;
 }
 
 /* Animated gradient background */
@@ -814,7 +813,7 @@ body, html {
 }
 
 .stat-card:hover {
-  transform: translateY(-12px) scale(1.03) rotateX(3deg);
+  transform: translateY(-8px) scale(1.03);
   background: linear-gradient(145deg, 
     var(--glass-thick) 0%, 
     var(--glass-regular) 100%
@@ -968,7 +967,6 @@ body, html {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: var(--space-8);
-  perspective: 1000px;
 }
 
 .feature-card {
@@ -990,7 +988,6 @@ body, html {
     0 -1px 0 rgba(0, 0, 0, 0.5) inset;
   position: relative;
   overflow: hidden;
-  transform-style: preserve-3d;
 }
 
 /* Animated gradient border */
@@ -1048,7 +1045,7 @@ body, html {
 }
 
 .feature-card:hover {
-  transform: translateY(-12px) scale(1.02) rotateX(2deg);
+  transform: translateY(-8px) scale(1.02);
   background: linear-gradient(145deg, 
     var(--glass-regular) 0%, 
     var(--glass-thin) 100%
@@ -1972,18 +1969,20 @@ footer {
 
 /* Feature Viewer */
 .feature-viewer {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.98);
-  backdrop-filter: blur(var(--blur-xl));
-  z-index: 100;
   display: none;
   flex-direction: column;
-  animation: fade-in-up 0.3s var(--ease-out);
+  height: 100%;
+  background: var(--vision-bg-primary);
+  animation: fade-in 0.2s ease;
 }
 
 .feature-viewer.active {
   display: flex;
+}
+
+.content.has-viewer {
+  padding: 0;
+  overflow: hidden;
 }
 
 .feature-header {

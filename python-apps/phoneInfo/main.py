@@ -8,6 +8,10 @@ import time
 import colorama
 from colorama import Fore, Back, Style
 
+# Force UTF-8 stdout so box-drawing characters survive the Windows pipe
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+
 # Initialize colorama
 colorama.init(autoreset=True)
 
@@ -156,6 +160,27 @@ def save_to_csv(info, filename="phone_log.csv"):
         print(f"{Fore.GREEN}[+] Intel saved to {filename}{Style.RESET_ALL}")
 
 if __name__ == "__main__":
+    # When a phone number is passed as a command-line argument (from Electron),
+    # run a single silent lookup (no banner, no colors) and exit.
+    if len(sys.argv) > 1:
+        # Disable colorama so no ANSI escape codes pollute the output
+        colorama.deinit()
+
+        number = sys.argv[1].strip()
+        print(f"[*] Looking up: {number}")
+        sys.stdout.flush()
+
+        # Temporarily neutralise color functions so existing helpers print plain text
+        _noop = lambda *a, **kw: ''
+        Fore.CYAN = Fore.GREEN = Fore.RED = Fore.YELLOW = Fore.WHITE = ''
+        Style.RESET_ALL = ''
+        Back.RED = Back.GREEN = Back.YELLOW = ''
+
+        info = get_number_info(number)
+        if info:
+            save_to_csv(info)
+        sys.exit(0)
+
     print_banner()
     animate_text("Initializing phone reconnaissance system...")
     

@@ -99,3 +99,40 @@ cache/
 !python-apps/**/output/**
 !python-apps/**/models/**
 
+# Build and distribution artifacts
+dist/
+release/
+out/
+build/
+*.exe
+!CLEM.exe
+*.msi
+*.dmg
+*.deb
+*.rpm
+*.AppImage
+
+# Electron builder outputs
+.electron-builder.yaml
+electron-builder.yml
+
+# Backup and temporary files
+*.backup
+*.old
+*.bak
+*.tmp
+*~
+nul
+desktop.ini
+
+# Development scripts (not needed in production)
+setup_all_environments.bat
+installer.bat
+add_python_apps.ps1
+remove_submodules.ps1
+img.jpg
+
+# Reports and documentation artifacts
+report/
+.qodo/
+

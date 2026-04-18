@@ -1,17 +1,24 @@
 {
     "name": "clem",
     "version": "1.0.0",
-    "description": "Futuristic launcher for Python applications",
+    "description": "Comprehensive Learning and Execution Manager - Advanced Computer Vision & AI Platform",
     "main": "main.js",
     "scripts": {
         "start": "electron . --enable-logging=false",
         "start-dev": "electron .",
-        "create-exe": "nexe main.js -o CLEM.exe"
+        "build": "electron-builder build --win --x64",
+        "build:dir": "electron-builder --dir",
+        "dist": "npm run build"
     },
-    "author": "",
+    "author": {
+        "name": "CLEM Project",
+        "email": "support@clemproject.com"
+    },
     "license": "MIT",
     "devDependencies": {
-        "electron": "^24.0.0"
+        "@fortawesome/fontawesome-free": "^7.2.0",
+        "electron": "^24.0.0",
+        "electron-builder": "^24.0.0"
     },
     "dependencies": {
         "electron-store": "^8.1.0",
@@ -23,9 +30,55 @@
         "type": "git",
         "url": "git+https://github.com/nour23019870/C.L.E.M-demo.git"
     },
-    "keywords": [],
+    "keywords": [
+        "computer-vision",
+        "ai",
+        "face-recognition",
+        "gesture-control",
+        "python",
+        "electron"
+    ],
     "bugs": {
         "url": "https://github.com/nour23019870/C.L.E.M-demo/issues"
     },
-    "homepage": "https://github.com/nour23019870/C.L.E.M-demo#readme"
+    "homepage": "https://github.com/nour23019870/C.L.E.M-demo#readme",
+    "build": {
+        "appId": "com.clemproject.clem",
+        "productName": "CLEM",
+        "copyright": "Copyright © 2025 CLEM Project",
+        "win": {
+            "target": [
+                "dir"
+            ],
+            "icon": "assets/icons/logo.png"
+        },
+        "files": [
+            "**/*",
+            "!installer.bat",
+            "!CLEM.bat",
+            "!setup_all_environments.bat",
+            "!add_python_apps.ps1",
+            "!remove_submodules.ps1",
+            "!**/*.md",
+            "!README.md",
+            "!report/**",
+            "!.qodo/**",
+            "!**/.git/**",
+            "!**/__pycache__/**",
+            "!**/test_*.py",
+            "!**/*.backup",
+            "!**/*.old",
+            "!img.jpg",
+            "!desktop.ini",
+            "!nul"
+        ],
+        "extraFiles": [
+            "README.md",
+            "LICENSE.txt"
+        ],
+        "directories": {
+            "output": "dist",
+            "buildResources": "assets"
+        }
+    }
 }

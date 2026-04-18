@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   cancelDownload: (appId) => ipcRenderer.invoke('cancel-download', appId),
   startPythonApp: (appId, args) => ipcRenderer.invoke('start-python-app', appId, args),
   stopPythonApp: (appId) => ipcRenderer.invoke('stop-python-app', appId),
+  sendInput: (appId, input) => ipcRenderer.invoke('send-input', appId, input),
   
   // Window control
   closeApp: () => ipcRenderer.invoke('close-app'),
@@ -47,5 +48,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Remove event listeners
   removeAllListeners: (channel) => {
     ipcRenderer.removeAllListeners(channel);
-  }
+  },
+
+  // Health report file access
+  listHealthReports: () => ipcRenderer.invoke('list-health-reports'),
+  readHealthReport: (filePath) => ipcRenderer.invoke('read-health-report', filePath)
 });

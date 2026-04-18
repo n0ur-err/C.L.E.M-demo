@@ -1,0 +1,351 @@
+[
+  {
+    "timestamp": "20260418_155422",
+    "facial_analysis": {
+      "timestamp": "20260418_155417",
+      "face_id": 0,
+      "features": {
+        "bbox": [
+          194,
+          194,
+          180,
+          180
+        ],
+        "landmarks": [
+          [
+            191,
+            245
+          ],
+          [
+            192,
+            270
+          ],
+          [
+            195,
+            295
+          ],
+          [
+            200,
+            318
+          ],
+          [
+            208,
+            341
+          ],
+          [
+            221,
+            362
+          ],
+          [
+            235,
+            382
+          ],
+          [
+            254,
+            395
+          ],
+          [
+            280,
+            398
+          ],
+          [
+            306,
+            395
+          ],
+          [
+            326,
+            382
+          ],
+          [
+            340,
+            362
+          ],
+          [
+            352,
+            340
+          ],
+          [
+            359,
+            317
+          ],
+          [
+            363,
+            294
+          ],
+          [
+            366,
+            269
+          ],
+          [
+            366,
+            244
+          ],
+          [
+            205,
+            229
+          ],
+          [
+            212,
+            213
+          ],
+          [
+            228,
+            205
+          ],
+          [
+            247,
+            205
+          ],
+          [
+            265,
+            210
+          ],
+          [
+            297,
+            210
+          ],
+          [
+            315,
+            205
+          ],
+          [
+            333,
+            204
+          ],
+          [
+            349,
+            212
+          ],
+          [
+            355,
+            227
+          ],
+          [
+            281,
+            239
+          ],
+          [
+            281,
+            255
+          ],
+          [
+            282,
+            270
+          ],
+          [
+            282,
+            286
+          ],
+          [
+            264,
+            303
+          ],
+          [
+            272,
+            305
+          ],
+          [
+            282,
+            306
+          ],
+          [
+            291,
+            304
+          ],
+          [
+            299,
+            302
+          ],
+          [
+            225,
+            248
+          ],
+          [
+            235,
+            240
+          ],
+          [
+            249,
+            239
+          ],
+          [
+            260,
+            247
+          ],
+          [
+            248,
+            251
+          ],
+          [
+            235,
+            252
+          ],
+          [
+            302,
+            247
+          ],
+          [
+            313,
+            238
+          ],
+          [
+            327,
+            238
+          ],
+          [
+            336,
+            246
+          ],
+          [
+            327,
+            250
+          ],
+          [
+            314,
+            249
+          ],
+          [
+            250,
+            339
+          ],
+          [
+            259,
+            331
+          ],
+          [
+            271,
+            327
+          ],
+          [
+            281,
+            330
+          ],
+          [
+            291,
+            327
+          ],
+          [
+            303,
+            330
+          ],
+          [
+            314,
+            338
+          ],
+          [
+            304,
+            350
+          ],
+          [
+            292,
+            355
+          ],
+          [
+            281,
+            356
+          ],
+          [
+            271,
+            356
+          ],
+          [
+            259,
+            351
+          ],
+          [
+            256,
+            339
+          ],
+          [
+            271,
+            337
+          ],
+          [
+            281,
+            338
+          ],
+          [
+            291,
+            336
+          ],
+          [
+            308,
+            338
+          ],
+          [
+            291,
+            339
+          ],
+          [
+            281,
+            340
+          ],
+          [
+            271,
+            339
+          ]
+        ],
+        "metrics": {
+          "left_eye_width": 35.0142822265625,
+          "right_eye_width": 34.01470184326172,
+          "eye_width_ratio": 1.0293867588043213,
+          "face_width": 175.0028533935547,
+          "face_height": 159.00314331054688,
+          "face_width_height_ratio": 1.1006251573562622
+        },
+        "symmetry": {
+          "eyes_level": 0.8742138364779874,
+          "overall_symmetry": 0.9656301404023967
+        },
+        "skin": {
+          "skin_tone": {
+            "hue": 18.246666666666666,
+            "saturation": 98.24333333333334,
+            "value": 187.72555555555556
+          },
+          "texture": 81.29509615912208
+        },
+        "facial_ratios": {
+          "top_third_ratio": 0.363966926630312,
+          "top_golden_ratio_diff": 1.254033073369688,
+          "middle_third_ratio": 1.3380906122107301,
+          "middle_golden_ratio_diff": 0.27990938778927,
+          "eye_spacing_ratio": 1.2168801176405333
+        }
+      },
+      "health_analysis": {
+        "facial_symmetry": 0.9656301404023967,
+        "symmetry_evaluation": "High symmetry",
+        "eyes_level_symmetry": 0.8742138364779874,
+        "skin_tone_note": "Normal skin tone variation detected",
+        "skin_texture": 81.29509615912208,
+        "texture_note": "Significant skin texture variation detected - consider hydration assessment",
+        "facial_fullness": 1.0,
+        "fullness_evaluation": "High facial fullness - within normal variation",
+        "golden_ratio_harmony": 0,
+        "estimated_stress_level": {
+          "value": 12.4,
+          "unit": "proxy score",
+          "note": "Estimated from facial tension patterns, not actual lab value"
+        },
+        "sleep_quality_estimate": {
+          "value": 6.0,
+          "unit": "quality score",
+          "note": "Estimated from eye appearance and facial relaxation indicators"
+        },
+        "analysis_timestamp": "2026-04-18 15:54:17"
+      },
+      "health_score": 7.6,
+      "health_status": "Good",
+      "recommendations": [
+        "Consider hydration and skincare routine"
+      ]
+    },
+    "body_analysis": null,
+    "overall_health_score": 7.6,
+    "overall_health_status": "Good",
+    "recommendations": [
+      "Consider hydration and skincare routine"
+    ]
+  }
+]

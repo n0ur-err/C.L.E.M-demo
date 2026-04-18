@@ -1,0 +1,1185 @@
+
+Initializing Air Writing...
+Air Writing has no initialization script, marking as ready
+Initializing ASL Translator...
+ASL Translator has no initialization script, marking as ready
+Initializing Facial Analysis...
+Facial Analysis has no initialization script, marking as ready
+Initializing health report...
+health report has no initialization script, marking as ready
+Initializing Emotion Recognition...
+Emotion Recognition has no initialization script, marking as ready
+Initializing Face Recognition...
+Face Recognition has no initialization script, marking as ready
+Initializing Face Scanner...
+Face Scanner has no initialization script, marking as ready
+Initializing Item Detection...
+Item Detection has no initialization script, marking as ready
+Initializing Media Control...
+Media Control has no initialization script, marking as ready
+Initializing Music Downloader...
+Music Downloader has no initialization script, marking as ready
+Initializing Phone Info...
+Phone Info has no initialization script, marking as ready
+Initializing YouTube Downloader...
+YouTube Downloader has no initialization script, marking as ready
+[13076:0417/152328.342:INFO:CONSOLE(0)] "Refused to apply style from 'https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&display=swap' because its MIME type ('text/html') is not a supported stylesheet MIME type, and strict MIME checking is enabled.", source: file:///D:/projects/C.L.E.M-demo/index.html (0)
+[13076:0417/152329.484:INFO:CONSOLE(1629)] "=== TESTING DARK MODE TOGGLE ===", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1629)
+[13076:0417/152329.484:INFO:CONSOLE(1631)] "Dark mode toggle element: [object HTMLInputElement]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1631)
+[13076:0417/152329.484:INFO:CONSOLE(1632)] "Element exists: true", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1632)
+[13076:0417/152329.484:INFO:CONSOLE(1635)] "Initial checked state: true", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1635)
+[13076:0417/152329.484:INFO:CONSOLE(1655)] "Γ£ô Dark mode event listener attached successfully", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1655)
+[13076:0417/152329.486:INFO:CONSOLE(1658)] "Testing programmatic click...", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1658)
+[13076:0417/152330.489:INFO:CONSOLE(1639)] "!!!!! DARK MODE CHANGED !!!!!", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1639)
+[13076:0417/152330.489:INFO:CONSOLE(1640)] "Event: [object Event]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1640)
+[13076:0417/152330.489:INFO:CONSOLE(1641)] "Target: [object HTMLInputElement]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1641)
+[13076:0417/152330.489:INFO:CONSOLE(1642)] "Checked: false", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1642)
+[13076:0417/152330.490:INFO:CONSOLE(1651)] "Dark mode is now OFF", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1651)
+[13076:0417/152330.490:INFO:CONSOLE(1661)] "Programmatic click executed, new state: false", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1661)
+Launching Face Recognition...
+Running Face Recognition with options: {
+  mode: 'text',
+  pythonPath: 'D:\\projects\\C.L.E.M-demo\\env\\Scripts\\python.exe',
+  pythonOptions: [ '-u' ],
+  scriptPath: 'D:\\projects\\C.L.E.M-demo\\python-apps\\face_reco',
+  args: []
+}
+[Face Recognition] Checking for required model files...
+[Face Recognition] Launching L1GHT REC0N Advanced Face Recognition System...
+[Face Recognition] L1GHT REC0N - Live Camera Mode
+[Face Recognition] ----------------------------------------------
+[Face Recognition] This program demonstrates the L1GHT REC0N profile interface with a live camera feed.
+[Face Recognition] Profile data is loaded from individual profile.json files in each person's dataset folder.
+[Face Recognition] Controls:
+[Face Recognition]   F: Toggle fullscreen mode
+[Face Recognition]   ESC or Q: Quit
+[Face Recognition] Loading face detection model...
+[Face Recognition] Loading face recognition model...
+[Face Recognition] Loading faces from dataset: D:\projects\C.L.E.M-demo\python-apps\face_reco\dataset
+[Face Recognition] Loading images for boyka...
+[Face Recognition] Loading images for nour...
+[Face Recognition] Loading images for ryan reynolds...
+[Face Recognition] Loaded 20 faces for 2 unique people
+[Face Recognition] People in database: nour, boyka
+[Face Recognition] Initializing camera...
+[Face Recognition] Trying camera 0 with DirectShow backend...
+[Face Recognition] Successfully initialized camera 0 with DirectShow
+[Face Recognition] Program terminated
+[Face Recognition] Process closed with code undefined
+Launching Emotion Recognition...
+Running Emotion Recognition with options: {
+  mode: 'text',
+  pythonPath: 'python-apps/emotions/env/Scripts/python.exe',
+  pythonOptions: [ '-u' ],
+  scriptPath: 'D:\\projects\\C.L.E.M-demo\\python-apps\\emotions',
+  args: []
+}
+[Emotion Recognition] Error: 2026-04-17 15:24:52.474362: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-04-17 15:25:03.578003: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Traceback (most recent call last):
+[Emotion Recognition] Error:   File "D:\projects\C.L.E.M-demo\python-apps\emotions\main.py", line 19, in <module>
+[Emotion Recognition] Error:     import tkinter as tk
+[Emotion Recognition] Error: ModuleNotFoundError: No module named 'tkinter'
+[Emotion Recognition] Process closed with code undefined
+Launching Item Detection...
+Running Item Detection with options: {
+  mode: 'text',
+  pythonPath: 'D:\\projects\\C.L.E.M-demo\\env\\Scripts\\python.exe',
+  pythonOptions: [ '-u' ],
+  scriptPath: 'D:\\projects\\C.L.E.M-demo\\python-apps\\item-detection',
+  args: []
+}
+[Item Detection] Initializing YOLOv5 live detection system...
+[Item Detection] Loading model: yolov5s.pt
+[Item Detection] Error: Using cache found in C:\Users\anesc/.cache\torch\hub\ultralytics_yolov5_master
+[Item Detection] Defaulting to user installation because normal site-packages is not writeable
+[Item Detection] Requirement already satisfied: ultralytics in c:\users\anesc\appdata\roaming\python\python313\site-packages (8.3.217)
+[Item Detection] Collecting ultralytics
+[Item Detection]   Downloading ultralytics-8.4.38-py3-none-any.whl.metadata (39 kB)
+[Item Detection] Requirement already satisfied: numpy>=1.23.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from ultralytics) (2.1.1)
+[Item Detection] Requirement already satisfied: matplotlib>=3.3.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from ultralytics) (3.10.1)
+[Item Detection] Requirement already satisfied: opencv-python>=4.6.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from ultralytics) (4.11.0.86)
+[Item Detection] Requirement already satisfied: pillow>=7.1.2 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from ultralytics) (11.1.0)
+[Item Detection] Requirement already satisfied: pyyaml>=5.3.1 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from ultralytics) (6.0.2)
+[Item Detection] Requirement already satisfied: requests>=2.23.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from ultralytics) (2.32.3)
+[Item Detection] Requirement already satisfied: scipy>=1.4.1 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from ultralytics) (1.15.2)
+[Item Detection] Requirement already satisfied: torch>=1.8.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from ultralytics) (2.7.0+cu118)
+[Item Detection] Requirement already satisfied: torchvision>=0.9.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from ultralytics) (0.22.0)
+[Item Detection] Requirement already satisfied: psutil>=5.8.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from ultralytics) (7.0.0)
+[Item Detection] Requirement already satisfied: polars>=0.20.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from ultralytics) (1.34.0)
+[Item Detection] Collecting ultralytics-thop>=2.0.18 (from ultralytics)
+[Item Detection]   Downloading ultralytics_thop-2.0.18-py3-none-any.whl.metadata (14 kB)
+[Item Detection] Requirement already satisfied: contourpy>=1.0.1 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from matplotlib>=3.3.0->ultralytics) (1.3.2)
+[Item Detection] Requirement already satisfied: cycler>=0.10 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from matplotlib>=3.3.0->ultralytics) (0.12.1)
+[Item Detection] Requirement already satisfied: fonttools>=4.22.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from matplotlib>=3.3.0->ultralytics) (4.57.0)
+[Item Detection] Requirement already satisfied: kiwisolver>=1.3.1 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from matplotlib>=3.3.0->ultralytics) (1.4.8)
+[Item Detection] Requirement already satisfied: packaging>=20.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from matplotlib>=3.3.0->ultralytics) (25.0)
+[Item Detection] Requirement already satisfied: pyparsing>=2.3.1 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from matplotlib>=3.3.0->ultralytics) (3.2.3)
+[Item Detection] Requirement already satisfied: python-dateutil>=2.7 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from matplotlib>=3.3.0->ultralytics) (2.9.0.post0)
+[Item Detection] Requirement already satisfied: polars-runtime-32==1.34.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from polars>=0.20.0->ultralytics) (1.34.0)
+[Item Detection] Requirement already satisfied: charset-normalizer<4,>=2 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from requests>=2.23.0->ultralytics) (3.4.1)
+[Item Detection] Requirement already satisfied: idna<4,>=2.5 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from requests>=2.23.0->ultralytics) (3.2)
+[Item Detection] Requirement already satisfied: urllib3<3,>=1.21.1 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from requests>=2.23.0->ultralytics) (2.4.0)
+[Item Detection] Requirement already satisfied: certifi>=2017.4.17 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from requests>=2.23.0->ultralytics) (2025.1.31)
+[Item Detection] Requirement already satisfied: filelock in c:\users\anesc\appdata\roaming\python\python313\site-packages (from torch>=1.8.0->ultralytics) (3.18.0)
+[Item Detection] Requirement already satisfied: typing-extensions>=4.10.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from torch>=1.8.0->ultralytics) (4.13.2)
+[Item Detection] Requirement already satisfied: sympy>=1.13.3 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from torch>=1.8.0->ultralytics) (1.13.3)
+[Item Detection] Requirement already satisfied: networkx in c:\users\anesc\appdata\roaming\python\python313\site-packages (from torch>=1.8.0->ultralytics) (3.4.2)
+[Item Detection] Requirement already satisfied: jinja2 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from torch>=1.8.0->ultralytics) (3.1.6)
+[Item Detection] Requirement already satisfied: fsspec in c:\users\anesc\appdata\roaming\python\python313\site-packages (from torch>=1.8.0->ultralytics) (2025.3.2)
+[Item Detection] Requirement already satisfied: setuptools in c:\users\anesc\appdata\roaming\python\python313\site-packages (from torch>=1.8.0->ultralytics) (78.1.0)
+[Item Detection] Requirement already satisfied: six>=1.5 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from python-dateutil>=2.7->matplotlib>=3.3.0->ultralytics) (1.16.0)
+[Item Detection] Requirement already satisfied: mpmath<1.4,>=1.1.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from sympy>=1.13.3->torch>=1.8.0->ultralytics) (1.3.0)
+[Item Detection] Requirement already satisfied: MarkupSafe>=2.0 in c:\users\anesc\appdata\roaming\python\python313\site-packages (from jinja2->torch>=1.8.0->ultralytics) (3.0.2)
+[Item Detection] Downloading ultralytics-8.4.38-py3-none-any.whl (1.2 MB)
+[Item Detection]    ---------------------------------------- 1.2/1.2 MB 12.9 MB/s eta 0:00:00
+[Item Detection] Downloading ultralytics_thop-2.0.18-py3-none-any.whl (28 kB)
+[Item Detection] Installing collected packages: ultralytics-thop, ultralytics
+[Item Detection]   Attempting uninstall: ultralytics-thop
+[Item Detection]     Found existing installation: ultralytics-thop 2.0.14
+[Item Detection]     Uninstalling ultralytics-thop-2.0.14:
+[Item Detection]       Successfully uninstalled ultralytics-thop-2.0.14
+[Item Detection]   Attempting uninstall: ultralytics
+[Item Detection]     Found existing installation: ultralytics 8.3.217
+[Item Detection]     Uninstalling ultralytics-8.3.217:
+[Item Detection]       Successfully uninstalled ultralytics-8.3.217
+[Item Detection] Error:   WARNING: The scripts ultralytics.exe and yolo.exe are installed in 'C:\Users\anesc\AppData\Roaming\Python\Python313\Scripts' which is not on PATH.
+[Item Detection] Error:   Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+[Item Detection] Successfully installed ultralytics-8.4.38 ultralytics-thop-2.0.18
+[Item Detection] Error: [notice] A new release of pip is available: 24.3.1 -> 26.0.1
+[Item Detection] Error: [notice] To update, run: python.exe -m pip install --upgrade pip
+[Item Detection] Error: Traceback (most recent call last):
+[Item Detection] Error:   File "C:\Users\anesc/.cache\torch\hub\ultralytics_yolov5_master\models\common.py", line 27, in <module>
+[Item Detection] Error:     import ultralytics
+[Item Detection] Error: ModuleNotFoundError: No module named 'ultralytics'
+[Item Detection] Error: During handling of the above exception, another exception occurred:
+[Item Detection] Error: Traceback (most recent call last):
+[Item Detection] Error:   File "D:\projects\C.L.E.M-demo\python-apps\item-detection\main.py", line 338, in <module>
+[Item Detection] Error:     main()
+[Item Detection] Error:   File "D:\projects\C.L.E.M-demo\python-apps\item-detection\main.py", line 314, in main
+[Item Detection] Error:     model, device = load_model(args.weights, args.device)
+[Item Detection] Error:   File "D:\projects\C.L.E.M-demo\python-apps\item-detection\main.py", line 18, in load_model
+[Item Detection] Error:     model = torch.hub.load('ultralytics/yolov5', 'custom', path=weights)
+[Item Detection] Error:   File "D:\projects\C.L.E.M-demo\env\lib\site-packages\torch\hub.py", line 647, in load
+[Item Detection] Error:     model = _load_local(repo_or_dir, model, *args, **kwargs)
+[Item Detection] Error:   File "D:\projects\C.L.E.M-demo\env\lib\site-packages\torch\hub.py", line 680, in _load_local
+[Item Detection] Error:     model = entry(*args, **kwargs)
+[Item Detection] Error:   File "C:\Users\anesc/.cache\torch\hub\ultralytics_yolov5_master\hubconf.py", line 135, in custom
+[Item Detection] Error:     return _create(path, autoshape=autoshape, verbose=_verbose, device=device)
+[Item Detection] Error:   File "C:\Users\anesc/.cache\torch\hub\ultralytics_yolov5_master\hubconf.py", line 54, in _create
+[Item Detection] Error:     from models.common import AutoShape, DetectMultiBackend
+[Item Detection] Error:   File "C:\Users\anesc/.cache\torch\hub\ultralytics_yolov5_master\models\common.py", line 34, in <module>
+[Item Detection] Error:     import ultralytics
+[Item Detection] Error: ModuleNotFoundError: No module named 'ultralytics'
+[Item Detection] Process closed with code undefined
+Launching ASL Translator...
+Running ASL Translator with options: {
+  mode: 'text',
+  pythonPath: 'python-apps/signLang/env/Scripts/python.exe',
+  pythonOptions: [ '-u' ],
+  scriptPath: 'D:\\projects\\C.L.E.M-demo\\python-apps\\signLang',
+  args: []
+}
+[ASL Translator] Error: 2026-04-17 15:29:04.319099: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-04-17 15:29:15.281123: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-04-17 15:30:04.667144: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+D:\projects\C.L.E.M-demo\python-apps\signLang\env\lib\site-packages\keras\src\optimizers\base_optimizer.py:86: UserWarning: Argument `decay` is no longer supported and will be ignored.
+[ASL Translator] Error:   warnings.warn(
+[ASL Translator] Error: WARNING:absl:Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+[ASL Translator] Error: WARNING:absl:Error in loading the saved optimizer state. As a result, your model is starting with a freshly initialized optimizer.
+[ASL Translator] Error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+W0000 00:00:1776436206.403022    3092 inference_feedback_manager.cc:114] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1776436206.460326    4592 inference_feedback_manager.cc:114] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+D:\projects\C.L.E.M-demo\python-apps\signLang\env\lib\site-packages\google\protobuf\symbol_database.py:55: UserWarning: SymbolDatabase.GetPrototype() is deprecated. Please use message_factory.GetMessageClass() instead. SymbolDatabase.GetPrototype() will be removed soon.
+[ASL Translator] Error:   warnings.warn('SymbolDatabase.GetPrototype() is deprecated. Please '
+[ASL Translator] Process closed with code undefined
+Launching Air Writing...
+Running Air Writing with options: {
+  mode: 'text',
+  pythonPath: 'python-apps/air-writing/env/Scripts/python.exe',
+  pythonOptions: [ '-u' ],
+  scriptPath: 'D:\\projects\\C.L.E.M-demo\\python-apps\\air-writing',
+  args: []
+}
+[Air Writing] Error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+W0000 00:00:1776436283.161352   24684 inference_feedback_manager.cc:114] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1776436283.363664   19044 inference_feedback_manager.cc:114] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+D:\projects\C.L.E.M-demo\python-apps\air-writing\env\lib\site-packages\google\protobuf\symbol_database.py:55: UserWarning: SymbolDatabase.GetPrototype() is deprecated. Please use message_factory.GetMessageClass() instead. SymbolDatabase.GetPrototype() will be removed soon.
+  warnings.warn('SymbolDatabase.GetPrototype() is deprecated. Please '
+
+[Air Writing] Searching for available cameras...
+Trying camera index 0 with default backend...
+SUCCESS! Camera found at index 0 using default backend
+Camera resolution: 1280x720
+Camera initialized successfully!
+Closing Air Writing application...
+Application closed successfully
+
+[Air Writing] Process closed with code undefined
+Launching Media Control...
+Running Media Control with options: {
+  mode: 'text',
+  pythonPath: 'python-apps/media_control/env/Scripts/python.exe',
+  pythonOptions: [ '-u' ],
+  scriptPath: 'D:\\projects\\C.L.E.M-demo\\python-apps\\media_control',
+  args: []
+}
+[Media Control] Error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+W0000 00:00:1776436349.018018   22328 inference_feedback_manager.cc:114] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1776436349.177071   27192 inference_feedback_manager.cc:114] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+D:\projects\C.L.E.M-demo\python-apps\media_control\env\lib\site-packages\google\protobuf\symbol_database.py:55: UserWarning: SymbolDatabase.GetPrototype() is deprecated. Please use message_factory.GetMessageClass() instead. SymbolDatabase.GetPrototype() will be removed soon.
+  warnings.warn('SymbolDatabase.GetPrototype() is deprecated. Please '
+
+[Media Control] NumPy version: 2.2.6
+Protobuf builder module found!
+All modules imported successfully!
+Attempting to enable GPU acceleration...
+OpenCL acceleration enabled
+Searching for available cameras...
+Trying camera index 0...
+SUCCESS! Camera found at index 0
+Camera info - Backend: MSMF, Resolution: 640x480
+MSMF backend detected, using DirectShow instead for better compatibility...
+Attempting to set resolution to 1280x720...
+Using resolution: 1280x720
+
+==================================================
+Starting main loop...
+Camera window should appear now.
+Press 'q' to quit
+==================================================
+
+Reading frame 1...
+[OK] Successfully read first frame! Shape: (720, 1280, 3)
+[OK] Opening camera window...
+[OK] Camera window displayed! Look for 'Hand Gesture Media Control' window.
+Active gestures: ['stop']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['lock', 'stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control']
+Active gestures: ['next_track']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['volume_control']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['next_track']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+
+[Media Control] Process closed with code undefined
+Launching Media Control...
+Running Media Control with options: {
+  mode: 'text',
+  pythonPath: 'python-apps/media_control/env/Scripts/python.exe',
+  pythonOptions: [ '-u' ],
+  scriptPath: 'D:\\projects\\C.L.E.M-demo\\python-apps\\media_control',
+  args: []
+}
+[Media Control] Error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+W0000 00:00:1776436402.317304    3712 inference_feedback_manager.cc:114] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1776436402.335955   18844 inference_feedback_manager.cc:114] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+D:\projects\C.L.E.M-demo\python-apps\media_control\env\lib\site-packages\google\protobuf\symbol_database.py:55: UserWarning: SymbolDatabase.GetPrototype() is deprecated. Please use message_factory.GetMessageClass() instead. SymbolDatabase.GetPrototype() will be removed soon.
+  warnings.warn('SymbolDatabase.GetPrototype() is deprecated. Please '
+
+[Media Control] NumPy version: 2.2.6
+Protobuf builder module found!
+All modules imported successfully!
+Attempting to enable GPU acceleration...
+OpenCL acceleration enabled
+Searching for available cameras...
+Trying camera index 0...
+SUCCESS! Camera found at index 0
+Camera info - Backend: MSMF, Resolution: 640x480
+MSMF backend detected, using DirectShow instead for better compatibility...
+Attempting to set resolution to 1280x720...
+Using resolution: 1280x720
+
+==================================================
+Starting main loop...
+Camera window should appear now.
+Press 'q' to quit
+==================================================
+
+Reading frame 1...
+[OK] Successfully read first frame! Shape: (720, 1280, 3)
+[OK] Opening camera window...
+[OK] Camera window displayed! Look for 'Hand Gesture Media Control' window.
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['lock']
+Active gestures: ['stop']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['lock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['unlock']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['volume_control']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['mode_switch']
+Active gestures: ['stop']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Active gestures: ['volume_control', 'play']
+Ignoring key press (debounce): 179
+Active gestures: ['volume_control', 'play']
+Ignoring key press (debounce): 179
+Active gestures: ['volume_control', 'play']
+Ignoring key press (debounce): 179
+Active gestures: ['volume_control', 'play']
+Ignoring key press (debounce): 179
+Active gestures: ['volume_control', 'play']
+Ignoring key press (debounce): 179
+Active gestures: ['volume_control', 'play']
+Ignoring key press (debounce): 179
+Active gestures: ['volume_control', 'play']
+Ignoring key press (debounce): 179
+Active gestures: ['volume_control', 'play']
+Ignoring key press (debounce): 179
+Active gestures: ['volume_control']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Active gestures: ['stop']
+Ignoring key press (debounce): 179
+Active gestures: ['stop']
+Ignoring key press (debounce): 179
+Active gestures: ['stop']
+Ignoring key press (debounce): 179
+Active gestures: ['stop']
+Ignoring key press (debounce): 179
+Active gestures: ['stop']
+Ignoring key press (debounce): 179
+Active gestures: ['stop']
+Ignoring key press (debounce): 179
+
+[Media Control] Process closed with code undefined
+Launching YouTube Downloader...
+Running YouTube Downloader with options: {
+  mode: 'text',
+  pythonPath: 'D:\\projects\\C.L.E.M-demo\\env\\Scripts\\python.exe',
+  pythonOptions: [ '-u' ],
+  scriptPath: 'D:\\projects\\C.L.E.M-demo\\python-apps\\youtube_download',
+  args: []
+}
+[YouTube Downloader] ========================================================================
+[YouTube Downloader]                     LIGHT VIDEO DOWNLOADER
+[YouTube Downloader]                        YouTube Video & Audio
+[YouTube Downloader] ========================================================================
+[YouTube Downloader] ≡ƒôÄ Paste YouTube URL here (or type 'exit'):
+[YouTube Downloader] Process closed with code undefined
+Launching Music Downloader...
+Running Music Downloader with options: {
+  mode: 'text',
+  pythonPath: 'D:\\projects\\C.L.E.M-demo\\env\\Scripts\\python.exe',
+  pythonOptions: [ '-u' ],
+  scriptPath: 'D:\\projects\\C.L.E.M-demo\\python-apps\\music_download',
+  args: []
+}
+[Music Downloader] ========================================================================
+[Music Downloader]                     LIGHT MUSIC DOWNLOADER
+[Music Downloader]                        Audio from YouTube
+[Music Downloader] ========================================================================
+[Music Downloader] ≡ƒôÄ Paste YouTube URL here (or type 'exit'):
+[Music Downloader] Process closed with code undefined
+Launching Phone Info...
+Running Phone Info with options: {
+  mode: 'text',
+  pythonPath: 'D:\\projects\\C.L.E.M-demo\\env\\Scripts\\python.exe',
+  pythonOptions: [ '-u' ],
+  scriptPath: 'D:\\projects\\C.L.E.M-demo\\python-apps\\phoneInfo',
+  args: []
+}
+[Phone Info] Error: Traceback (most recent call last):
+[Phone Info] Error:   File "D:\projects\C.L.E.M-demo\python-apps\phoneInfo\main.py", line 159, in <module>
+[Phone Info] Error:     print_banner()
+[Phone Info] Error:   File "D:\projects\C.L.E.M-demo\python-apps\phoneInfo\main.py", line 30, in print_banner
+[Phone Info] Error:     print(banner)
+[Phone Info] Error:   File "D:\projects\C.L.E.M-demo\env\lib\site-packages\colorama\ansitowin32.py", line 47, in write
+[Phone Info] Error:     self.__convertor.write(text)
+[Phone Info] Error:   File "D:\projects\C.L.E.M-demo\env\lib\site-packages\colorama\ansitowin32.py", line 177, in write
+[Phone Info] Error:     self.write_and_convert(text)
+[Phone Info] Error:   File "D:\projects\C.L.E.M-demo\env\lib\site-packages\colorama\ansitowin32.py", line 202, in write_and_convert
+[Phone Info] Error:     self.write_plain_text(text, cursor, start)
+[Phone Info] Error:   File "D:\projects\C.L.E.M-demo\env\lib\site-packages\colorama\ansitowin32.py", line 210, in write_plain_text
+[Phone Info] Error:     self.wrapped.write(text[start:end])
+[Phone Info] Error:   File "encodings\cp1252.py", line 19, in encode
+[Phone Info] Error: UnicodeEncodeError: 'charmap' codec can't encode characters in position 2-8: character maps to <undefined>
+[Phone Info]
+
+[Phone Info] Process closed with code undefined
+[13076:0417/153607.356:INFO:CONSOLE(185)] "Switching to settings section - ensuring listeners are attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (185)
+[13076:0417/153607.631:INFO:CONSOLE(271)] "=== Setting up settings listeners ===", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (271)
+[13076:0417/153607.631:INFO:CONSOLE(221)] "Loaded settings: [object Object]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (221)
+[13076:0417/153607.631:INFO:CONSOLE(241)] "Γ£ô Dark mode applied", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (241)
+[13076:0417/153607.631:INFO:CONSOLE(266)] "Notification status updated: enabled", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (266)
+[13076:0417/153607.631:INFO:CONSOLE(290)] "darkModeToggle element: [object HTMLInputElement]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (290)
+[13076:0417/153607.631:INFO:CONSOLE(241)] "Γ£ô Dark mode applied", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (241)
+[13076:0417/153607.631:INFO:CONSOLE(305)] "Γ£ô Dark mode toggle listener attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (305)
+[13076:0417/153607.631:INFO:CONSOLE(327)] "Γ£ô Notifications toggle listener attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (327)
+[13076:0417/153607.631:INFO:CONSOLE(337)] "Auto-start toggle attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (337)
+[13076:0417/153607.632:INFO:CONSOLE(348)] "Camera select attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (348)
+[13076:0417/153607.632:INFO:CONSOLE(358)] "Resolution select attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (358)
+[13076:0417/153607.632:INFO:CONSOLE(368)] "FPS select attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (368)
+[13076:0417/153607.632:INFO:CONSOLE(379)] "Model precision select attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (379)
+[13076:0417/153607.632:INFO:CONSOLE(389)] "GPU acceleration toggle attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (389)
+[13076:0417/153607.632:INFO:CONSOLE(399)] "Confidence threshold select attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (399)
+[13076:0417/153607.632:INFO:CONSOLE(410)] "Resource usage select attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (410)
+[13076:0417/153607.632:INFO:CONSOLE(420)] "Caching toggle attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (420)
+[13076:0417/153607.632:INFO:CONSOLE(431)] "Save faces toggle attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (431)
+[13076:0417/153607.632:INFO:CONSOLE(441)] "Save reports toggle attached", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (441)
+[13076:0417/153607.632:INFO:CONSOLE(446)] "Settings listeners setup complete", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (446)
+[13076:0417/153609.156:INFO:CONSOLE(1639)] "!!!!! DARK MODE CHANGED !!!!!", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1639)
+[13076:0417/153609.156:INFO:CONSOLE(1640)] "Event: [object Event]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1640)
+[13076:0417/153609.156:INFO:CONSOLE(1641)] "Target: [object HTMLInputElement]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1641)
+[13076:0417/153609.156:INFO:CONSOLE(1642)] "Checked: false", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1642)
+[13076:0417/153609.157:INFO:CONSOLE(1651)] "Dark mode is now OFF", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1651)
+[13076:0417/153609.157:INFO:CONSOLE(298)] "!!! Dark mode toggled: false", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (298)
+[13076:0417/153609.157:INFO:CONSOLE(232)] "Settings saved: [object Object]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (232)
+[13076:0417/153609.157:INFO:CONSOLE(245)] "Γ£ô Light mode applied", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (245)
+[13076:0417/153609.823:INFO:CONSOLE(1639)] "!!!!! DARK MODE CHANGED !!!!!", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1639)
+[13076:0417/153609.823:INFO:CONSOLE(1640)] "Event: [object Event]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1640)
+[13076:0417/153609.823:INFO:CONSOLE(1641)] "Target: [object HTMLInputElement]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1641)
+[13076:0417/153609.823:INFO:CONSOLE(1642)] "Checked: true", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1642)
+[13076:0417/153609.824:INFO:CONSOLE(1649)] "Dark mode is now ON", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1649)
+[13076:0417/153609.824:INFO:CONSOLE(298)] "!!! Dark mode toggled: true", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (298)
+[13076:0417/153609.824:INFO:CONSOLE(232)] "Settings saved: [object Object]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (232)
+[13076:0417/153609.824:INFO:CONSOLE(241)] "Γ£ô Dark mode applied", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (241)
+[13076:0417/153610.450:INFO:CONSOLE(317)] "Notifications toggled: false", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (317)
+[13076:0417/153610.451:INFO:CONSOLE(232)] "Settings saved: [object Object]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (232)
+[13076:0417/153610.451:INFO:CONSOLE(266)] "Notification status updated: disabled", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (266)
+[13076:0417/153611.214:INFO:CONSOLE(317)] "Notifications toggled: true", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (317)
+[13076:0417/153611.214:INFO:CONSOLE(232)] "Settings saved: [object Object]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (232)
+[13076:0417/153611.214:INFO:CONSOLE(266)] "Notification status updated: enabled", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (266)
+[13076:0417/153612.454:INFO:CONSOLE(317)] "Notifications toggled: false", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (317)
+[13076:0417/153612.454:INFO:CONSOLE(232)] "Settings saved: [object Object]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (232)
+[13076:0417/153612.454:INFO:CONSOLE(266)] "Notification status updated: disabled", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (266)
+[13076:0417/153622.858:INFO:CONSOLE(386)] "GPU acceleration toggled: false", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (386)
+[13076:0417/153622.858:INFO:CONSOLE(1191)] "Toast notification suppressed (notifications disabled): AI Models GPU acceleration disabled", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1191)
+[13076:0417/153623.196:INFO:CONSOLE(386)] "GPU acceleration toggled: true", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (386)
+[13076:0417/153623.196:INFO:CONSOLE(1191)] "Toast notification suppressed (notifications disabled): AI Models GPU acceleration enabled", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (1191)
+[13076:0417/153625.409:INFO:CONSOLE(317)] "Notifications toggled: true", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (317)
+[13076:0417/153625.409:INFO:CONSOLE(232)] "Settings saved: [object Object]", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (232)
+[13076:0417/153625.409:INFO:CONSOLE(266)] "Notification status updated: enabled", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (266)
+[13076:0417/153626.107:INFO:CONSOLE(386)] "GPU acceleration toggled: false", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (386)
+[13076:0417/153626.647:INFO:CONSOLE(386)] "GPU acceleration toggled: true", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (386)
+[13076:0417/153631.446:INFO:CONSOLE(334)] "Auto-start toggled: true", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (334)
+[13076:0417/153632.925:INFO:CONSOLE(334)] "Auto-start toggled: false", source: file:///D:/projects/C.L.E.M-demo/scripts/renderer.js (334)

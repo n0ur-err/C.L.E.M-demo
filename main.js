@@ -318,10 +318,12 @@ function launchApp(appId) {
   // Regular app launch with PythonShell for embedded execution
   const options = {
     mode: 'text',
+    encoding: 'utf8',
     pythonPath: pythonPath,
     pythonOptions: ['-u'], // Unbuffered output
     scriptPath: mainScriptDir,
-    args: app.launchArgs || []
+    args: app.launchArgs || [],
+    env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
   };
   
   try {
@@ -566,19 +568,37 @@ function startDownloadProcess(appId, url, quality = 'best') {
 // Generic Python app launcher
 function startPythonApp(appId, args = []) {
   try {
-    const scriptPath = path.join(__dirname, 'python-apps', appId.replace('-', '_'));
-    
+    // Look up the app config to get the correct script path and python path
+    const appCfg = appsConfig.apps.find(a => a.id === appId);
+    const scriptDir = appCfg
+      ? path.join(__dirname, appCfg.scriptPath)
+      : path.join(__dirname, 'python-apps', appId.replace(/-/g, '_'));
+
+    let pythonPath;
+    if (appCfg && appCfg.pythonPath) {
+      pythonPath = appCfg.pythonPath.startsWith('env/')
+        ? path.join(__dirname, appCfg.pythonPath)
+        : appCfg.pythonPath;
+    } else {
+      pythonPath = path.join(__dirname, 'env', 'Scripts', 'python.exe');
+    }
+    if (!fs.existsSync(pythonPath)) pythonPath = 'python';
+
+    const mainScript = (appCfg && appCfg.mainScript) ? appCfg.mainScript : 'main.py';
+
     const options = {
       mode: 'text',
-      pythonPath: path.join(__dirname, 'env', 'Scripts', 'python.exe'),
+      encoding: 'utf8',
+      pythonPath,
       pythonOptions: ['-u'],
-      scriptPath: scriptPath,
-      args: args
+      scriptPath: scriptDir,
+      args: args,
+      env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
     };
 
     console.log(`Starting ${appId} with options:`, options);
     
-    const pyshell = new PythonShell('main.py', options);
+    const pyshell = new PythonShell(mainScript, options);
     pythonProcesses[appId] = pyshell;
 
     pyshell.on('message', function (message) {
@@ -686,6 +706,14 @@ app.whenReady().then(() => {
     return startPythonApp(appId, args);
   });
 
+  ipcMain.handle('send-input', (event, appId, input) => {
+    if (pythonProcesses[appId]) {
+      pythonProcesses[appId].send(input);
+      return true;
+    }
+    return false;
+  });
+
   ipcMain.handle('stop-python-app', (event, appId) => {
     if (pythonProcesses[appId]) {
       pythonProcesses[appId].kill();
@@ -694,6 +722,36 @@ app.whenReady().then(() => {
       return true;
     }
     return false;
+  });
+
+  // Health report file handlers
+  ipcMain.handle('list-health-reports', () => {
+    const outputDir = path.join(__dirname, 'python-apps', 'analyse', 'output');
+    try {
+      if (!fs.existsSync(outputDir)) return [];
+      return fs.readdirSync(outputDir)
+        .filter(f => f.endsWith('.json') && !f.endsWith('_report.json'))
+        .map(f => {
+          const full = path.join(outputDir, f);
+          const stat = fs.statSync(full);
+          return { name: f, path: full, size: stat.size, mtime: stat.mtimeMs };
+        })
+        .sort((a, b) => b.mtime - a.mtime);
+    } catch (e) {
+      return [];
+    }
+  });
+
+  ipcMain.handle('read-health-report', (event, filePath) => {
+    try {
+      // Restrict to the analyse output directory to prevent path traversal
+      const allowed = path.resolve(path.join(__dirname, 'python-apps', 'analyse', 'output'));
+      const resolved = path.resolve(filePath);
+      if (!resolved.startsWith(allowed)) throw new Error('Access denied');
+      return JSON.parse(fs.readFileSync(resolved, 'utf8'));
+    } catch (e) {
+      return null;
+    }
   });
 
   // System metrics handler

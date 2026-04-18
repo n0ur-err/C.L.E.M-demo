@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CLEM - Computer Vision & Media Assistant</title>
   <link rel="stylesheet" href="styles/vision-pro.css">
-  <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="./node_modules/@fortawesome/fontawesome-free/css/all.min.css">
 </head>
 <body>
   <!-- Animated background -->
@@ -706,13 +706,25 @@
           <h2>Utilities</h2>
           <div class="feature-cards">
             <div class="feature-card" data-feature="phone-info">
-              <div class="feature-icon">
-                <i class="fas fa-mobile-alt"></i>
+              <div class="feature-card-header">
+                <div class="feature-icon">
+                  <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div class="feature-info">
+                  <h3>Phone Info</h3>
+                  <span class="feature-badge"><i class="fas fa-search"></i> OSINT</span>
+                </div>
               </div>
-              <div class="feature-info">
-                <h3>Phone Info</h3>
-                <p>Extract and display phone information.</p>
-                <button class="feature-btn">Open</button>
+              <div class="feature-card-body">
+                <p>Extract and display detailed information about a phone number including carrier, location, and line type.</p>
+              </div>
+              <div class="feature-card-footer">
+                <button class="feature-btn">
+                  <i class="fas fa-play"></i> Activate
+                </button>
+                <button class="feature-btn-secondary">
+                  <i class="fas fa-info-circle"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -900,7 +912,7 @@
           </div>
         </section>
 
-        <!-- Feature viewer panel (where the app content will be displayed) -->
+        <!-- Feature viewer panel (overlays content area when active) -->
         <div class="feature-viewer" id="featureViewer">
           <div class="feature-header">
             <button class="close-feature-btn" id="closeFeatureBtn">

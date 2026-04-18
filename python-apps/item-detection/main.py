@@ -13,9 +13,21 @@ def load_model(weights='yolov5s.pt', device=''):
     # Determine device
     if not device:
         device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    
-    # Load the model using torch.hub with direct weight path
-    model = torch.hub.load('ultralytics/yolov5', 'custom', path=weights)
+
+    # PyTorch >= 2.6 changed weights_only default to True, which breaks YOLOv5 .pt loading.
+    # Patch torch.load to use weights_only=False for trusted local model files.
+    _orig_torch_load = torch.load
+    def _patched_torch_load(*args, **kwargs):
+        kwargs.setdefault('weights_only', False)
+        return _orig_torch_load(*args, **kwargs)
+    torch.load = _patched_torch_load
+
+    try:
+        # Load the model using torch.hub with direct weight path
+        model = torch.hub.load('ultralytics/yolov5', 'custom', path=weights)
+    finally:
+        torch.load = _orig_torch_load
+
     model.to(device)
     
     return model, device

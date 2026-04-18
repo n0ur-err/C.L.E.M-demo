@@ -6,11 +6,8 @@ import json
 from datetime import datetime
 import random
 import sys
-import tkinter as tk
-from tkinter import simpledialog, messagebox
 
 # Use a global flag to track application state
-dialog_shown = False
 profile_data = {}
 
 # Check for GPU support
@@ -45,87 +42,6 @@ if has_cuda:
     print("Setting DNN backend to CUDA")
     face_detector_model.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
     face_detector_model.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
-
-# Function to create a simple dialog
-def create_simple_dialog(title, fields, defaults=None):
-    """Creates a simple dialog with the given fields and returns the input values"""
-    if defaults is None:
-        defaults = {}
-    
-    result = {}
-    
-    # Create a top-level window
-    dialog = tk.Tk()
-    dialog.title(title)
-    dialog.geometry("400x500")
-    
-    # Center the window
-    dialog.eval('tk::PlaceWindow . center')
-    
-    # Create label and entry for each field
-    entries = {}
-    
-    # Add a title
-    tk.Label(dialog, text=title, font=("Arial", 12, "bold")).pack(pady=10)
-    
-    # Add form fields
-    for i, (field, type_hint) in enumerate(fields.items()):
-        frame = tk.Frame(dialog)
-        frame.pack(fill=tk.X, padx=20, pady=5)
-        
-        tk.Label(frame, text=f"{field.capitalize()}:", width=15, anchor="w").pack(side=tk.LEFT)
-        
-        if type_hint == "text":
-            # For multi-line text input
-            entries[field] = tk.Text(frame, height=4, width=30)
-            if field in defaults:
-                entries[field].insert(tk.END, defaults[field])
-            entries[field].pack(side=tk.RIGHT, expand=True, fill=tk.X)
-        elif type_hint == "combo":
-            # For dropdown selections
-            var = tk.StringVar(value=defaults.get(field, ""))
-            options = []
-            
-            if field == "gender":
-                options = ["Male", "Female", "Other"]
-            elif field == "status":
-                options = ["CIVILIAN", "PERSON OF INTEREST", "UNDER SURVEILLANCE", "WANTED"]
-            elif field == "threat_level":
-                options = ["LOW", "MODERATE", "HIGH"]
-            elif field == "auto_capture":
-                options = ["Yes", "No"]
-            
-            # Create dropdown - fixed to provide a list of options instead of individual arguments
-            combo = tk.OptionMenu(frame, var, *options)
-            combo.pack(side=tk.RIGHT, expand=True, fill=tk.X)
-            entries[field] = var
-        else:
-            # For standard text input
-            var = tk.StringVar(value=defaults.get(field, ""))
-            entry = tk.Entry(frame, textvariable=var)
-            entry.pack(side=tk.RIGHT, expand=True, fill=tk.X)
-            entries[field] = var
-    
-    # Function to handle submit
-    def on_submit():
-        # Collect all values
-        for field, entry in entries.items():
-            if isinstance(entry, tk.Text):
-                result[field] = entry.get("1.0", tk.END).strip()
-            elif isinstance(entry, tk.StringVar):
-                result[field] = entry.get()
-        
-        dialog.destroy()
-    
-    # Add submit button
-    submit_btn = tk.Button(dialog, text="Submit", command=on_submit, 
-                          bg="#4CAF50", fg="white", padx=10, pady=5)
-    submit_btn.pack(pady=20)
-    
-    # Start the dialog loop
-    dialog.mainloop()
-    
-    return result
 
 def detect_faces(frame, confidence_threshold=0.5):
     """Detect faces in a frame using DNN model"""
@@ -174,38 +90,23 @@ def save_profile_info(profile_info):
     print(f"Profile saved to {personal_profile_path}")
 
 def main():
-    """Main entry point with GUI support for use in CLEM"""
+    """Main entry point - accepts JSON args from CLEM launcher."""
     print("Starting Face Scanner...")
-    
+
     try:
-        # Get person's name
-        person_name = simpledialog.askstring("Face Scanner - New Profile", "Enter the person's name:")
+        # Expect: sys.argv[1] = JSON profile, sys.argv[2] = JSON capture settings
+        if len(sys.argv) < 2:
+            print("ERROR: No profile data provided. Launch face-scanner from the CLEM interface.")
+            sys.exit(1)
+
+        profile_info = json.loads(sys.argv[1])
+        person_name = profile_info.get("name", "").strip()
         if not person_name:
-            print("No name provided. Exiting.")
-            messagebox.showinfo("Face Scanner", "Operation cancelled. No name provided.")
-            return
-        
-        # Collect profile information
-        fields = {
-            "age": "entry",
-            "gender": "combo",
-            "occupation": "entry",
-            "nationality": "entry",
-            "status": "combo",
-            "threat_level": "combo",
-            "notes": "text"
-        }
-        defaults = {
-            "age": str(random.randint(18, 65)),
-            "gender": random.choice(["Male", "Female"]),
-            "occupation": random.choice(["Student", "Engineer", "Teacher", "Doctor", "Artist", "Programmer"]),
-            "nationality": random.choice(["USA", "Canada", "UK", "Germany", "Japan", "China", "India", "Australia"]),
-            "status": "CIVILIAN",
-            "threat_level": "LOW",
-            "notes": "Profile created during face scanning session."
-        }
-        profile_info = create_simple_dialog(f"Create Profile for {person_name}", fields, defaults)
-        profile_info["name"] = person_name
+            print("ERROR: No name provided in profile data.")
+            sys.exit(1)
+
+        capture_settings = json.loads(sys.argv[2]) if len(sys.argv) > 2 else {}
+
         profile_info["last_seen"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         profile_info["sightings"] = 1
         
@@ -226,17 +127,6 @@ def main():
         
         print(f"\nFound {len(existing_files)} existing images for {person_name}")
         print(f"Saving new images to {person_dir}")
-        
-        # Get capture settings
-        capture_settings = create_simple_dialog("Capture Settings", {
-            "auto_capture": "combo",
-            "interval": "entry",
-            "target_count": "entry"
-        }, {
-            "auto_capture": "Yes",
-            "interval": "3.0",
-            "target_count": "10"
-        })
         
         # Process settings
         auto_capture = capture_settings.get("auto_capture", "Yes") == "Yes"
@@ -296,9 +186,10 @@ def main():
                 break
         
         if video_capture is None:
-            error_msg = "Could not open webcam. Please check:\n1. Camera is connected\n2. No other app is using the camera\n3. Camera permissions are granted"
-            print(error_msg)
-            messagebox.showerror("Camera Error", error_msg)
+            print("ERROR: Could not open webcam. Please check:")
+            print("  1. Camera is connected")
+            print("  2. No other app is using the camera")
+            print("  3. Camera permissions are granted")
             return
             
         video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -457,17 +348,12 @@ def main():
         video_capture.release()
         cv2.destroyAllWindows()
         
-        completion_message = f"\nFace scanning complete. {capture_count} images saved to {person_dir}"
-        print(completion_message)
+        print(f"\nFace scanning complete. {capture_count} images saved to {person_dir}")
         print("The profile has been created and saved.")
         print("\nYou can now use Face Recognition to identify this person in the future.")
-        
-        messagebox.showinfo("Face Scanner", completion_message)
-            
+
     except Exception as e:
-        error_message = f"An error occurred: {str(e)}"
-        print(error_message)
-        messagebox.showerror("Error", error_message)
+        print(f"ERROR: An error occurred: {str(e)}")
 
 if __name__ == "__main__":
     main()

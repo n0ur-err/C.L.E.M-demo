@@ -493,8 +493,10 @@ async function activateFeature(featureId) {
   // Set active feature
   activeFeature = featureId;
   
-  // Show the feature viewer
+  // Show the feature viewer - hide sections, let viewer fill space naturally
   featureTitle.textContent = app.name;
+  document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+  document.querySelector('.content').classList.add('has-viewer');
   featureViewer.classList.add('active');
   
   // Add loading state to feature content
@@ -512,6 +514,410 @@ async function activateFeature(featureId) {
   addRecentActivity(app.name, app.id);
   
   try {
+    // Phone Info uses a form-based UI; skip auto-launch
+    if (featureId === 'phone-info') {
+      showToast('Ready', 'Phone Info ready. Enter a phone number to look up.', 'info');
+      featureContent.innerHTML = '';
+      const contentContainer = document.createElement('div');
+      contentContainer.className = 'feature-content-container';
+      contentContainer.innerHTML = `
+        <div class="embedded-app-interface">
+          <div class="app-header">
+            <h3>Phone Number Intelligence</h3>
+            <div class="app-status">
+              <i class="fas fa-circle status-indicator" id="phone-info-status-dot"></i>
+              <span id="phone-info-status-text">Ready</span>
+            </div>
+          </div>
+          <div class="app-content">
+            <div class="connection-section">
+              <div class="connection-status">
+                <i class="fas fa-mobile-alt"></i>
+                <h4>Phone Number Lookup</h4>
+                <p>Enter a phone number in international format (e.g. +15551234567)</p>
+                <div class="connection-buttons" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                  <input type="text" id="phone-number-input" placeholder="+15551234567"
+                    style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:14px;min-width:200px;" />
+                  <button class="connection-btn phone-lookup-btn" id="phone-lookup-btn">
+                    <i class="fas fa-search"></i>
+                    Look Up
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="app-console">
+              <div class="console-header">
+                <h4>Results</h4>
+                <button class="console-clear-btn">
+                  <i class="fas fa-trash"></i>
+                  Clear
+                </button>
+              </div>
+              <div class="console-content" id="app-console-phone-info">
+                <div class="console-line">
+                  <span class="timestamp">[${new Date().toLocaleTimeString()}]</span>
+                  <span class="message">Phone Info ready. Enter a number and click Look Up.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      featureContent.appendChild(contentContainer);
+
+      // Wire lookup button
+      const lookupBtn = contentContainer.querySelector('#phone-lookup-btn');
+      const phoneInput = contentContainer.querySelector('#phone-number-input');
+      const statusDot = contentContainer.querySelector('#phone-info-status-dot');
+      const statusText = contentContainer.querySelector('#phone-info-status-text');
+
+      const doLookup = async () => {
+        const number = phoneInput.value.trim();
+        if (!number) {
+          showToast('Error', 'Please enter a phone number', 'error');
+          return;
+        }
+        lookupBtn.disabled = true;
+        lookupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Looking up...';
+        statusDot.className = 'fas fa-circle status-indicator running';
+        statusText.textContent = 'Running';
+        addToConsole('phone-info', `Looking up: ${number}`);
+        await window.electronAPI.startPythonApp('phone-info', [number]);
+      };
+
+      lookupBtn.addEventListener('click', doLookup);
+      phoneInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doLookup();
+      });
+
+      // Console clear
+      const consoleClearBtn = contentContainer.querySelector('.console-clear-btn');
+      if (consoleClearBtn) {
+        consoleClearBtn.addEventListener('click', () => {
+          const consoleContent = contentContainer.querySelector('#app-console-phone-info');
+          if (consoleContent) {
+            consoleContent.innerHTML = `
+              <div class="console-line">
+                <span class="timestamp">[${new Date().toLocaleTimeString()}]</span>
+                <span class="message">Console cleared</span>
+              </div>`;
+          }
+        });
+      }
+      return;
+    }
+
+    // Face Scanner uses a pre-launch profile form instead of tkinter dialogs
+    if (featureId === 'face-scanner') {
+      showToast('Ready', 'Fill in the profile details to begin face scanning.', 'info');
+      featureContent.innerHTML = '';
+      const contentContainer = document.createElement('div');
+      contentContainer.className = 'feature-content-container';
+      contentContainer.innerHTML = `
+        <div class="embedded-app-interface">
+          <div class="app-header">
+            <h3>Face Scanner - New Profile</h3>
+            <div class="app-status">
+              <i class="fas fa-circle status-indicator" id="face-scanner-status-dot"></i>
+              <span id="face-scanner-status-text">Ready</span>
+            </div>
+          </div>
+          <div class="app-content" style="overflow-y:auto;max-height:calc(100vh - 260px);">
+            <div class="connection-section">
+              <div class="connection-status">
+                <i class="fas fa-user-plus"></i>
+                <h4>Profile Details</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;text-align:left;">
+                  <div>
+                    <label style="font-size:12px;color:#aaa;">Full Name *</label>
+                    <input type="text" id="fs-name" placeholder="e.g. John Doe"
+                      style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:13px;box-sizing:border-box;" />
+                  </div>
+                  <div>
+                    <label style="font-size:12px;color:#aaa;">Age</label>
+                    <input type="number" id="fs-age" value="25" min="1" max="120"
+                      style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:13px;box-sizing:border-box;" />
+                  </div>
+                  <div>
+                    <label style="font-size:12px;color:#aaa;">Gender</label>
+                    <select id="fs-gender"
+                      style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:13px;box-sizing:border-box;">
+                      <option>Male</option><option>Female</option><option>Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style="font-size:12px;color:#aaa;">Occupation</label>
+                    <input type="text" id="fs-occupation" placeholder="e.g. Engineer"
+                      style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:13px;box-sizing:border-box;" />
+                  </div>
+                  <div>
+                    <label style="font-size:12px;color:#aaa;">Nationality</label>
+                    <input type="text" id="fs-nationality" placeholder="e.g. USA"
+                      style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:13px;box-sizing:border-box;" />
+                  </div>
+                  <div>
+                    <label style="font-size:12px;color:#aaa;">Status</label>
+                    <select id="fs-status"
+                      style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:13px;box-sizing:border-box;">
+                      <option>CIVILIAN</option><option>PERSON OF INTEREST</option>
+                      <option>UNDER SURVEILLANCE</option><option>WANTED</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style="font-size:12px;color:#aaa;">Threat Level</label>
+                    <select id="fs-threat"
+                      style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:13px;box-sizing:border-box;">
+                      <option>LOW</option><option>MODERATE</option><option>HIGH</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style="font-size:12px;color:#aaa;">Auto-Capture</label>
+                    <select id="fs-auto"
+                      style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:13px;box-sizing:border-box;">
+                      <option>Yes</option><option>No</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style="font-size:12px;color:#aaa;">Capture Interval (s)</label>
+                    <input type="number" id="fs-interval" value="3.0" min="0.5" step="0.5"
+                      style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:13px;box-sizing:border-box;" />
+                  </div>
+                  <div>
+                    <label style="font-size:12px;color:#aaa;">Target Image Count</label>
+                    <input type="number" id="fs-count" value="10" min="1" max="100"
+                      style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:13px;box-sizing:border-box;" />
+                  </div>
+                  <div style="grid-column:1/-1;">
+                    <label style="font-size:12px;color:#aaa;">Notes</label>
+                    <textarea id="fs-notes" rows="2" placeholder="Additional notes..."
+                      style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#1e1e2e;color:#fff;font-size:13px;box-sizing:border-box;resize:vertical;"></textarea>
+                  </div>
+                </div>
+                <div style="margin-top:14px;">
+                  <button class="connection-btn" id="face-scanner-start-btn" style="width:100%;">
+                    <i class="fas fa-play"></i> Start Face Scanner
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="app-console">
+              <div class="console-header">
+                <h4>Output</h4>
+                <button class="console-clear-btn">
+                  <i class="fas fa-trash"></i> Clear
+                </button>
+              </div>
+              <div class="console-content" id="app-console-face-scanner">
+                <div class="console-line">
+                  <span class="timestamp">[${new Date().toLocaleTimeString()}]</span>
+                  <span class="message">Fill in the profile details and click Start Face Scanner. A camera window will open.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      featureContent.appendChild(contentContainer);
+
+      const startBtn = contentContainer.querySelector('#face-scanner-start-btn');
+      const statusDot = contentContainer.querySelector('#face-scanner-status-dot');
+      const statusText = contentContainer.querySelector('#face-scanner-status-text');
+
+      startBtn.addEventListener('click', async () => {
+        const name = contentContainer.querySelector('#fs-name').value.trim();
+        if (!name) {
+          showToast('Error', 'Please enter a name for the profile.', 'error');
+          return;
+        }
+
+        const profile = {
+          name,
+          age: contentContainer.querySelector('#fs-age').value,
+          gender: contentContainer.querySelector('#fs-gender').value,
+          occupation: contentContainer.querySelector('#fs-occupation').value || 'Unknown',
+          nationality: contentContainer.querySelector('#fs-nationality').value || 'Unknown',
+          status: contentContainer.querySelector('#fs-status').value,
+          threat_level: contentContainer.querySelector('#fs-threat').value,
+          notes: contentContainer.querySelector('#fs-notes').value || 'Profile created via CLEM.'
+        };
+
+        const settings = {
+          auto_capture: contentContainer.querySelector('#fs-auto').value,
+          interval: contentContainer.querySelector('#fs-interval').value,
+          target_count: contentContainer.querySelector('#fs-count').value
+        };
+
+        startBtn.disabled = true;
+        startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+        statusDot.className = 'fas fa-circle status-indicator running';
+        statusText.textContent = 'Running';
+        addToConsole('face-scanner', `Starting face scan for: ${name}`);
+
+        await window.electronAPI.startPythonApp('face-scanner', [
+          JSON.stringify(profile),
+          JSON.stringify(settings)
+        ]);
+      });
+
+      const consoleClearBtn = contentContainer.querySelector('.console-clear-btn');
+      if (consoleClearBtn) {
+        consoleClearBtn.addEventListener('click', () => {
+          const consoleEl = contentContainer.querySelector('#app-console-face-scanner');
+          if (consoleEl) consoleEl.innerHTML = `<div class="console-line"><span class="timestamp">[${new Date().toLocaleTimeString()}]</span><span class="message">Console cleared</span></div>`;
+        });
+      }
+      return;
+    }
+
+    // Health Report: read JSON files directly and render in-app UI
+    if (featureId === 'health-report') {
+      showToast('Loading', 'Loading health reports...', 'info');
+      featureContent.innerHTML = '';
+      const contentContainer = document.createElement('div');
+      contentContainer.className = 'feature-content-container';
+      featureContent.appendChild(contentContainer);
+
+      async function renderHealthReportList() {
+        const reports = await window.electronAPI.listHealthReports();
+        if (!reports || reports.length === 0) {
+          contentContainer.innerHTML = `
+            <div class="embedded-app-interface">
+              <div class="app-header"><h3>Health Reports</h3></div>
+              <div class="app-content" style="display:flex;align-items:center;justify-content:center;height:200px;color:#aaa;">
+                <div style="text-align:center;">
+                  <i class="fas fa-file-medical" style="font-size:48px;opacity:0.3;display:block;margin-bottom:16px;"></i>
+                  <p>No health reports found. Run a Facial Analysis first.</p>
+                </div>
+              </div>
+            </div>`;
+          return;
+        }
+
+        const listHTML = reports.map((r, i) => {
+          const date = new Date(r.mtime).toLocaleString();
+          const kb = (r.size / 1024).toFixed(1);
+          const isComplete = r.name.startsWith('complete_');
+          const badge = isComplete
+            ? `<span style="background:rgba(0,200,100,0.15);border:0.5px solid rgba(0,200,100,0.4);color:#0c8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">COMPLETE</span>`
+            : `<span style="background:rgba(0,122,255,0.15);border:0.5px solid rgba(0,122,255,0.4);color:#48f;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">FACIAL</span>`;
+          return `
+            <div class="health-report-row" data-path="${r.path.replace(/\\/g,'\\\\')}" data-idx="${i}"
+              style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;
+                     border:0.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);
+                     cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
+              <i class="fas fa-file-medical-alt" style="font-size:20px;color:#7af;flex-shrink:0;"></i>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;color:#eee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.name}</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">${date} &bull; ${kb} KB</div>
+              </div>
+              ${badge}
+              <i class="fas fa-chevron-right" style="color:#555;font-size:12px;flex-shrink:0;"></i>
+            </div>`;
+        }).join('');
+
+        contentContainer.innerHTML = `
+          <div class="embedded-app-interface">
+            <div class="app-header">
+              <h3><i class="fas fa-heartbeat" style="margin-right:8px;color:#f66;"></i>Health Reports</h3>
+              <span style="font-size:12px;color:#888;">${reports.length} report${reports.length !== 1 ? 's' : ''} found</span>
+            </div>
+            <div class="app-content" style="overflow-y:auto;max-height:calc(100vh - 220px);">
+              <div style="padding:16px;">${listHTML}</div>
+            </div>
+          </div>`;
+
+        // Wire click handlers
+        contentContainer.querySelectorAll('.health-report-row').forEach(row => {
+          row.addEventListener('mouseenter', () => { row.style.background = 'rgba(255,255,255,0.08)'; row.style.borderColor = 'rgba(0,122,255,0.3)'; });
+          row.addEventListener('mouseleave', () => { row.style.background = 'rgba(255,255,255,0.04)'; row.style.borderColor = 'rgba(255,255,255,0.08)'; });
+          row.addEventListener('click', () => renderHealthReportDetail(row.dataset.path));
+        });
+      }
+
+      async function renderHealthReportDetail(filePath) {
+        const data = await window.electronAPI.readHealthReport(filePath);
+        if (!data) {
+          showToast('Error', 'Failed to read report file.', 'error');
+          return;
+        }
+
+        const records = Array.isArray(data) ? data : [data];
+        const fileName = filePath.replace(/\\/g, '/').split('/').pop();
+
+        function scoreColor(score) {
+          if (score >= 8) return '#0c8';
+          if (score >= 6) return '#fa0';
+          return '#f44';
+        }
+
+        function renderRecord(rec, idx) {
+          const score = rec.overall_health_score ?? rec.health_score ?? '—';
+          const status = rec.overall_health_status ?? rec.health_status ?? '—';
+          const ts = rec.timestamp ?? '—';
+          const recs = rec.recommendations ?? [];
+          const fa = rec.facial_analysis ?? {};
+          const ha = fa.health_analysis ?? {};
+
+          const metricRow = (label, val, unit='') => `
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.06);">
+              <span style="color:#aaa;font-size:13px;">${label}</span>
+              <span style="color:#eee;font-size:13px;font-weight:500;">${typeof val === 'number' ? val.toFixed(2) : val}${unit ? ' '+unit : ''}</span>
+            </div>`;
+
+          const faceMetrics = ha ? [
+            ha.facial_symmetry != null ? metricRow('Facial Symmetry', ha.facial_symmetry) : '',
+            ha.symmetry_evaluation ? metricRow('Symmetry Evaluation', ha.symmetry_evaluation) : '',
+            ha.skin_tone_note ? metricRow('Skin Tone', ha.skin_tone_note) : '',
+            ha.texture_note ? metricRow('Skin Texture', ha.texture_note) : '',
+            ha.fullness_evaluation ? metricRow('Facial Fullness', ha.fullness_evaluation) : '',
+            ha.estimated_stress_level?.value != null ? metricRow('Est. Stress Level', ha.estimated_stress_level.value, ha.estimated_stress_level.unit) : '',
+            ha.sleep_quality_estimate?.value != null ? metricRow('Est. Sleep Quality', ha.sleep_quality_estimate.value, ha.sleep_quality_estimate.unit) : '',
+          ].filter(Boolean).join('') : '';
+
+          const recsHTML = recs.length
+            ? recs.map(r => `<li style="padding:4px 0;color:#ccc;font-size:13px;">${r}</li>`).join('')
+            : '<li style="color:#888;font-size:13px;">No recommendations</li>';
+
+          return `
+            <div style="background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-bottom:16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                <div>
+                  <div style="font-size:12px;color:#888;">Record ${idx+1} &bull; ${ts}</div>
+                  <div style="font-size:22px;font-weight:700;color:${scoreColor(score)};margin-top:4px;">${score}/10 <span style="font-size:14px;font-weight:400;color:#ccc;">${status}</span></div>
+                </div>
+                <div style="width:64px;height:64px;border-radius:50%;background:conic-gradient(${scoreColor(score)} ${score*36}deg, rgba(255,255,255,0.08) 0deg);display:flex;align-items:center;justify-content:center;position:relative;">
+                  <div style="width:50px;height:50px;border-radius:50%;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${scoreColor(score)};">${score}</div>
+                </div>
+              </div>
+              ${faceMetrics ? `<div style="margin-bottom:16px;"><div style="font-size:12px;color:#7af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;font-weight:600;">Facial Metrics</div>${faceMetrics}</div>` : ''}
+              <div>
+                <div style="font-size:12px;color:#7af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;font-weight:600;">Recommendations</div>
+                <ul style="margin:0;padding-left:18px;">${recsHTML}</ul>
+              </div>
+            </div>`;
+        }
+
+        const allRecords = records.map(renderRecord).join('');
+        contentContainer.innerHTML = `
+          <div class="embedded-app-interface">
+            <div class="app-header" style="gap:12px;">
+              <button id="hr-back-btn" style="background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);color:#eee;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;">
+                <i class="fas fa-arrow-left"></i> Back
+              </button>
+              <h3 style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;">${fileName}</h3>
+            </div>
+            <div class="app-content" style="overflow-y:auto;max-height:calc(100vh - 220px);">
+              <div style="padding:16px;">${allRecords}</div>
+            </div>
+          </div>`;
+
+        contentContainer.querySelector('#hr-back-btn').addEventListener('click', renderHealthReportList);
+      }
+
+      await renderHealthReportList();
+      return;
+    }
+
     showToast('Activating', `Starting ${app.name}...`, 'info');
     const success = await window.electronAPI.launchApp(featureId);
     
@@ -655,7 +1061,7 @@ async function activateFeature(featureId) {
         `;
       }
       // For phone info app
-      else if (featureId === 'phoneInfo') {
+      else if (featureId === 'phone-info') {
         contentContainer.innerHTML = `
           <div class="embedded-app-interface">
             <div class="app-header">
@@ -1018,6 +1424,8 @@ function stopApp(featureId) {
   // Close feature viewer
   setTimeout(() => {
     featureViewer.classList.remove('active');
+    document.querySelector('.content').classList.remove('has-viewer');
+    document.querySelectorAll('.content-section').forEach(s => s.style.display = '');
   }, 1000);
 }
 
@@ -1026,6 +1434,8 @@ function closeFeature() {
   if (!activeFeature) return;
   
   featureViewer.classList.remove('active');
+  document.querySelector('.content').classList.remove('has-viewer');
+  document.querySelectorAll('.content-section').forEach(s => s.style.display = '');
   
   // Terminate the Python process
   window.electronAPI.terminateApp(activeFeature).then(() => {
@@ -1406,6 +1816,32 @@ function setupEventListeners() {
   window.electronAPI.onPythonOutput((data) => {
     const { appId, message, type } = data;
     addToConsole(appId, message);
+
+    // Reset phone-info lookup button when process closes
+    if (appId === 'phone-info' && message && message.startsWith('Process closed')) {
+      const lookupBtn = document.querySelector('#phone-lookup-btn');
+      const statusDot = document.querySelector('#phone-info-status-dot');
+      const statusText = document.querySelector('#phone-info-status-text');
+      if (lookupBtn) {
+        lookupBtn.disabled = false;
+        lookupBtn.innerHTML = '<i class="fas fa-search"></i> Look Up';
+      }
+      if (statusDot) statusDot.className = 'fas fa-circle status-indicator';
+      if (statusText) statusText.textContent = 'Ready';
+    }
+
+    // Reset face-scanner start button when process closes
+    if (appId === 'face-scanner' && message && message.startsWith('Process closed')) {
+      const startBtn = document.querySelector('#face-scanner-start-btn');
+      const statusDot = document.querySelector('#face-scanner-status-dot');
+      const statusText = document.querySelector('#face-scanner-status-text');
+      if (startBtn) {
+        startBtn.disabled = false;
+        startBtn.innerHTML = '<i class="fas fa-play"></i> Start Face Scanner';
+      }
+      if (statusDot) statusDot.className = 'fas fa-circle status-indicator';
+      if (statusText) statusText.textContent = 'Ready';
+    }
     
     // Update UI based on message content
     const activeDownloadItems = document.querySelectorAll(`#download-list-${appId} .download-item`);
