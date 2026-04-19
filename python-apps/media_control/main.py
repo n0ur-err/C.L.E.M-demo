@@ -1,42 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Add the CLEM environment to Python's path
 import sys
 import os
-from collections.abc import Sequence
 
-# Set UTF-8 encoding for console output on Windows
-if sys.platform == 'win32':
-    try:
-        import codecs
-        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
-    except:
-        # If UTF-8 setup fails, continue with default encoding
-        pass
-
-# Add our local Python installation to the path
-clem_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-python_paths = [
-    os.path.join(clem_root, "env", "Lib", "site-packages"),
-    os.path.join(clem_root, "Python310", "Lib", "site-packages"),
-    os.path.join(clem_root, "Python310", "Lib"),
-    os.path.join(clem_root, "Python310", "DLLs"),
-]
-
-for path in python_paths:
-    if os.path.exists(path) and path not in sys.path:
-        sys.path.insert(0, path)
-
-# First import NumPy (required by OpenCV)
-try:
-    import numpy as np
-    print(f"NumPy version: {np.__version__}")
-except ImportError as e:
-    print(f"Error importing NumPy: {e}")
-    sys.exit(1)
-
-# Then import other modules
+import numpy as np
 import cv2
 import time
 import handTracking as htm
@@ -45,12 +12,37 @@ from ctypes import cast, POINTER, windll
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import psutil
-import os
-print("All modules imported successfully!")
 
 # Windows API for media control
 import ctypes
 from ctypes import wintypes
+
+import base64
+import json
+import threading
+
+# stdout helpers for Electron integration
+def send_frame(frame, quality=55):
+    ret, buf = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, quality])
+    if ret:
+        b64 = base64.b64encode(buf).decode('ascii')
+        sys.stdout.write(f'FRAME:{b64}\n')
+        sys.stdout.flush()
+
+def send_status(data: dict):
+    sys.stdout.write(f'STATUS:{json.dumps(data)}\n')
+    sys.stdout.flush()
+
+# Stdin watcher for QUIT signal from Electron
+_quit = threading.Event()
+
+def _stdin_watcher():
+    for line in sys.stdin:
+        if line.strip().upper() == 'QUIT':
+            _quit.set()
+            break
+
+threading.Thread(target=_stdin_watcher, daemon=True).start()
 
 # Define Windows key codes for media control
 KEYEVENTF_EXTENDEDKEY = 0x0001
@@ -243,7 +235,9 @@ detector = htm.handDetector(detectionCon=0.7, maxHands=2)
 
 # Audio setup
 devices = AudioUtilities.GetSpeakers()
-interface = devices.Activate(
+# pycaw >= 0.5 wraps IMMDevice in AudioDevice; access ._dev for the COM interface
+_dev = devices._dev if hasattr(devices, '_dev') else devices
+interface = _dev.Activate(
     IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
 volume = cast(interface, POINTER(IAudioEndpointVolume))
 volRange = volume.GetVolumeRange()
@@ -455,7 +449,7 @@ print("Camera window should appear now.")
 print("Press 'q' to quit")
 print("="*50 + "\n")
 
-while True:
+while not _quit.is_set():
     frame_count += 1
     if frame_count == 1:
         print(f"Reading frame {frame_count}...")
@@ -801,17 +795,16 @@ while True:
                 (10, h-15), cv2.FONT_HERSHEY_SIMPLEX, 0.6, 
                 (0, 255, 0) if use_gpu else (0, 255, 255), 2)
     
-    # Show image
-    cv2.imshow("Hand Gesture Media Control", img)
-    
-    # Debug: Confirm window is shown on first frame
-    if frame_count == 1:
-        print(f"[OK] Camera window displayed! Look for 'Hand Gesture Media Control' window.")
-    
-    # Exit on 'q'
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    # Stream frame to Electron
+    send_frame(img)
+    send_status({
+        'mode': controlMode,
+        'volume': current_vol,
+        'muted': bool(isSystemMuted),
+        'fps': round(avg_fps, 1),
+        'song': current_song_info,
+        'action': media_action_feedback if time.time() < media_action_timeout else '',
+    })
 
 # Clean up
 cap.release()
-cv2.destroyAllWindows()

@@ -1356,6 +1356,540 @@ async function activateFeature(featureId) {
       return;
     }
 
+    // Item Detection: stream camera + detection stats in-app
+    if (featureId === 'item-detection') {
+      showToast('Ready', 'Starting Item Detection...', 'info');
+      featureContent.innerHTML = '';
+      featureContent.style.padding = '0';
+
+      featureContent.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:100%;background:var(--vision-bg-primary);border-radius:var(--radius-2xl);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <span style="font-weight:600;font-size:15px;">Item Detection</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i class="fas fa-circle" style="color:#2ecc71;font-size:8px;" id="id-dot"></i>
+              <span style="font-size:13px;color:#aaa;" id="id-status-text">Initializing...</span>
+            </div>
+          </div>
+          <div style="display:flex;flex:1;min-height:0;gap:0;">
+            <div style="position:relative;flex:1;background:#000;min-height:0;">
+              <canvas id="id-canvas" style="width:100%;height:100%;display:block;object-fit:contain;"></canvas>
+              <div id="id-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;color:#aaa;gap:12px;">
+                <i class="fas fa-spinner fa-spin" style="font-size:28px;"></i>
+                <span>Loading model &amp; opening camera...</span>
+              </div>
+            </div>
+            <div style="width:220px;padding:16px 12px;border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;gap:10px;overflow:hidden;">
+              <div style="font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;">Detections</div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span style="color:#aaa;">Objects</span>
+                <span id="id-obj-count" style="color:#fff;font-weight:600;">0</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span style="color:#aaa;">FPS</span>
+                <span id="id-fps" style="color:#fff;font-weight:600;">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span style="color:#aaa;">Device</span>
+                <span id="id-device" style="color:#f39c12;font-weight:600;">—</span>
+              </div>
+              <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px;">
+                <div style="font-size:11px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Detected Items</div>
+                <div id="id-detections" style="font-size:12px;color:#ccc;line-height:1.8;">—</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.06);">
+            <button id="id-btn-stop" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(231,76,60,0.15);color:#fff;cursor:pointer;font-size:13px;">
+              <i class="fas fa-stop"></i> Stop
+            </button>
+          </div>
+          <div style="padding:0 16px 8px;">
+            <div class="console-content" id="app-console-item-detection" style="max-height:60px;font-size:11px;"></div>
+          </div>
+        </div>
+      `;
+
+      const ok = await window.electronAPI.startPythonApp('item-detection', []);
+      if (!ok) {
+        addToConsole('item-detection', 'Failed to start item detection.');
+        return;
+      }
+
+      document.getElementById('id-btn-stop').addEventListener('click', () => {
+        window.electronAPI.sendInput('item-detection', 'QUIT');
+      });
+
+      const canvas = document.getElementById('id-canvas');
+      const ctx = canvas.getContext('2d');
+
+      window.electronAPI.removeAllListeners('python-frame');
+      window.electronAPI.onPythonFrame((data) => {
+        if (data.appId !== 'item-detection') return;
+        const overlay = document.getElementById('id-loading');
+        if (overlay) overlay.style.display = 'none';
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = 'data:image/jpeg;base64,' + data.frame;
+      });
+
+      return;
+    }
+
+    // Media Control: stream camera + gesture stats in-app
+    if (featureId === 'media-control') {
+      showToast('Ready', 'Starting Media Gesture Control...', 'info');
+      featureContent.innerHTML = '';
+      featureContent.style.padding = '0';
+
+      featureContent.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:100%;background:var(--vision-bg-primary);border-radius:var(--radius-2xl);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <span style="font-weight:600;font-size:15px;">Media Gesture Control</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i class="fas fa-circle" style="color:#2ecc71;font-size:8px;" id="mc-dot"></i>
+              <span style="font-size:13px;color:#aaa;" id="mc-status-text">Initializing...</span>
+            </div>
+          </div>
+          <div style="display:flex;flex:1;min-height:0;gap:0;">
+            <div style="position:relative;flex:1;background:#000;min-height:0;">
+              <canvas id="mc-canvas" style="width:100%;height:100%;display:block;object-fit:contain;"></canvas>
+              <div id="mc-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;color:#aaa;gap:12px;">
+                <i class="fas fa-spinner fa-spin" style="font-size:28px;"></i>
+                <span>Opening camera...</span>
+              </div>
+            </div>
+            <div style="width:220px;padding:16px 12px;border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;gap:10px;overflow:hidden;">
+              <div style="font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;">Status</div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span style="color:#aaa;">Mode</span>
+                <span id="mc-mode" style="color:#f39c12;font-weight:600;">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span style="color:#aaa;">Volume</span>
+                <span id="mc-volume" style="color:#fff;font-weight:600;">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span style="color:#aaa;">FPS</span>
+                <span id="mc-fps" style="color:#fff;font-weight:600;">—</span>
+              </div>
+              <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px;">
+                <div style="font-size:11px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Now Playing</div>
+                <div id="mc-song" style="font-size:12px;color:#ccc;line-height:1.6;">—</div>
+              </div>
+              <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px;">
+                <div id="mc-action" style="font-size:13px;color:#2ecc71;font-weight:600;min-height:20px;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.06);">
+            <button id="mc-btn-stop" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(231,76,60,0.15);color:#fff;cursor:pointer;font-size:13px;">
+              <i class="fas fa-stop"></i> Stop
+            </button>
+          </div>
+          <div style="padding:0 16px 8px;">
+            <div class="console-content" id="app-console-media-control" style="max-height:60px;font-size:11px;"></div>
+          </div>
+        </div>
+      `;
+
+      const ok = await window.electronAPI.startPythonApp('media-control', []);
+      if (!ok) {
+        addToConsole('media-control', 'Failed to start media control.');
+        return;
+      }
+
+      document.getElementById('mc-btn-stop').addEventListener('click', () => {
+        window.electronAPI.sendInput('media-control', 'QUIT');
+      });
+
+      const canvas = document.getElementById('mc-canvas');
+      const ctx = canvas.getContext('2d');
+
+      window.electronAPI.removeAllListeners('python-frame');
+      window.electronAPI.onPythonFrame((data) => {
+        if (data.appId !== 'media-control') return;
+        const overlay = document.getElementById('mc-loading');
+        if (overlay) overlay.style.display = 'none';
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = 'data:image/jpeg;base64,' + data.frame;
+      });
+
+      return;
+    }
+
+    // YouTube Downloader: full custom UI
+    if (featureId === 'youtube-download') {
+      featureContent.innerHTML = '';
+      featureContent.style.padding = '0';
+
+      featureContent.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:100%;background:#111;border-radius:16px;overflow:hidden;font-family:inherit;">
+
+          <!-- Header -->
+          <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;background:linear-gradient(135deg,rgba(229,57,53,0.15),transparent);border-bottom:1px solid rgba(255,255,255,0.07);">
+            <div style="width:36px;height:36px;background:linear-gradient(135deg,#e53935,#b71c1c);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+              <i class="fab fa-youtube" style="color:#fff;font-size:18px;"></i>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:15px;color:#fff;">YouTube Downloader</div>
+              <div style="font-size:11px;color:#aaa;" id="yt-status">Ready to download</div>
+            </div>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+              <div id="yt-dot" style="width:8px;height:8px;border-radius:50%;background:#2ecc71;"></div>
+            </div>
+          </div>
+
+          <!-- Scrollable body -->
+          <div style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;">
+
+            <!-- URL input -->
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Video URL</div>
+              <div style="display:flex;gap:8px;">
+                <input id="yt-url" type="text" placeholder="Paste YouTube URL here..."
+                  style="flex:1;padding:11px 14px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:13px;outline:none;transition:border 0.2s;"
+                  onfocus="this.style.borderColor='rgba(229,57,53,0.6)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" />
+                <button id="yt-paste"
+                  style="padding:11px 16px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#ccc;cursor:pointer;font-size:13px;white-space:nowrap;transition:background 0.2s;"
+                  onmouseover="this.style.background='#252525'" onmouseout="this.style.background='#1a1a1a'">
+                  <i class="fas fa-clipboard"></i> Paste
+                </button>
+              </div>
+            </div>
+
+            <!-- Type + Quality -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div>
+                <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Type</div>
+                <div style="display:flex;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;overflow:hidden;">
+                  <button id="yt-type-video"
+                    style="flex:1;padding:10px 8px;background:rgba(229,57,53,0.25);border:none;color:#fff;cursor:pointer;font-size:13px;font-weight:600;border-right:1px solid rgba(255,255,255,0.08);">
+                    <i class="fas fa-film" style="margin-right:5px;"></i>Video
+                  </button>
+                  <button id="yt-type-audio"
+                    style="flex:1;padding:10px 8px;background:transparent;border:none;color:#666;cursor:pointer;font-size:13px;font-weight:600;">
+                    <i class="fas fa-music" style="margin-right:5px;"></i>Audio
+                  </button>
+                </div>
+              </div>
+              <div id="yt-quality-wrap">
+                <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Quality</div>
+                <select id="yt-quality"
+                  style="width:100%;padding:10px 14px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:13px;cursor:pointer;outline:none;appearance:none;">
+                  <option value="best">Best available</option>
+                  <option value="1080p">1080p HD</option>
+                  <option value="720p">720p HD</option>
+                  <option value="480p">480p</option>
+                  <option value="360p">360p</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Save folder -->
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Save Location</div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div id="yt-folder-display"
+                  style="flex:1;padding:11px 14px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#888;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                  <i class="fas fa-folder" style="margin-right:6px;color:#f39c12;"></i>Default (~/Videos)
+                </div>
+                <button id="yt-browse"
+                  style="padding:11px 16px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#ccc;cursor:pointer;font-size:13px;white-space:nowrap;transition:background 0.2s;"
+                  onmouseover="this.style.background='#252525'" onmouseout="this.style.background='#1a1a1a'">
+                  <i class="fas fa-folder-open"></i> Browse
+                </button>
+              </div>
+            </div>
+
+            <!-- Download button -->
+            <button id="yt-download-btn"
+              style="padding:14px;background:linear-gradient(135deg,#e53935,#c62828);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.3px;transition:opacity 0.2s;box-shadow:0 4px 20px rgba(229,57,53,0.3);"
+              onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+              <i class="fas fa-download" style="margin-right:8px;"></i>Download
+            </button>
+
+            <!-- Video info card -->
+            <div id="yt-info-card" style="display:none;padding:14px;background:#1a1a1a;border-radius:12px;border:1px solid rgba(255,255,255,0.08);display:none;align-items:center;gap:12px;">
+              <div style="width:40px;height:40px;background:rgba(229,57,53,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="fab fa-youtube" style="color:#e53935;font-size:18px;"></i>
+              </div>
+              <div style="overflow:hidden;">
+                <div id="yt-title" style="font-size:13px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+                <div id="yt-duration" style="font-size:11px;color:#888;margin-top:2px;"></div>
+              </div>
+            </div>
+
+            <!-- Progress -->
+            <div id="yt-progress-area" style="display:none;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-size:12px;color:#aaa;" id="yt-progress-label">Downloading...</span>
+                <span style="font-size:13px;font-weight:700;color:#fff;" id="yt-progress-pct">0%</span>
+              </div>
+              <div style="background:#1a1a1a;border-radius:8px;height:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);">
+                <div id="yt-progress-bar" style="height:100%;background:linear-gradient(90deg,#e53935,#ff7043);border-radius:8px;width:0%;transition:width 0.5s ease;"></div>
+              </div>
+            </div>
+
+            <!-- Done banner -->
+            <div id="yt-done" style="display:none;padding:14px 16px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.25);border-radius:12px;align-items:center;gap:12px;">
+              <i class="fas fa-check-circle" style="color:#2ecc71;font-size:22px;flex-shrink:0;"></i>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#2ecc71;">Download complete!</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;" id="yt-done-path"></div>
+              </div>
+              <button id="yt-open-folder"
+                style="margin-left:auto;padding:8px 14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#fff;cursor:pointer;font-size:12px;white-space:nowrap;">
+                <i class="fas fa-folder-open"></i> Open
+              </button>
+            </div>
+
+            <!-- Console -->
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                Console
+                <button id="yt-clear-console" style="background:none;border:none;color:#555;cursor:pointer;font-size:10px;text-transform:none;letter-spacing:0;">
+                  <i class="fas fa-trash"></i> clear
+                </button>
+              </div>
+              <div id="yt-console"
+                style="background:#0d0d0d;border-radius:10px;border:1px solid rgba(255,255,255,0.05);padding:12px;font-family:'Courier New',monospace;font-size:11px;color:#aaa;height:160px;overflow-y:auto;line-height:1.6;">
+              </div>
+            </div>
+
+          </div>
+        </div>
+      `;
+
+      let ytFolder = null;
+      let currentDownloadType = 'video';
+
+      const ytLog = (msg, color) => {
+        const c = document.getElementById('yt-console');
+        if (!c) return;
+        const line = document.createElement('div');
+        line.style.color = color || '#888';
+        line.textContent = msg;
+        c.appendChild(line);
+        c.scrollTop = c.scrollHeight;
+      };
+
+      const setStatus = (text, dotColor) => {
+        const s = document.getElementById('yt-status');
+        const d = document.getElementById('yt-dot');
+        if (s) s.textContent = text;
+        if (d && dotColor) d.style.background = dotColor;
+      };
+
+      // Type toggle
+      document.getElementById('yt-type-video').addEventListener('click', () => {
+        currentDownloadType = 'video';
+        document.getElementById('yt-type-video').style.background = 'rgba(229,57,53,0.25)';
+        document.getElementById('yt-type-video').style.color = '#fff';
+        document.getElementById('yt-type-audio').style.background = 'transparent';
+        document.getElementById('yt-type-audio').style.color = '#666';
+        const sel = document.getElementById('yt-quality');
+        sel.innerHTML = '<option value="best">Best available</option><option value="1080p">1080p HD</option><option value="720p">720p HD</option><option value="480p">480p</option><option value="360p">360p</option>';
+        document.getElementById('yt-quality-wrap').style.display = '';
+      });
+
+      document.getElementById('yt-type-audio').addEventListener('click', () => {
+        currentDownloadType = 'audio';
+        document.getElementById('yt-type-audio').style.background = 'rgba(52,152,219,0.25)';
+        document.getElementById('yt-type-audio').style.color = '#fff';
+        document.getElementById('yt-type-video').style.background = 'transparent';
+        document.getElementById('yt-type-video').style.color = '#666';
+        const sel = document.getElementById('yt-quality');
+        sel.innerHTML = '<option value="audio">MP3 — Best quality</option>';
+        document.getElementById('yt-quality-wrap').style.display = '';
+      });
+
+      // Paste
+      document.getElementById('yt-paste').addEventListener('click', async () => {
+        try {
+          const text = await navigator.clipboard.readText();
+          document.getElementById('yt-url').value = text;
+        } catch(e) { ytLog('Clipboard read failed: ' + e, '#e74c3c'); }
+      });
+
+      // Browse
+      document.getElementById('yt-browse').addEventListener('click', async () => {
+        const chosen = await window.electronAPI.showFolderDialog();
+        if (chosen) {
+          ytFolder = chosen;
+          document.getElementById('yt-folder-display').innerHTML =
+            `<i class="fas fa-folder" style="margin-right:6px;color:#f39c12;"></i>${chosen}`;
+        }
+      });
+
+      // Clear console
+      document.getElementById('yt-clear-console').addEventListener('click', () => {
+        document.getElementById('yt-console').innerHTML = '';
+      });
+
+      // Open folder — ytFolder null = main.js falls back to ~/Videos
+      document.getElementById('yt-open-folder').addEventListener('click', () => {
+        window.electronAPI.openFolder(ytFolder);
+      });
+
+      // Download
+      document.getElementById('yt-download-btn').addEventListener('click', async () => {
+        const url = document.getElementById('yt-url').value.trim();
+        if (!url) { ytLog('Please enter a URL first.', '#e74c3c'); return; }
+
+        const quality = currentDownloadType === 'audio' ? 'audio' : document.getElementById('yt-quality').value;
+
+        // Reset UI state
+        document.getElementById('yt-info-card').style.display = 'none';
+        const done = document.getElementById('yt-done');
+        done.style.display = 'none';
+        const progArea = document.getElementById('yt-progress-area');
+        progArea.style.display = '';
+        document.getElementById('yt-progress-bar').style.width = '0%';
+        document.getElementById('yt-progress-pct').textContent = '0%';
+        document.getElementById('yt-progress-label').textContent = 'Fetching info...';
+        setStatus('Downloading...', '#f39c12');
+
+        const btn = document.getElementById('yt-download-btn');
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Downloading...';
+
+        ytLog(`> ${url}`, '#3498db');
+        ytLog(`  Type: ${currentDownloadType === 'audio' ? 'Audio (MP3)' : 'Video'}  |  Quality: ${quality}`, '#555');
+
+        // Remove old listeners
+        window.electronAPI.removeAllListeners('download-progress');
+        window.electronAPI.removeAllListeners('download-complete');
+        window.electronAPI.removeAllListeners('download-error');
+        window.electronAPI.removeAllListeners('download-info');
+        window.electronAPI.removeAllListeners('python-output');
+
+        window.electronAPI.onDownloadInfo((data) => {
+          if (data.appId !== 'youtube-download') return;
+          const card = document.getElementById('yt-info-card');
+          card.style.display = 'flex';
+          document.getElementById('yt-title').textContent = data.title || '';
+          document.getElementById('yt-progress-label').textContent = 'Downloading...';
+        });
+
+        window.electronAPI.onDownloadProgress((data) => {
+          if (data.appId !== 'youtube-download') return;
+          const pct = Math.min(100, Math.round(data.progress));
+          document.getElementById('yt-progress-bar').style.width = pct + '%';
+          document.getElementById('yt-progress-pct').textContent = pct + '%';
+          if (pct >= 100) document.getElementById('yt-progress-label').textContent = 'Processing...';
+        });
+
+        window.electronAPI.onDownloadComplete((data) => {
+          if (data.appId !== 'youtube-download') return;
+          document.getElementById('yt-progress-bar').style.width = '100%';
+          document.getElementById('yt-progress-pct').textContent = '100%';
+          document.getElementById('yt-progress-label').textContent = 'Done!';
+          setStatus('Done', '#2ecc71');
+          done.style.display = 'flex';
+          document.getElementById('yt-done-path').textContent = ytFolder || '~/Videos';
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.innerHTML = '<i class="fas fa-download" style="margin-right:8px;"></i>Download';
+          ytLog('Download complete!', '#2ecc71');
+        });
+
+        window.electronAPI.onDownloadError((data) => {
+          if (data.appId !== 'youtube-download') return;
+          setStatus('Error', '#e74c3c');
+          progArea.style.display = 'none';
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.innerHTML = '<i class="fas fa-download" style="margin-right:8px;"></i>Download';
+          ytLog('ERROR: ' + (data.message || 'Download failed'), '#e74c3c');
+        });
+
+        window.electronAPI.onPythonOutput((data) => {
+          if (data.appId !== 'youtube-download') return;
+          const msg = data.message || '';
+          if (!msg.trim() || msg.startsWith('===')) return; // skip banner
+          const dim = msg.startsWith('[youtube]') || msg.startsWith('[info]') || msg.includes('Downloading webpage') || msg.includes('tv client');
+          ytLog(msg, dim ? '#444' : '#777');
+        });
+
+        await window.electronAPI.startDownload('youtube-download', url, quality, ytFolder || null);
+      });
+
+      return;
+    }
+
+    // Air Writing: stream camera + drawing canvas in-app
+    if (featureId === 'air-writing') {
+      showToast('Ready', 'Starting Air Writing...', 'info');
+      featureContent.innerHTML = '';
+      featureContent.style.padding = '0';
+
+      featureContent.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:100%;background:var(--vision-bg-primary);border-radius:var(--radius-2xl);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <span style="font-weight:600;font-size:15px;">Air Writing</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i class="fas fa-circle" style="color:#2ecc71;font-size:8px;" id="aw-dot"></i>
+              <span style="font-size:13px;color:#aaa;" id="aw-status-text">Initializing...</span>
+            </div>
+          </div>
+          <div style="position:relative;flex:1;background:#000;min-height:0;">
+            <canvas id="aw-canvas" style="width:100%;height:100%;display:block;object-fit:contain;"></canvas>
+            <div id="aw-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;color:#aaa;gap:12px;">
+              <i class="fas fa-spinner fa-spin" style="font-size:28px;"></i>
+              <span>Opening camera &amp; loading hand tracking...</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.06);align-items:center;">
+            <span style="font-size:12px;color:#888;">Strokes: <span id="aw-strokes">0</span></span>
+            <span style="font-size:12px;color:#888;margin-left:12px;"><span id="aw-drawing-state"></span></span>
+            <button id="aw-btn-stop" style="margin-left:auto;padding:8px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(231,76,60,0.15);color:#fff;cursor:pointer;font-size:13px;">
+              <i class="fas fa-stop"></i> Stop
+            </button>
+          </div>
+        </div>
+      `;
+
+      const ok = await window.electronAPI.startPythonApp('air-writing', []);
+      if (!ok) {
+        document.getElementById('aw-status-text').textContent = 'Failed to start';
+        return;
+      }
+
+      document.getElementById('aw-btn-stop').addEventListener('click', () => {
+        window.electronAPI.sendInput('air-writing', 'QUIT');
+      });
+
+      const canvas = document.getElementById('aw-canvas');
+      const ctx = canvas.getContext('2d');
+
+      window.electronAPI.removeAllListeners('python-frame');
+      window.electronAPI.onPythonFrame((data) => {
+        if (data.appId !== 'air-writing') return;
+        const overlay = document.getElementById('aw-loading');
+        if (overlay) overlay.style.display = 'none';
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = 'data:image/jpeg;base64,' + data.frame;
+      });
+
+      return;
+    }
+
     showToast('Activating', `Starting ${app.name}...`, 'info');
     const success = await window.electronAPI.launchApp(featureId);
     
@@ -1367,7 +1901,7 @@ async function activateFeature(featureId) {
       contentContainer.className = 'feature-content-container';
       
       // For features that might have a video feed, create a video area
-      if (['face-reco', 'emotions', 'analyse', 'SignLang', 'item-detection', 'air-writing', 'media-control'].includes(featureId)) {
+      if (['face-reco', 'emotions', 'analyse', 'SignLang'].includes(featureId)) {
         contentContainer.innerHTML = `
           <div class="feature-video-area">
             <div class="video-placeholder">
@@ -2302,6 +2836,63 @@ function setupEventListeners() {
         if (el('fa-status-text')) el('fa-status-text').textContent = s.face ? 'Face Detected' : 'Searching...';
         if (el('fa-recs') && s.recommendations && s.recommendations.length) {
           el('fa-recs').innerHTML = s.recommendations.map(r => `• ${r}`).join('<br>');
+        }
+      } catch(e) {}
+      return;
+    }
+
+    // Parse item-detection STATUS lines — update detection stats UI
+    if (appId === 'item-detection' && message && message.startsWith('STATUS:')) {
+      try {
+        const s = JSON.parse(message.slice(7));
+        const el = (id) => document.getElementById(id);
+        if (el('id-fps'))       el('id-fps').textContent       = s.fps !== undefined ? s.fps : '—';
+        if (el('id-obj-count')) el('id-obj-count').textContent = s.objects !== undefined ? s.objects : '0';
+        if (el('id-device'))    el('id-device').textContent    = s.device || '—';
+        if (el('id-status-text')) el('id-status-text').textContent = 'Live';
+        if (el('id-detections') && s.detections && s.detections.length) {
+          el('id-detections').innerHTML = s.detections
+            .map(d => `<div style="display:flex;justify-content:space-between;"><span style="color:#4af;">${d.label}</span><span style="color:#888;">${Math.round(d.conf * 100)}%</span></div>`)
+            .join('');
+        } else if (el('id-detections') && s.objects === 0) {
+          el('id-detections').innerHTML = '<span style="color:#555;">No objects detected</span>';
+        }
+        if (s.error) {
+          const overlay = document.getElementById('id-loading');
+          if (overlay) {
+            overlay.innerHTML = `<i class="fas fa-exclamation-triangle" style="font-size:28px;color:#e74c3c;"></i><span style="color:#e74c3c;">${s.error}</span>`;
+          }
+          if (el('id-status-text')) { el('id-status-text').textContent = s.error; el('id-status-text').style.color = '#e74c3c'; }
+        }
+      } catch(e) {}
+      return;
+    }
+
+    // Parse air-writing STATUS lines
+    if (appId === 'air-writing' && message && message.startsWith('STATUS:')) {
+      try {
+        const s = JSON.parse(message.slice(7));
+        const el = (id) => document.getElementById(id);
+        if (el('aw-status-text')) el('aw-status-text').textContent = s.info || 'Live';
+        if (el('aw-strokes') && s.strokes !== undefined) el('aw-strokes').textContent = s.strokes;
+        if (el('aw-drawing-state')) el('aw-drawing-state').textContent = s.drawing ? '✏️ Drawing' : '';
+      } catch(e) {}
+      return;
+    }
+
+    // Parse media-control STATUS lines — update gesture stats UI
+    if (appId === 'media-control' && message && message.startsWith('STATUS:')) {
+      try {
+        const s = JSON.parse(message.slice(7));
+        const el = (id) => document.getElementById(id);
+        if (el('mc-fps'))    el('mc-fps').textContent    = s.fps !== undefined ? s.fps : '—';
+        if (el('mc-volume')) el('mc-volume').textContent = s.muted ? 'MUTED' : (s.volume !== undefined ? s.volume + '%' : '—');
+        if (el('mc-song'))   el('mc-song').textContent   = s.song || '—';
+        if (el('mc-action') && s.action) el('mc-action').textContent = s.action;
+        if (el('mc-status-text')) el('mc-status-text').textContent = 'Live';
+        if (el('mc-mode') && s.mode) {
+          el('mc-mode').textContent = s.mode;
+          el('mc-mode').style.color = s.mode === 'LOCKED' ? '#e74c3c' : s.mode === 'MEDIA' ? '#3498db' : '#2ecc71';
         }
       } catch(e) {}
       return;

@@ -97,7 +97,7 @@
       "color": "#16a085",
       "scriptPath": "python-apps/media_control",
       "mainScript": "main.py",
-      "pythonPath": "python-apps/media_control/env/Scripts/python.exe"
+      "pythonPath": "python-apps/air-writing/env/Scripts/python.exe"
     },
     {
       "id": "music-download",

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -410,9 +410,9 @@ function terminateAllPythonProcesses() {
 }
 
 // Download process management
-function startDownloadProcess(appId, url, quality = 'best') {
+function startDownloadProcess(appId, url, quality = 'best', outputPath = null) {
   try {
-    const outputPath = path.join(require('os').homedir(), 'Videos');
+    if (!outputPath) outputPath = path.join(require('os').homedir(), 'Videos');
     const scriptPath = path.join(__dirname, 'python-apps', appId.replace('-', '_'));
     
     const options = {
@@ -485,25 +485,16 @@ function startDownloadProcess(appId, url, quality = 'best') {
           }
         }
         
-        // Detect completion from various messages
-        if (message.includes('Download completed') || 
-            message.includes('✅') ||
-            message.includes('[Merger] Merging formats') ||
-            message.includes('Deleting original file')) {
+        // Detect completion via explicit marker
+        if (message.includes('DOWNLOAD_COMPLETE')) {
           downloadCompleted = true;
-          mainWindow.webContents.send('download-complete', { 
-            appId, 
-            message 
-          });
+          mainWindow.webContents.send('download-complete', { appId, message });
         }
         
-        // Detect actual errors (not warnings)
-        if (message.includes('ERROR:') || message.includes('❌ Download error:')) {
+        // Detect actual errors
+        if (message.includes('DOWNLOAD_ERROR:') || message.includes('ERROR:')) {
           hasError = true;
-          mainWindow.webContents.send('download-error', { 
-            appId, 
-            error: message 
-          });
+          mainWindow.webContents.send('download-error', { appId, message });
         }
       }
     });
@@ -576,9 +567,10 @@ function startPythonApp(appId, args = []) {
 
     let pythonPath;
     if (appCfg && appCfg.pythonPath) {
-      pythonPath = appCfg.pythonPath.startsWith('env/')
-        ? path.join(__dirname, appCfg.pythonPath)
-        : appCfg.pythonPath;
+      const p = appCfg.pythonPath;
+      pythonPath = (p.startsWith('env/') || p.startsWith('python-apps/'))
+        ? path.join(__dirname, p)
+        : p;
     } else {
       pythonPath = path.join(__dirname, 'env', 'Scripts', 'python.exe');
     }
@@ -598,6 +590,12 @@ function startPythonApp(appId, args = []) {
 
     console.log(`Starting ${appId} with options:`, options);
     
+    // Kill any existing process for this app before starting a new one
+    if (pythonProcesses[appId]) {
+      try { pythonProcesses[appId].kill(); } catch(e) {}
+      delete pythonProcesses[appId];
+    }
+
     const pyshell = new PythonShell(mainScript, options);
     pythonProcesses[appId] = pyshell;
 
@@ -615,6 +613,17 @@ function startPythonApp(appId, args = []) {
           appId, 
           message, 
           type: 'output' 
+        });
+      }
+    });
+
+    pyshell.on('stderr', function (stderr) {
+      console.error(`[${appId}] stderr:`, stderr);
+      if (mainWindow) {
+        mainWindow.webContents.send('python-output', { 
+          appId, 
+          message: `[stderr] ${stderr}`, 
+          type: 'error' 
         });
       }
     });
@@ -696,8 +705,21 @@ app.whenReady().then(() => {
   });
 
   // Python process management handlers
-  ipcMain.handle('start-download', (event, appId, url, quality) => {
-    return startDownloadProcess(appId, url, quality);
+  ipcMain.handle('start-download', (event, appId, url, quality, outputPath) => {
+    return startDownloadProcess(appId, url, quality, outputPath);
+  });
+
+  ipcMain.handle('show-folder-dialog', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory'],
+      title: 'Choose download folder',
+      defaultPath: path.join(require('os').homedir(), 'Videos')
+    });
+    return result.canceled ? null : result.filePaths[0];
+  });
+
+  ipcMain.handle('open-folder', (event, folderPath) => {
+    shell.openPath(folderPath || path.join(os.homedir(), 'Videos'));
   });
 
   ipcMain.handle('cancel-download', (event, appId) => {

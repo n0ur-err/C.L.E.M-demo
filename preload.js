@@ -9,11 +9,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   terminateApp: (appId) => ipcRenderer.invoke('terminate-app', appId),
   
   // Python process management
-  startDownload: (appId, url, quality) => ipcRenderer.invoke('start-download', appId, url, quality),
+  startDownload: (appId, url, quality, outputPath) => ipcRenderer.invoke('start-download', appId, url, quality, outputPath),
   cancelDownload: (appId) => ipcRenderer.invoke('cancel-download', appId),
   startPythonApp: (appId, args) => ipcRenderer.invoke('start-python-app', appId, args),
   stopPythonApp: (appId) => ipcRenderer.invoke('stop-python-app', appId),
   sendInput: (appId, input) => ipcRenderer.invoke('send-input', appId, input),
+
+  // Folder utilities
+  showFolderDialog: () => ipcRenderer.invoke('show-folder-dialog'),
+  openFolder: (folderPath) => ipcRenderer.invoke('open-folder', folderPath),
   
   // Window control
   closeApp: () => ipcRenderer.invoke('close-app'),

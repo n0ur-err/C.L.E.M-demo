@@ -1,0 +1,533 @@
+[
+  {
+    "timestamp": "20260419_183639",
+    "frame_id": 104,
+    "face_id": 0,
+    "features": {
+      "bbox": [
+        274,
+        386,
+        260,
+        260
+      ],
+      "landmarks": [
+        [
+          275,
+          486
+        ],
+        [
+          274,
+          517
+        ],
+        [
+          277,
+          550
+        ],
+        [
+          284,
+          580
+        ],
+        [
+          297,
+          608
+        ],
+        [
+          316,
+          632
+        ],
+        [
+          338,
+          653
+        ],
+        [
+          365,
+          669
+        ],
+        [
+          393,
+          670
+        ],
+        [
+          417,
+          663
+        ],
+        [
+          433,
+          642
+        ],
+        [
+          444,
+          619
+        ],
+        [
+          457,
+          594
+        ],
+        [
+          467,
+          570
+        ],
+        [
+          476,
+          546
+        ],
+        [
+          481,
+          522
+        ],
+        [
+          482,
+          498
+        ],
+        [
+          314,
+          474
+        ],
+        [
+          332,
+          463
+        ],
+        [
+          355,
+          458
+        ],
+        [
+          378,
+          457
+        ],
+        [
+          401,
+          463
+        ],
+        [
+          429,
+          466
+        ],
+        [
+          445,
+          460
+        ],
+        [
+          461,
+          461
+        ],
+        [
+          475,
+          464
+        ],
+        [
+          479,
+          478
+        ],
+        [
+          413,
+          491
+        ],
+        [
+          415,
+          512
+        ],
+        [
+          417,
+          533
+        ],
+        [
+          420,
+          554
+        ],
+        [
+          390,
+          567
+        ],
+        [
+          401,
+          570
+        ],
+        [
+          413,
+          574
+        ],
+        [
+          422,
+          570
+        ],
+        [
+          429,
+          564
+        ],
+        [
+          340,
+          494
+        ],
+        [
+          353,
+          488
+        ],
+        [
+          369,
+          488
+        ],
+        [
+          379,
+          496
+        ],
+        [
+          367,
+          501
+        ],
+        [
+          352,
+          501
+        ],
+        [
+          427,
+          497
+        ],
+        [
+          439,
+          488
+        ],
+        [
+          453,
+          488
+        ],
+        [
+          461,
+          495
+        ],
+        [
+          453,
+          501
+        ],
+        [
+          440,
+          501
+        ],
+        [
+          369,
+          605
+        ],
+        [
+          382,
+          598
+        ],
+        [
+          397,
+          594
+        ],
+        [
+          410,
+          598
+        ],
+        [
+          420,
+          593
+        ],
+        [
+          428,
+          595
+        ],
+        [
+          432,
+          602
+        ],
+        [
+          427,
+          614
+        ],
+        [
+          419,
+          621
+        ],
+        [
+          408,
+          624
+        ],
+        [
+          395,
+          623
+        ],
+        [
+          381,
+          617
+        ],
+        [
+          376,
+          605
+        ],
+        [
+          397,
+          603
+        ],
+        [
+          409,
+          605
+        ],
+        [
+          420,
+          602
+        ],
+        [
+          428,
+          603
+        ],
+        [
+          420,
+          604
+        ],
+        [
+          409,
+          608
+        ],
+        [
+          396,
+          606
+        ]
+      ],
+      "metrics": {
+        "left_eye_width": 39.051246643066406,
+        "right_eye_width": 34.058773040771484,
+        "eye_width_ratio": 1.1465840339660645,
+        "face_width": 207.3475341796875,
+        "face_height": 180.1138458251953,
+        "face_width_height_ratio": 1.15120267868042
+      },
+      "symmetry": {
+        "eyes_level": 1.0,
+        "overall_symmetry": 0.6029074695989033
+      },
+      "skin": {
+        "skin_tone": {
+          "hue": 35.07070707070707,
+          "saturation": 66.64646464646465,
+          "value": 154.23599632690542
+        },
+        "texture": 51.93415839431392
+      },
+      "facial_ratios": {
+        "top_third_ratio": 0.28458996297113753,
+        "top_golden_ratio_diff": 1.3334100370288626,
+        "middle_third_ratio": 1.4469105553930675,
+        "middle_golden_ratio_diff": 0.17108944460693265,
+        "eye_spacing_ratio": 1.3133744131597338
+      },
+      "eye_metrics": {
+        "left_ear": 0.3353,
+        "right_ear": 0.3823,
+        "avg_ear": 0.3588,
+        "ear_asymmetry": 0.1307,
+        "left_height": 13.1,
+        "right_height": 13.02
+      },
+      "mouth_metrics": {
+        "mouth_width": 63.07,
+        "mouth_height": 27.72,
+        "mar": 0.4395,
+        "upper_lip_height": 7.07,
+        "lower_lip_height": 16.03,
+        "smile_index": 0.0
+      },
+      "eyebrow_metrics": {
+        "left_brow_height": 0.1758,
+        "right_brow_height": 0.1621,
+        "avg_brow_height": 0.169,
+        "brow_asymmetry": 0.0137,
+        "inner_brow_distance": 0.1563,
+        "left_brow_arch": 0.0583,
+        "right_brow_arch": 0.0611
+      },
+      "jaw_metrics": {
+        "jaw_width_ratio": 0.7746,
+        "chin_deviation": -0.1302,
+        "chin_height_ratio": 0.2686,
+        "jaw_angle": 156.69
+      },
+      "nose_metrics": {
+        "nose_length": 63.39,
+        "nose_width": 39.12,
+        "nose_width_ratio": 0.6171,
+        "nose_deviation": 0.082
+      },
+      "lip_color": {
+        "r": 185.8,
+        "g": 120.9,
+        "b": 119.1,
+        "hue": 0.0,
+        "saturation": 91.0,
+        "brightness": 185.0,
+        "redness_index": 65.8
+      },
+      "skin_regions": {
+        "forehead": {
+          "r": 203.2,
+          "g": 164.1,
+          "b": 154.0,
+          "brightness": 173.8,
+          "redness": 44.1,
+          "yellowness": 29.6,
+          "texture": 371.48
+        },
+        "left_cheek": {
+          "r": 206.6,
+          "g": 162.8,
+          "b": 152.8,
+          "brightness": 174.1,
+          "redness": 48.9,
+          "yellowness": 31.9,
+          "texture": 112.87
+        },
+        "right_cheek": {
+          "r": 174.8,
+          "g": 130.2,
+          "b": 119.3,
+          "brightness": 141.4,
+          "redness": 50.0,
+          "yellowness": 33.2,
+          "texture": 470.13
+        },
+        "nose_bridge": {
+          "r": 238.4,
+          "g": 182.2,
+          "b": 172.8,
+          "brightness": 197.8,
+          "redness": 61.0,
+          "yellowness": 37.6,
+          "texture": 56.39
+        }
+      },
+      "face_shape": "round"
+    },
+    "health_analysis": {
+      "facial_symmetry": 0.273,
+      "symmetry_evaluation": "Significant asymmetry",
+      "note_symmetry": "Notable facial asymmetry; consider musculoskeletal review if new onset",
+      "eyes_level_symmetry": 1.0,
+      "nose_deviation": 0.082,
+      "nose_deviation_note": "Nasal tip deviation from midline detected",
+      "chin_deviation": 0.1302,
+      "jaw_alignment_note": "Mild chin deviation - may indicate jaw asymmetry",
+      "eye_aspect_ratio": 0.3588,
+      "left_ear": 0.3353,
+      "right_ear": 0.3823,
+      "eye_fatigue": "Minimal",
+      "eye_health_note": "Eyes appear alert and well-rested",
+      "ear_asymmetry": 0.1307,
+      "ear_asymmetry_note": "Symmetric eye openness",
+      "left_eye_openness_px": 13.1,
+      "right_eye_openness_px": 13.02,
+      "brow_height_ratio": 0.169,
+      "brow_position_note": "Normal brow elevation",
+      "inner_brow_distance": 0.1563,
+      "brow_furrow_note": "Relaxed brow - no furrowing",
+      "brow_asymmetry": 0.0137,
+      "brow_arch": 0.0597,
+      "mouth_aspect_ratio": 0.4395,
+      "lip_tension_note": "Normal lip posture - relaxed mouth",
+      "smile_index": 0.0,
+      "mouth_expression": "Neutral mouth posture",
+      "jaw_angle": 156.7,
+      "jaw_tension_note": "Open jaw angle - relaxed posture",
+      "stress_composite": 0.113,
+      "stress_level": "Low",
+      "stress_note": "Relaxed facial posture detected",
+      "skin_texture": 51.93,
+      "texture_note": "Elevated texture - mild dehydration or normal variation",
+      "skin_hue": 35.1,
+      "skin_saturation": 66.6,
+      "skin_brightness": 154.2,
+      "skin_tone_note": "Normal skin tone variation",
+      "skin_regions_summary": {
+        "forehead": {
+          "brightness": 173.8,
+          "redness": 44.1,
+          "yellowness": 29.6,
+          "texture": 371.48
+        },
+        "left_cheek": {
+          "brightness": 174.1,
+          "redness": 48.9,
+          "yellowness": 31.9,
+          "texture": 112.87
+        },
+        "right_cheek": {
+          "brightness": 141.4,
+          "redness": 50.0,
+          "yellowness": 33.2,
+          "texture": 470.13
+        },
+        "nose_bridge": {
+          "brightness": 197.8,
+          "redness": 61.0,
+          "yellowness": 37.6,
+          "texture": 56.39
+        }
+      },
+      "avg_regional_texture": 252.72,
+      "peak_redness": 61.0,
+      "redness_note": "Elevated redness in one or more regions",
+      "avg_yellowness": 33.1,
+      "jaundice_screen": "No significant jaundice indicators",
+      "avg_skin_brightness": 171.8,
+      "skin_uniformity": 20.1,
+      "pallor_screen": "Normal skin brightness - no pallor indicators",
+      "uniformity_note": "Moderate regional variation - may be lighting-related",
+      "skin_hydration_estimate": 0.701,
+      "hydration_note": "Good skin hydration indicators",
+      "face_shape": "round",
+      "face_shape_note": "Round - equal width and height",
+      "golden_ratio_harmony": 0.1759,
+      "golden_ratio_diff": 1.3334,
+      "golden_ratio_note": "Facial thirds diverge from golden ratio - common variation",
+      "top_third_ratio": 0.285,
+      "middle_third_ratio": 1.447,
+      "eye_spacing_ratio": 1.313,
+      "eye_spacing_note": "Wide-set eye appearance",
+      "jaw_width_ratio": 0.775,
+      "jaw_note": "Proportionate jaw width",
+      "chin_height_ratio": 0.269,
+      "nose_width_ratio": 0.617,
+      "nose_note": "Average nasal proportions",
+      "nose_length_px": 63.4,
+      "nose_width_px": 39.1,
+      "face_width_height_ratio": 1.151,
+      "facial_fullness": 1.0,
+      "fullness_evaluation": "High facial fullness - may indicate fluid retention",
+      "lip_redness_index": 65.8,
+      "lip_brightness": 185.0,
+      "lip_hue": 0.0,
+      "lip_saturation": 91.0,
+      "lip_rgb": {
+        "r": 185.8,
+        "g": 120.9,
+        "b": 119.1
+      },
+      "lip_color_note": "Well-vascularised lips - healthy lip colour",
+      "cyanosis_screen": "No cyanosis indicators",
+      "lip_jaundice_screen": "Normal lip tone - no jaundice indicators",
+      "lip_fullness_ratio": 0.3663,
+      "lip_fullness_note": "Full lips - well-hydrated appearance",
+      "mouth_face_ratio": 0.304,
+      "nose_face_ratio": 0.352,
+      "symmetry_score": 4.4,
+      "fatigue_score": 9.1,
+      "stress_score": 8.9,
+      "skin_score": 5.1,
+      "structural_score": 1.2,
+      "circulation_score": 9.1,
+      "overall_composite_score": 5.7,
+      "fatigue_trend": "Stable",
+      "stress_trend": "Stable",
+      "symmetry_trend": "Stable",
+      "skin_trend": "Stable",
+      "analysis_timestamp": "2026-04-19 18:36:39"
+    },
+    "health_status": "Fair",
+    "health_score": 5.7,
+    "recommendations": [
+      "Check for sleeping position issues",
+      "Consider facial exercises to improve muscle tone",
+      "Consider hydration and skincare routine",
+      "Monitor for fluid retention/edema"
+    ]
+  }
+]

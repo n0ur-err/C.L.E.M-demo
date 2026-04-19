@@ -5,15 +5,32 @@ from collections import deque
 import sys
 import time
 import os
+import base64
+import json
+import threading
 
-# Set UTF-8 encoding for console output
-if sys.platform == 'win32':
-    try:
-        import codecs
-        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
-    except:
-        pass
+# stdout helpers for Electron integration
+def send_frame(frame, quality=60):
+    ret, buf = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, quality])
+    if ret:
+        b64 = base64.b64encode(buf).decode('ascii')
+        sys.stdout.write(f'FRAME:{b64}\n')
+        sys.stdout.flush()
+
+def send_status(data: dict):
+    sys.stdout.write(f'STATUS:{json.dumps(data)}\n')
+    sys.stdout.flush()
+
+# Stdin watcher for QUIT signal from Electron
+_quit = threading.Event()
+
+def _stdin_watcher():
+    for line in sys.stdin:
+        if line.strip().upper() == 'QUIT':
+            _quit.set()
+            break
+
+threading.Thread(target=_stdin_watcher, daemon=True).start()
 
 mp_hands = mp.solutions.hands
 
@@ -130,7 +147,10 @@ def erase_by_thumb(thumb_pos):
 with mp_hands.Hands(min_detection_confidence=0.85, min_tracking_confidence=0.5, max_num_hands=1) as hands:
     frame_count = 0
     error_count = 0
-    while cap.isOpened():
+    last_stream = 0.0
+    STREAM_INTERVAL = 0.05
+    send_status({'info': 'Camera open, ready to draw'})
+    while cap.isOpened() and not _quit.is_set():
         try:
             success, frame = cap.read()
             if not success or frame is None or frame.size == 0:
@@ -226,14 +246,12 @@ with mp_hands.Hands(min_detection_confidence=0.85, min_tracking_confidence=0.5, 
         cv2.putText(canvas, f"Color: {list(colors.keys())[list(colors.values()).index(current_color)]}",
                     (10, 140), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
-        cv2.imshow("Air Writing", canvas)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        now = time.time()
+        if now - last_stream >= STREAM_INTERVAL:
+            last_stream = now
+            send_frame(canvas)
+            send_status({'strokes': len(strokes), 'drawing': len(points) > 0})
 
 print("Closing Air Writing application...")
 cap.release()
-cv2.destroyAllWindows()
-# Give time for proper cleanup
-time.sleep(0.5)
 print("Application closed successfully")

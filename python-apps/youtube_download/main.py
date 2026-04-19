@@ -61,13 +61,16 @@ def download_video(url, output_path=None, quality='best'):
     
     os.makedirs(output_path, exist_ok=True)
     
-    # Quality options mapping with fallbacks
+    # Quality options — force separate video+audio streams so ffmpeg always merges
+    # NEVER use 'best[height<=N]' as fallback — that resolves to a combined 360p stream (format 18)
     quality_formats = {
-        'best': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/best',
-        'worst': 'worst[ext=mp4]/worst',
-        '720p': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720][ext=mp4]/best[height<=720]',
-        '480p': 'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio/best[height<=480][ext=mp4]/best[height<=480]',
-        'audio': 'bestaudio[ext=m4a]/bestaudio/best'
+        'best':  'bestvideo+bestaudio',
+        '1080p': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio',
+        '720p':  'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio',
+        '480p':  'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio',
+        '360p':  'bestvideo[height<=360]+bestaudio',
+        'worst': 'worstvideo+worstaudio',
+        'audio': 'bestaudio/best',
     }
     
     format_selector = quality_formats.get(quality, 'best[ext=mp4]/best')
@@ -98,6 +101,10 @@ def download_video(url, output_path=None, quality='best'):
         'ignoreerrors': False,
         'ffmpeg_location': SCRIPT_DIR,  # Point to the directory containing ffmpeg.exe
         'progress_hooks': [progress_hook],  # Add progress hook
+        # android_vr client works without PO tokens and resolves all formats including 1080p+
+        # web/ios/android/mweb all require PO tokens or EJS remote components in 2025+
+        'extractor_args': {'youtube': {'player_client': ['android_vr']}},
+        'prefer_free_formats': False,
     }
     
     if quality == 'audio':
@@ -128,12 +135,12 @@ def download_video(url, output_path=None, quality='best'):
             # Download the video
             ydl.download([url])
             
-        print("\n✅ Download completed successfully!")
-        print(f"📁 Files saved to: {output_path}")
+        print("\nDOWNLOAD_COMPLETE")
+        print(f"Saved to: {output_path}")
         
     except DownloadError as e:
         error_msg = str(e)
-        print(f'\n❌ Download error: {error_msg}')
+        print(f'DOWNLOAD_ERROR: {error_msg}')
         
         # If format not available, try progressive fallbacks
         if "Requested format is not available" in error_msg:
@@ -151,6 +158,8 @@ def download_video(url, output_path=None, quality='best'):
                     print(f"  Attempt {i+1}: Trying format '{fallback_format}'...")
                     fallback_opts = ydl_opts.copy()
                     fallback_opts['format'] = fallback_format
+                    # Keep android_vr for fallback — it's the only client that works without PO tokens
+                    fallback_opts['extractor_args'] = {'youtube': {'player_client': ['android_vr']}}
                     
                     with yt_dlp.YoutubeDL(fallback_opts) as ydl:
                         ydl.download([url])
