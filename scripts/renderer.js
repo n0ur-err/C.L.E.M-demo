@@ -1829,6 +1829,87 @@ async function activateFeature(featureId) {
     }
 
     // Air Writing: stream camera + drawing canvas in-app
+    if (featureId === 'SignLang') {
+      showToast('Ready', 'Starting ASL Translator...', 'info');
+      featureContent.innerHTML = '';
+      featureContent.style.padding = '0';
+
+      featureContent.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:100%;background:var(--vision-bg-primary);border-radius:var(--radius-2xl);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <span style="font-weight:600;font-size:15px;">ASL Translator</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i class="fas fa-circle" style="color:#2ecc71;font-size:8px;" id="asl-dot"></i>
+              <span style="font-size:13px;color:#aaa;" id="asl-status-text">Initializing...</span>
+            </div>
+          </div>
+          <div style="position:relative;flex:1;background:#000;min-height:0;">
+            <canvas id="asl-canvas" style="width:100%;height:100%;display:block;object-fit:contain;"></canvas>
+            <div id="asl-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;color:#aaa;gap:12px;">
+              <i class="fas fa-spinner fa-spin" style="font-size:28px;"></i>
+              <span>Loading model &amp; opening camera...</span>
+            </div>
+            <!-- Overlay: current letter + confidence -->
+            <div id="asl-overlay" style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);border-radius:12px;padding:12px 18px;min-width:110px;text-align:center;display:none;">
+              <div id="asl-letter" style="font-size:52px;font-weight:700;color:#2ecc71;line-height:1;">-</div>
+              <div style="margin-top:6px;height:6px;background:rgba(255,255,255,0.15);border-radius:3px;overflow:hidden;">
+                <div id="asl-conf-bar" style="height:100%;width:0%;background:#2ecc71;border-radius:3px;transition:width 0.2s;"></div>
+              </div>
+              <div id="asl-conf-pct" style="font-size:11px;color:#aaa;margin-top:4px;">0%</div>
+            </div>
+          </div>
+          <!-- Subtitle bar -->
+          <div style="padding:10px 16px;background:rgba(255,255,255,0.04);border-top:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="font-size:12px;color:#888;white-space:nowrap;">Subtitle:</span>
+              <span id="asl-subtitle" style="font-size:14px;color:#fff;flex:1;word-break:break-all;"></span>
+              <button id="asl-btn-clear" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.08);color:#aaa;cursor:pointer;font-size:12px;">Clear</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span id="asl-buffer" style="font-size:11px;color:#666;flex:1;"></span>
+              <button id="asl-btn-stop" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(231,76,60,0.15);color:#fff;cursor:pointer;font-size:13px;">
+                <i class="fas fa-stop"></i> Stop
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const ok = await window.electronAPI.startPythonApp('SignLang', []);
+      if (!ok) {
+        document.getElementById('asl-status-text').textContent = 'Failed to start';
+        return;
+      }
+
+      document.getElementById('asl-btn-stop').addEventListener('click', () => {
+        window.electronAPI.sendInput('SignLang', 'QUIT');
+      });
+
+      // Clear button only clears UI — the Python side manages its own subtitle state
+      document.getElementById('asl-btn-clear').addEventListener('click', () => {
+        document.getElementById('asl-subtitle').textContent = '';
+      });
+
+      const canvas = document.getElementById('asl-canvas');
+      const ctx = canvas.getContext('2d');
+
+      window.electronAPI.removeAllListeners('python-frame');
+      window.electronAPI.onPythonFrame((data) => {
+        if (data.appId !== 'SignLang') return;
+        const loading = document.getElementById('asl-loading');
+        if (loading) loading.style.display = 'none';
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = 'data:image/jpeg;base64,' + data.frame;
+      });
+
+      return;
+    }
+
     if (featureId === 'air-writing') {
       showToast('Ready', 'Starting Air Writing...', 'info');
       featureContent.innerHTML = '';
@@ -1901,7 +1982,7 @@ async function activateFeature(featureId) {
       contentContainer.className = 'feature-content-container';
       
       // For features that might have a video feed, create a video area
-      if (['face-reco', 'emotions', 'analyse', 'SignLang'].includes(featureId)) {
+      if (['face-reco', 'emotions', 'analyse'].includes(featureId)) {
         contentContainer.innerHTML = `
           <div class="feature-video-area">
             <div class="video-placeholder">
@@ -2918,6 +2999,24 @@ function setupEventListeners() {
             if (pctEl) pctEl.textContent = pct + '%';
           });
         }
+      } catch(e) {}
+      return;
+    }
+
+    // Parse SignLang STATUS lines — update ASL overlay UI
+    if (appId === 'SignLang' && message && message.startsWith('STATUS:')) {
+      try {
+        const s = JSON.parse(message.slice(7));
+        const el = (id) => document.getElementById(id);
+        const overlay = el('asl-overlay');
+        if (overlay) overlay.style.display = 'block';
+        if (el('asl-letter')) el('asl-letter').textContent = s.letter || '-';
+        const confPct = Math.round((s.confidence || 0) * 100);
+        if (el('asl-conf-bar')) el('asl-conf-bar').style.width = confPct + '%';
+        if (el('asl-conf-pct')) el('asl-conf-pct').textContent = confPct + '%';
+        if (el('asl-subtitle') && s.subtitle !== undefined) el('asl-subtitle').textContent = s.subtitle;
+        if (el('asl-buffer')) el('asl-buffer').textContent = s.buffer && s.buffer.length ? 'Buffer: ' + s.buffer.join(' ') : '';
+        if (el('asl-status-text')) el('asl-status-text').textContent = s.letter ? `Detecting: ${s.letter}` : 'Waiting for hand...';
       } catch(e) {}
       return;
     }

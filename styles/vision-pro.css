@@ -1657,6 +1657,45 @@ body, html {
   color: var(--text-primary);
 }
 
+/* Disabled setting rows */
+.setting-item--disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: default;
+}
+
+.setting-item--disabled label {
+  cursor: default;
+}
+
+/* Coming soon badge */
+.coming-soon-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #888;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+/* Disabled settings group — relative for overlay */
+.settings-group--disabled {
+  position: relative;
+  pointer-events: none;
+}
+
+.settings-group--disabled .widget-header {
+  opacity: 0.45;
+}
+
+.settings-group-overlay {
+  display: none;
+}
+
 /* Toggle Switch - visionOS Premium Style */
 .toggle-switch {
   position: relative;

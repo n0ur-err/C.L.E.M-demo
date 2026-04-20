@@ -5,6 +5,30 @@ import tensorflow as tf
 from collections import deque
 import time
 import os
+import sys
+import base64
+import json
+import threading
+
+# Ensure stdout is UTF-8
+sys.stdout.reconfigure(encoding='utf-8')
+
+def send_frame(frame_bgr):
+    _, buf = cv.imencode('.jpg', frame_bgr, [cv.IMWRITE_JPEG_QUALITY, 80])
+    b64 = base64.b64encode(buf).decode('ascii')
+    print(f'FRAME:{b64}', flush=True)
+
+def send_status(obj):
+    print(f'STATUS:{json.dumps(obj)}', flush=True)
+
+# Listen for QUIT command on stdin
+quit_event = threading.Event()
+def _stdin_listener():
+    for line in sys.stdin:
+        if line.strip() == 'QUIT':
+            quit_event.set()
+            break
+threading.Thread(target=_stdin_listener, daemon=True).start()
 
 # Use absolute path for model loading
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -52,6 +76,8 @@ while True:
 
     pred_class = ""
     confidence = 0
+    most_common = ""
+    avg_conf = 0.0
 
     if result.multi_hand_landmarks:
         for hand_landmarks in result.multi_hand_landmarks:
@@ -103,27 +129,19 @@ while True:
     cv.putText(frame, f"Buffer: {' '.join([p.upper() for p in pred_buffer])}", (30, 160),
                cv.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 0), 2)
 
-    # Combine original frame and skeleton
+    # Combine original frame and skeleton side by side
     combined = np.hstack([cv.resize(frame, (640, 480)), skeleton])
-    cv.imshow("ASL Skeleton Predictor", combined)
+    send_frame(combined)
 
-    key = cv.waitKey(1) & 0xFF
-    if key == ord('q'):
+    # Send current status
+    send_status({
+        'letter': most_common.upper() if pred_buffer else '',
+        'confidence': float(avg_conf) if pred_buffer else 0.0,
+        'subtitle': subtitle,
+        'buffer': [p.upper() for p in pred_buffer]
+    })
+
+    if quit_event.is_set():
         break
-    elif key == ord('c'):
-        subtitle = ""
-        last_prediction = ""
-    elif key == ord('s'):
-        # Save subtitle to file
-        with open('asl_subtitle.txt', 'w') as f:
-            f.write(subtitle)
-    elif key == ord('x'):
-        # Copy subtitle to clipboard (Windows only)
-        try:
-            import subprocess
-            subprocess.run('clip', universal_newlines=True, input=subtitle)
-        except Exception:
-            pass
 
 cap.release()
-cv.destroyAllWindows()
