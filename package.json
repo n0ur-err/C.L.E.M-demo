@@ -6,7 +6,7 @@
     "scripts": {
         "start": "electron . --enable-logging=false",
         "start-dev": "electron .",
-        "build": "electron-builder build --win --x64",
+        "build": "electron-builder",
         "build:dir": "electron-builder --dir",
         "dist": "npm run build"
     },
@@ -46,14 +46,28 @@
         "appId": "com.clemproject.clem",
         "productName": "CLEM",
         "copyright": "Copyright © 2025 CLEM Project",
+        "asar": false,
         "win": {
             "target": [
-                "dir"
+                {
+                    "target": "nsis",
+                    "arch": ["x64"]
+                }
             ],
-            "icon": "assets/icons/logo.png"
+            "icon": "assets/icons/logo.ico"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "installerIcon": "assets/icons/logo.ico",
+            "uninstallerIcon": "assets/icons/logo.ico",
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "CLEM"
         },
         "files": [
             "**/*",
+            "!dist/**",
             "!installer.bat",
             "!CLEM.bat",
             "!setup_all_environments.bat",
@@ -65,12 +79,23 @@
             "!.qodo/**",
             "!**/.git/**",
             "!**/__pycache__/**",
+            "!**/*.pyc",
+            "!**/*.pyo",
             "!**/test_*.py",
             "!**/*.backup",
             "!**/*.old",
             "!img.jpg",
             "!desktop.ini",
-            "!nul"
+            "!nul",
+            "!first_5_lines.txt",
+            "!output.txt",
+            "!convert-icon.py",
+            "!build.bat",
+            "!CHECK-SETUP.bat",
+            "!CREATE-INSTALLER.bat",
+            "!START-HERE.bat",
+            "!build-installer.iss",
+            "!fix_zlib.ps1"
         ],
         "extraFiles": [
             "README.md",
